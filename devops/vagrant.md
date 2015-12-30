@@ -7,10 +7,9 @@
 - `vagrant ssh`
 - Now you're in a brand new Ubuntu VM. Do any additional install and add it to a provisioning shell script in the generated Vagrantfile.
 - You can put your provisioning commands in a dedicated file and point to it like this: `config.vm.provision "shell", path: "./vagrant_files/provision.sh", privileged: false`. **Disable privileged mode** so the script runs as the `vagrant` user rather than `root` (sudo still works fine).
-
-## Caveats
-
-- Running seemingly safe code in a Vagrant VM can lead to severe performance problems. For example running a PHP script that imports a massive XML file (living in the mounted directory) is *orders of magnitude* slower in Vagrant than on host. So Vagrant isn't always a good solution to isolate when troubleshooting complex scripts.
+- Vagrant performance will be *slow* by default. It looks like people have had great success improving performance by orders of magnitude, but I haven't figured out how yet:
+  - https://stefanwrobel.com/how-to-make-vagrant-performance-not-suck
+  - http://stackoverflow.com/questions/31742264/php-on-vagrant-virtualbox-on-linux
 
 ## Mysql install & setup
 
