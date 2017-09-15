@@ -1,0 +1,34 @@
+# Dockerfile for topherhunt/glassfrog-circleci:latest
+# Base Docker image used for CircleCI 2.0 tests.
+# Should prepare the correct Ruby version, most up-to-date gems, and all other
+# packages required for tests.
+#
+# > docker build -f .circleci/dockerfile-circleci -t topherhunt/glassfrog-circleci:latest .
+# > docker run -it topherhunt/glassfrog-circleci:latest /bin/bash
+# > docker push topherhunt/glassfrog-circleci:latest
+
+FROM ruby:2.2.5
+
+# Install basic packages
+RUN apt-get update && apt-get install -y build-essential git unzip apt-utils apt-transport-https
+
+# Install NodeJS v6 and Yarn (requires special repositories)
+# See https://yarnpkg.com/lang/en/docs/install/#linux-tab
+# and https://nodejs.org/en/download/package-manager/
+RUN curl -sL https://deb.nodesource.com/setup_6.x | bash - && \
+    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
+    apt-get update && apt-get install -y nodejs yarn
+
+# Needed for headless integration tests, I think
+RUN apt-get install -y qt5-default libqt5webkit5-dev chromedriver xvfb && \
+    ln -s /usr/lib/chromium/chromedriver /usr/bin/chromedriver
+
+WORKDIR /app
+ENV RAILS_ENV test
+ADD Gemfile* /app/
+RUN bundle install
+VOLUME /app
+
+# Done! This image can be used for CircleCI builds, or run manually for debugging:
+# $ docker run -it -v ~/Sites/h1/glassfrog:/app topherhunt/glassfrog-circleci:latest /bin/bash
