@@ -18,6 +18,11 @@
 - You can also *export a SQL dump through SSH*, which eliminates the SCP step and is handy if the server has no free disk space: `ssh grayowl "pg_dump -h hostname -U username -d database_name --password" > 2016-09-27-dumpfile.psql` (will prompt for password as normal)
 - `psql -h localhost -U grayowlmaster --password grayowl_development < 2016-06-01_grayowl_staging.psql` (imports / executes a sql dump against a specified environment)
 
+# Full-text search
+
+- https://youtu.be/YWj8ws6jc0g?t=23m30s
+- https://www.postgresql.org/docs/current/static/textsearch.html
+
 # Regex substitution
 
 - Advanced regex replacement in Postgres:
@@ -34,6 +39,27 @@ SELECT
 FROM candidates
 WHERE found_at > '2016-09-15'
 GROUP BY DATE(found_at), regexp_replace(url, 'https?://([^\/]+\.)*([\w\d\-\_]+\.[\w]+).*', '\2')
-ORDER BY DATE(found_at) DESC, regexp_replace(url, 'https?://([^\/]+\.)*([\w\d\-\_]+\.[\w]+).*', '\2')
 LIMIT 100;
+```
+
+# Disk space usage
+
+- `pg_size_pretty(value)` - formats a number as KB, MB, GB etc.
+- The following query returns disk usage info on the current db:
+
+```
+SELECT *
+FROM (
+  SELECT *, total_bytes - index_bytes - COALESCE(toast_bytes,0) AS table_bytes
+  FROM (
+    SELECT c.oid, nspname AS table_schema, relname AS TABLE_NAME,
+      c.reltuples AS row_estimate,
+      pg_total_relation_size(c.oid) AS total_bytes,
+      pg_indexes_size(c.oid) AS index_bytes,
+      pg_total_relation_size(reltoastrelid) AS toast_bytes
+    FROM pg_class c
+    LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE relkind = 'r'
+  ) a
+) a;
 ```

@@ -21,6 +21,11 @@
 
 - `for file in ./*; do echo "$file:    $(git log -1 --format=%cd $file)"; done`
   # list last commit date for each file in a directory
-- `git ls-files | egrep "(app/|config/|db/|spec/[^_])" | xargs cat | wc -l`
-  # get line count for a project
-  # You can modify the regex to specify which folders should be included.
+- `git ls-files | egrep "(app/|config/|db/|test/|spec/[^_])" | grep -v " " | xargs cat | wc -l`
+  # get line count for a project, only including certain folders
+
+## Diff
+
+- `gd`
+- `gd HEAD`
+- `gd -w`
