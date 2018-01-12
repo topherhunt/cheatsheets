@@ -2,17 +2,19 @@
 
 Use Homebrew. Don't install the packages manually, it's super painful.
 
-```
-brew update
-brew install erlang
-brew install elixir
-```
+* `brew update`
+* `brew install erlang`
+* See https://github.com/taylor/kiex for installing Kiex (Elixir version manager)
+* `kiex list`
+* `kiex install 1.3.4` - install a specific Elixir version
+* `kiex default 1.3.4` then restart your session
 
 ## Running Elixir code
 
 - `iex`
 - `iex -S mix` - shell in context of this project
-- `mix run priv/repo/some_file.exs` - run an arbitrary script
+- `mix run priv/repo/some_file.exs` - run any .exs script
+- `mix run priv/repo/script.exs one two` - pass args to a script. Args can be accessed via `System.argv()`.
 
 ## Mix commands
 

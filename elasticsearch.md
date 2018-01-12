@@ -2,15 +2,15 @@
 
 In production, ideally use a managed service like Heroku Bonsai.
 
-In development, `brew install elasticsearch` then I can run `elasticsearch` to start the local server.
+In development, `brew install elasticsearch@5.6` then I can run `elasticsearch` to start the local server.
+
+It's important to have a basic GUI for testing out queries. As of 2018-01-01, Mirage doesn't yet support v6, so note which version you're running, and ensure the same version is used in dev and prod.
 
 ## Installing
 
 For basic Rails integration, include the gem [elasticsearch-model](https://github.com/elastic/elasticsearch-rails/tree/master/elasticsearch-model).
 
-Under the good, this gem uses the ES driver [elasticsearch](https://github.com/elastic/elasticsearch-ruby).
-
-## Setting up search integration
+Under the hood, this gem uses the ES driver [elasticsearch](https://github.com/elastic/elasticsearch-ruby).
 
 In your model, include the helper methods and callbacks:
 
@@ -44,37 +44,65 @@ def as_indexed_json(options={}) # ElasticSearch integration
 end
 ```
 
-Import all pre-existing data if needed:
+Create or re-create the index
 
 ```
-Article.import
+Article.__elasticsearch__.create_index!(force: true)
 ```
 
-Basic searching:
+Import or re-import all pre-existing data when needed:
 
 ```
-response = Article.__elasticsearch__.search("basic string")
+Article.__elasticsearch__.import
+```
+
+## Searching
+
+A basic search:
+
+```
+# Always pass an ES query hash, not just a string.
+response = Elasticsearch::Model.search({query: {match: {title: "fox"}}})
 response.results # returns an array of Hashie JSON results
 response.results.total
 response.results.first._source
 response.records.to_a # load the associated ActiveRecord objects by id
 ```
 
-Advanced searching example:
+A full-text, flexible search:
 
 ```
 # see the ElasticSearch query DSL for how to use highlight etc. properly
-Article.search(
-  query: {match: {title: "Fox dogs"}},
+Elasticsearch::Model.search(
+  query: {
+    multi_match: {
+      query: "bear apple",
+      # Looks at all fields by default. Do NOT set `fields: ["*"]`, that is buggy.
+      operator: "or", # default is AND (more restrictive)
+      fuzziness: "AUTO" # this is the default
+    }
+  },
   highlight: {fields: {title: {}}}
 )
 ```
 
 Other search options:
 
-- Use `from` and `size` to paginate
+- Search just one model: e.g. `Article.__elasticsearch__.search({...})`
+- Search just _some_ indexes: `...{query: {match: {_type: "project"}}}`
+- Return all records: `...{query: {match_all: {}}}`
 
-## Diagnostics
+- Use `from` and `size` to paginate
+- `multi_match` query type:
+  - `fields` - array of fields to consider in the search. Don't use `fields: ["*"]`; this omits some fields for an unclear reason.
+  - `fuzziness: "AUTO"` - allows near matches.
+
+## Configuration
+
+- By default, ES uses the standard tokenizer which doesn't perform stemming, meaning that only whole terms (or near matches, if fuzziness is enabled) will be matched in a search. To also search partial terms or word stems, see https://www.elastic.co/guide/en/elasticsearch/reference/5.4/analysis-analyzers.html and https://www.elastic.co/guide/en/elasticsearch/guide/current/_controlling_analysis.html.
+- Inspect an index's current configuration by going to `http://localhost:9200/ic-test-users/_settings` and `http://localhost:9200/ic-test-users/_mapping`.
+
+Other useful diagnostic commands:
 
 ```
 Article.__elasticsearch__.client.cluster.health

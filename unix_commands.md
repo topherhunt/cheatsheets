@@ -4,6 +4,11 @@
 
 # Video / image / audio processing
 
+Convert .png to .jpg, compress size of all .jpgs, and remove the originals:
+```
+sips -Z 1200 *.jpg *.JPG; for f in *.png; do sips --matchTo '/System/Library/ColorSync/Profiles/sRGB Profile.icc' -Z 1200 -s format jpeg "$f" --out "${f/.png/.jpg}"; rm "$f"; done
+```
+
 - `sips -Z 1024 *.jpg *.JPG` # resize all images *in-place* (ignoring subfolders)
 - `for f in *.m4a; do ffmpeg -i "$f" "$f.mp3"; done` # convert each m4a file to mp3
 - `ffmpeg -i infile -vcodec copy -af "volume=10dB" outfile` # boost volume of a video file
@@ -42,3 +47,6 @@
   - `lsof -Pn -i4` # (OSX)
 - `echo '{"text": "Test content"}' | curl -d @- http://domain.com:8000/queries.json`
   # send a test request with JSON data to verify that a JSON service is accessible
+
+Monitor my public IP every second:
+`while : ; do dig TXT +short o-o.myaddr.l.google.com @ns1.google.com ; sleep 1 ; done`

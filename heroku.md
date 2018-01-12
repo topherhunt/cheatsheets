@@ -19,3 +19,8 @@
 - `heroku rake db:migrate --app citm-staging`
   # run a Heroku command on a specific environment
   # (required if this app has multiple Heroku environments)
+
+## Troubleshooting
+
+- `heroku ps` - list all running processes on this app
+- `heroku ps:stop <process id>` - kill a frozen process

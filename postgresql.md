@@ -8,6 +8,11 @@
 - `\conninfo` - list info about current connection
 - `\connect [database name]` - connect to a database
 
+## Managing databases, users, roles
+
+- `createdb $(whoami)` - create a default database for this user
+- `CREATE ROLE postgres SUPERUSER CREATEDB LOGIN PASSWORD 'postgres';`
+
 ## Connecting to a remote database
 
 - `psql -h grayowlnetwork.czo1pb6i4lc0.us-east-1.rds.amazonaws.com -U grayowlmaster -d grayowl_staging --password` (specifies host, user, database, and password (supplied in a subsequent prompt))
