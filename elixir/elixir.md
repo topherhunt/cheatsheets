@@ -23,6 +23,11 @@ Use Homebrew. Don't install the packages manually, it's super painful.
 - `mix test` - runs ExUnit tests
 - `mix test test/file_name.exs:43`
 
+## Docs
+
+- `mix hex.docs open --offline [package name]` - this fetches docs for a package (if not already downloaded), then opens them locally in your browser. Run this to cache packages for access when on an airplane.
+- It looks like you can't open the Elixir docs themselves using this method. Instead, download the latest docs at https://elixir-lang.org/docs.html and open `index.html` from that download instead.
+
 ## Misc.
 
 - Use function `i/1` to get details about any value.

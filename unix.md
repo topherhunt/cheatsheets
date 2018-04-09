@@ -32,11 +32,18 @@ sips -Z 1200 *.jpg *.JPG; for f in *.png; do sips --matchTo '/System/Library/Col
 
 # Background processes
 
+- `w` - list all current sessions to this machine, and what they're running
+- `last` - list all *recent* sessions on this machine
+- `ps aux` - list all running processes
 - `nohup [bash command]` # ensure the command doesn't die when your SSH connection ends
 
 # Looping
 
 - `while : ; do echo "Hi there!"; sleep 1; done` - infinite loop
+
+# Downloads
+
+- `wget -c <url>` - download a resource, resuming from partial progress if interrupted
 
 # Network
 

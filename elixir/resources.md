@@ -18,3 +18,7 @@
 
 - http://confreaks.tv/videos/elixirconf2016-code-spelunking-for-knowledge-and-profit
 - http://confreaks.tv/videos/elixirconf2016-closing-keynote
+
+## Useful libraries
+
+- https://github.com/nccgroup/sobelow
