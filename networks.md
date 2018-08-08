@@ -1,7 +1,7 @@
 
 ## Set up a general-purpose SSH server
 
-- Launch a tiny virtual server (e.g. EC2 instance, Ubuntu image, nano). Ensure you can access port 22 (for SSH) plus whatever port you want the server to receive HTTP requests at (e.g. 9878). Only allow SSH access via keypair.
+- Launch a tiny virtual server (e.g. AWS EC2 instance, Ubuntu, nano). Ensure you can access port 22 (for SSH) plus whatever port you want the server to receive HTTP requests at (e.g. 9878).
 - Add an alias (e.g. `vpn1`) to `~/.ssh/config` for easy access, like this:
 
 ```
@@ -13,6 +13,7 @@ Host vpn1
 ```
 
 - SSH into the server
+- Ensure the firewall won't block these ports: `sudo ufw allow 22 && sudo ufw allow 9878`
 - `sudo vi /etc/ssh/sshd_config` and add the following settings:
 
 ```
@@ -34,17 +35,19 @@ TODO:
 
 - Start with a general-purpose SSH server (see above)
 - Check that HTTP requests reach the server: on the server run `nc -lk 9878`, make a web request to `http://your-server:9878/`, and the `nc` output should show the request. Then quit `nc`.
-- Open the reverse tunnel: `ssh -R *:9878:localhost:3000 -N vpn1`
-  - In this case the tunnel will listen on the server port 9878 and forward all traffic to local port 3000.
-  - If you see a warning like `remote port forwarding failed for listen port 80`, your user on the remote server likely doesn't have permission to take over that port.
+- Open the reverse tunnel: `ssh -vNR *:9878:localhost:3000 - vpn1`
+  - This tunnel will listen on the server port 9878 and forward all traffic to local port 3000.
+  - If you see a warning like `remote port forwarding failed for listen port 80`, your user on the remote server likely doesn't have permission to listen on that port.
 - Check that HTTP requests reach your local machine: locally run `nc -lk 3000`, make a web request to `http://your-server:9878/`, and the `nc` output should show the request. Then quit `nc`.
 - Start your local server at the desired port (in this case 3000).
+
+Now all requests to `http://your-server:9878/blah` should be forwarded to your local machine at `localhost:3000/blah`.
 
 
 ## Route web traffic from local machine through a server (VPN over SSH):
 
 - Start with a general-purpose SSH server (see above)
-- `ssh -ND 1024 vpn1` - this opens the SSH tunnel that you'll route traffic through
+- `ssh -vND 1024 vpn1` - this opens the SSH tunnel that you'll route traffic through.
 - Configure the OSX network interface to use a SOCKS V5 proxy through `localhost:1024`. Add the SSH server's IP to the "bypass" list so that the tunnel itself isn't subject to the proxy rules.
 - Now verify that all your network traffic is proxied:
   - https://whatismyipaddress.com/ should think you're at that location
