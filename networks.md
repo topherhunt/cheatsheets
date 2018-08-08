@@ -2,15 +2,26 @@
 ## Set up a general-purpose SSH server
 
 - Launch a tiny virtual server (e.g. EC2 instance, Ubuntu image, nano). Ensure you can access port 22 (for SSH) plus whatever port you want the server to receive HTTP requests at (e.g. 9878). Only allow SSH access via keypair.
-- Add an alias (e.g. `vpn1`) to `~/.ssh/config` for easy access
+- Add an alias (e.g. `vpn1`) to `~/.ssh/config` for easy access, like this:
+
+```
+# Configured 2018-08-07
+Host vpn1
+  User ubuntu
+  Hostname ec2-1234-5678.compute-1.amazonaws.com
+  IdentityFile ~/.ssh/topher-aws.pem
+```
+
 - SSH into the server
 - `sudo vi /etc/ssh/sshd_config` and add the following settings:
-  ```
-  AllowAgentForwarding yes
-  AllowTcpForwarding yes
-  PermitTunnel yes
-  GatewayPorts clientspecified
-  ```
+
+```
+AllowAgentForwarding yes
+AllowTcpForwarding yes
+PermitTunnel yes
+GatewayPorts clientspecified
+```
+
 - `sudo systemctl restart sshd` - to make the settings take effect
 - `exit` back to your local machine
 - Now you can `ssh vpn1` to ssh in, use the `-D` flag to open a forwarding tunnel, and use the `-R` flag to set up reverse forwarding, etc.
@@ -33,7 +44,7 @@ TODO:
 ## Route web traffic from local machine through a server (VPN over SSH):
 
 - Start with a general-purpose SSH server (see above)
-- `ssh -ND 1024 vpn1` - this opens the SSH tunnel that you can use as the proxy
+- `ssh -ND 1024 vpn1` - this opens the SSH tunnel that you'll route traffic through
 - Configure the OSX network interface to use a SOCKS V5 proxy through `localhost:1024`. Add the SSH server's IP to the "bypass" list so that the tunnel itself isn't subject to the proxy rules.
 - Now verify that all your network traffic is proxied:
   - https://whatismyipaddress.com/ should think you're at that location
