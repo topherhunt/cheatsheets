@@ -5,6 +5,7 @@
 # Video / image / audio processing
 
 Convert .png to .jpg, compress size of all .jpgs, and remove the originals:
+(1200 is a better standard than 1024.)
 ```
 sips -Z 1200 *.jpg *.JPG; for f in *.png; do sips --matchTo '/System/Library/ColorSync/Profiles/sRGB Profile.icc' -Z 1200 -s format jpeg "$f" --out "${f/.png/.jpg}"; rm "$f"; done
 ```

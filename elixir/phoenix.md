@@ -1,94 +1,94 @@
-## Setup
+## Commands
+
+Setting up:
 
 - `mix phoenix new app_name`
 - `mix deps.get`
+- `mix deps.compile` - recompile deps if you've made manual changes
 - `npm install`
+- `mix ecto.create`
+- `mix ecto.migrate`
+- `mix ecto.rollback`
+- `mix ecto.drop`
+- `MIX_ENV=test mix ecto.reset`
 
-## Running the server, console, and tasks
+Generating code:
 
-- `mix phoenix.server` - start the server
-- `mix phoenix.routes`
-- `mix phoenix.gen.html Video videos user_id:references:users url:string title:string description:text`
-- `mix phoenix_haml.gen.html User users name:string age:integer`
-  (generates haml templates, not eex)
-- `mix phoenix.gen.model Category categories name:string`
-- `iex -S mix` - run iex in context of this project
-- `iex -S mix phoenix.server` - run contextual iex AND start the server
-- `mix run -e MyApp.Module.execute_some_function("one")`
-- `mix run priv/repo/seeds.exs` - you can run any arbitrary .exs script this way
+- `mix ecto.gen.migration create_user`
+- `mix phx.gen.html Accounts User users name:string email:string password_hash:string last_signed_in_at:utc_datetime`
 
-## Mix package commands
+Running things:
 
-- `mix help` - more mix commands
-- `mix run path/to/file.exs` - execute an arbitrary script
-- `mix hex.docs open --offline hound` - opens the docs for any package
+- `mix phx.server`
+- `iex -S mix`
+- `mix run priv/repo/seeds.exs` (or pass in any .exs script)
+- `mix run -e MyApp.Module.execute_some_function("one")` - run arbitrary function
+- `mix test` - runs test suite (auto migrates db first)
+- `iex -S mix test --trace` - run test suite, with pry debugging enabled
+- `mix test path/to/folder/or/file.exs` - run just a single test file
+- `mix test path/to/folder/or/file.exs:31` - run just a single test
 
-## Environments & env variables
 
-- A default Phoenix app has 3 environments: `:dev`, `:test`, `:prod`. Any dependency applications (e.g. Logger) are always run in `:prod` even if your Phoenix app is in `:dev`.
-- Access `Mix.env` (keyword list of all env vars) anywhere in your project code
-- Temporarily set/override an env var: `MIX_ENV=test mix run blah/blah.exs`
-- Store sensitive env vars in `config/secrets.exs` which *is not* checked into Git. `config/config.exs` should auto-execute `secrets.exs` (loading any vars declared there) if the file is present. You can also define any production config values there too (in a separate, inert map) for safekeeping, and manually transfer them to Heroku etc.
+Help & docs:
 
-## Plugs
+- `mix help`
+- `hexdocs PACKAGE_NAME` (aliased to: `mix hex.docs open --offline PACKAGE_NAME`)
 
-- Module plugs: `init/1` runs at compile time; `call/2` runs at runtime. Call it like:
-  `plug Rumbl.Auth` and it will call the right functions.
-- Function plugs: `plug :func_name, [args_list]`
-- Guard on plugs: `plug :func when action in [:index, :show]`
-- You can't plug a function from another module; instead import the function.
-- After each plug, Phoenix checks if `conn` is halted. If so, it skips all further plugs (including the controller action) and returns the response as-is.
-- Plugs can live anywhere; I'll put mine in `web/plugs/`.
+## Env
 
-## Conn
-
-- Request fields:
-  * host - eg. `"www.example.com"`
-  * method - eg. `"GET"`
-  * path_info - eg. `["admin", "users"]`
-  * req_headers - eg. `[{"content_type", "text/plain"}]`
-  * scheme - eg. :https
-- Lazy fields:
-  * cookies
-  * params
-  * assigns - you can add any custom data here
-  * halted
-  * state
-- Response fields:
-  * resp_body - defaults to `""`
-  * resp_cookies
-  * resp_headers
-  * status
+- A default Phoenix app has 3 environments: dev, test, prod. Any dependency applications (e.g. Logger) are always run in `:prod` even if your Phoenix app is in `:dev`. Check the current env with `Mix.env`.
+- Override the mix env: `MIX_ENV=test mix run blah/blah.exs`
 
 ## Controller
 
-- Transforms a request into a response plus side effects. Side effects should be invoked from the controller layer, not the models or views.
+- Phoenix uses the Plug library. All middleware (including your controller action itself) is just a series of plugs. After each plug, Phoenix checks if `conn` is halted. If so, it skips all further plugs (including the controller action) and returns the response as-is.
+- The `conn` struct is big, but its keys fit in 3 categories: request fields (eg. host, method, path_info, req_headers, scheme), response fields (eg. resp_body, resp_cookies, resp_headers, status), and lazy fields (eg. cookies, params, assigns, halted)
+- Transforms a request into a response plus side effects. Side effects should be invoked from the controller layer, not the schemas or views.
+- Avoid nested conditionals & complex logic in controller actions using `with` and by extracting most operations to one or more Context module.
 - When referencing request `params`, use strings for keys. Only use atoms internally where I'm guaranteed to have a finite number of them; atoms aren't garbage-collected.
-- Use `with` so controller actions don't need nested `case` statements.
+- Web development should be supremely boring. There should be no sexy, interesting, intricate controllers; controllers should mostly tell subtle variations of the same story (e.g. CRUD).
 
 ## Views & templates
 
-- No distinction between templates and partials.
-- `render "partial.html", var: "some value"` - call a template (in the inferred view) and pass it vars
-- Render a template from the console:
-  * `MyApp.UserView.render("index.html", users: []) |> Phoenix.HTML.safe_to_string`
-  * `Phoenix.View.render_to_string(Rumbl.UserView, ​"user.html"​, user: user)`
-- Links: `Phoenix.HTML.Link.link("name", to: "path", method: :post)`
-- Named route helpers: `user_path(@conn, :edit, user.id)` or `user_path(@conn, :index)`
-- Best practice: Avoid chaining methods & complex logic in templates. Extract these to view functions. Exceptions raised in the template are hell to troubleshoot.
+Rendering things from console:
+- `Phoenix.View.render_to_string(MyApp.UserView, ​"user.html"​, user: user)`
+- `Phoenix.HTML.Link.link("name", to: "path", method: :post)`
 
-## Form helpers
+Troubleshooting:
+- Avoid complex logic & chained functions in templates; extract these to view helpers. Exceptions in templates can be tough to track down.
+- `.haml` template syntax: see the https://github.com/nurugger07/calliope markup guide to ensure I'm using the right syntax for Elixir embeds.
+- Also, I can hack the `phoenix_haml` dependency to print out the `eex` string compiled by Calliope; often this makes it obvious why the eex parser is complaining. (Need to run `mix deps.compile` after changing code in deps.)
 
-```
-= form_for @changeset, @action, fn f -> do ...
-= label f, :field_name, class: "classes"
-= text_input f, :field_name, class: "classes"
-= textarea f, :field_name, class: "classes"
-= hidden_input f, :field_name, value: "value", class: "classes"
-= select f, :field_name, [{"label", val}, ...], prompt: "Select one", class: "classes"
-= error_tag f, :field_name
-= submit "Submit", class: "classes"
-```
+Form helpers:
+
+    = form_for @changeset, @action, fn f -> do ...
+    = label f, :field_name, class: "classes"
+    = text_input f, :field_name, class: "classes"
+    = textarea f, :field_name, class: "classes"
+    = hidden_input f, :field_name, value: "value", class: "classes"
+    = select f, :field_name, [{"label", val}, ...], prompt: "Select one", class: "classes"
+    = error_tag f, :field_name
+    = submit "Submit", class: "classes"
+
+## Ecto, schemas, Repo
+
+- Declare a field as `virtual: true` so it won't be persisted.
+- Declare a field as type `{:array, :string}` to make it a List of that value type. Useful with virtual attrs.
+- Lifecycle hooks: You can add `:on_delete` behavior to the db layer (during migration) or to the schema's association (less performant)
+- Best practice: Mention all indexes and constraints as comments in the `schema` block, since Phoenix doesn't have a `schema.rb` equivalent.
+
+Changesets:
+
+- Warning: If you misspell a field in a validation macro, *it will silently skip that field*. Ensure test coverage of all validations.
+- Another warning: `*_constraint` functions simply catch db-layer constraint errors and convert them to friendly object validation error messages; if you haven't added the corresponding db-layer constraint, these functions will have no effect.
+- See `Ecto.Changeset` docs for full list of validation and constraint functions available.
+
+Associations:
+
+- During a query, pipe through `|> Ecto.preload(:videos)` to preload an association
+- `user = Repo.preload(user, :videos)` - returns the `user` with `user.videos` populated
+- `videos = Ecto.assoc(user, :videos)` - returns the associations as a list
+- Fetching nested associations: `Ecto.assoc(post, [:comments, :author]`
 
 ## Assets & Brunch
 
@@ -112,3 +112,14 @@
 ## Logging
 
 By default, a Phoenix app spits all logs to STDOUT. In the test environment etc., you can use the `logger_file_backend` library to route logs to a file.
+
+## Debugging
+
+- `IO.puts("arbitrary string")`
+- `IO.inspect(value)`
+- Run IEx.pry:
+  * In `config/test.exs`, set `:ownership_timeout` to a large value so db connections don't time out while prying
+  * Add `require IEx` to the target file
+  * Insert `IEx.pry` at the target line
+  * Run the tests in iex: `iex -S mix test --trace`
+- You can inspect any Hex dependency code in `deps/`. You can even alter the code of a dependency, run `mix deps.compile`, then restart the Phoenix server, and your changes will be live.

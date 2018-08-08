@@ -1,15 +1,16 @@
-defmodule Zb.Interview do
-  use Zb.Web, :model
+defmodule Vanilla.Accounts.User do
+  use Ecto.Schema
+  import Ecto.Changeset
 
-  schema "interviews" do
+  schema "users" do
     belongs_to :user, Zb.User # indexed
     field :position, :integer
     field :password, :string, virtual: true
     field :password_hash, :string
     field :eligible_for_voting, :boolean
-    field :woke_at_time, Timex.Ecto.Time # for a :time field
-    field :due_on_date, Timex.Ecto.Date
-    field :completed_at, Timex.Ecto.DateTime # UTC
+    field :a_time_field, Timex.Ecto.Time # for a :time field
+    field :a_date_field, Timex.Ecto.Date
+    field :a_utc_datetime_field, Timex.Ecto.DateTime # UTC
     has_many :vote_taggings, Zb.VoteTagging
     has_many :tags, through: [:vote_taggings, :tag]
     timestamps()

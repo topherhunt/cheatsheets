@@ -29,6 +29,7 @@ unless Rails.env.production?
     transport_options: {
       request: {timeout: 5}
     }
+    # set `log: true` to log all ES requests for debugging etc.
   )
 end
 ```
