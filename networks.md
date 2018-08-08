@@ -24,12 +24,10 @@ TODO:
 - Start with a general-purpose SSH server (see above)
 - Check that HTTP requests reach the server: on the server run `nc -lk 9878`, make a web request to `http://your-server:9878/`, and the `nc` output should show the request. Then quit `nc`.
 - Open the reverse tunnel: `ssh -R *:9878:localhost:3000 -N vpn1`
+  - In this case the tunnel will listen on the server port 9878 and forward all traffic to local port 3000.
+  - If you see a warning like `remote port forwarding failed for listen port 80`, your user on the remote server likely doesn't have permission to take over that port.
 - Check that HTTP requests reach your local machine: locally run `nc -lk 3000`, make a web request to `http://your-server:9878/`, and the `nc` output should show the request. Then quit `nc`.
 - Start your local server at the desired port (in this case 3000).
-
-TODO:
-- Q: How to accept / forward requests at port 80?
-- Q: Can I forward to a different port than where it's received?
 
 
 ## Route web traffic from local machine through a server (VPN over SSH):
@@ -46,7 +44,7 @@ Caveats:
 
 - Amazon's video streaming service will easily detect that your request is coming through a proxy, and will block access.
 - To make yourself harder to identify, you can bounce between different servers and IPs as proxies.
-- Some traffic (e.g. pings) apparently bypasses the SOCKS proxy regardless of your settings.
+- Some traffic (e.g. pings) apparently bypasses the SOCKS proxy regardless of your settings. Not yet sure if it's possible to route these through the tunnel too.
 
 
 ## Throttle network speed
