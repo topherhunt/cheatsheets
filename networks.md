@@ -35,7 +35,7 @@ TODO:
 
 - Start with a general-purpose SSH server (see above)
 - Check that HTTP requests reach the server: on the server run `nc -lk 9878`, make a web request to `http://your-server:9878/`, and the `nc` output should show the request. Then quit `nc`.
-- Open the reverse tunnel: `ssh -vNR *:9878:localhost:3000 - vpn1`
+- Open the reverse tunnel: `ssh -vNR *:9878:localhost:3000 vpn1`
   - This tunnel will listen on the server port 9878 and forward all traffic to local port 3000.
   - If you see a warning like `remote port forwarding failed for listen port 80`, your user on the remote server likely doesn't have permission to listen on that port.
 - Check that HTTP requests reach your local machine: locally run `nc -lk 3000`, make a web request to `http://your-server:9878/`, and the `nc` output should show the request. Then quit `nc`.
