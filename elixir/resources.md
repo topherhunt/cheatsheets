@@ -22,3 +22,4 @@
 ## Useful libraries
 
 - https://github.com/nccgroup/sobelow
+- CSV import: https://underthehood.meltwater.com/blog/2018/08/08/excel-friendly-csv-exports-with-elixir/

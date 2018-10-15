@@ -1,8 +1,8 @@
 
 ## Set up a general-purpose SSH server
 
-- Launch a tiny virtual server (e.g. AWS EC2 instance, Ubuntu, nano). Ensure you can access port 22 (for SSH) plus whatever port you want the server to receive HTTP requests at (e.g. 9878).
-- Add an alias (e.g. `vpn1`) to `~/.ssh/config` for easy access, like this:
+- Launch a tiny VPS (eg. EC2 nano Ubuntu). Ensure you can access port 22 (for SSH) plus the port where the server will receive HTTP requests (e.g. 9878).
+- In `~/.ssh/config`, add an alias (eg. `vpn1`) for easy access:
 
 ```
 # Configured 2018-08-07
@@ -13,8 +13,8 @@ Host vpn1
 ```
 
 - SSH into the server
-- Ensure the firewall won't block these ports: `sudo ufw allow 22 && sudo ufw allow 9878`
-- `sudo vi /etc/ssh/sshd_config` and add the following settings:
+- Ensure the firewall won't block ports: `sudo ufw allow 22 && sudo ufw allow 9878`
+- Edit `/etc/ssh/sshd_config` to add the following settings:
 
 ```
 AllowAgentForwarding yes
@@ -31,23 +31,24 @@ TODO:
 * Q: Are all the above setting changes required to enable traffic forwarding and reverse forwarding?
 
 
-## Forward HTTP requests from a server, to a local machine (e.g. dev Rails server):
+## Forward HTTP requests to a local server:
+
+Use https://ngrok.com/ where possible, this is a super nice tool for forwarding to local.
+`ngrok http 3000` will start a proxy server, listen for any requests, and forward them to `localhost:3000` over its tunnel.
+
+If ngrok doesn't work, I can also forward HTTP requests to my local machine like this:
 
 - Start with a general-purpose SSH server (see above)
-- Check that HTTP requests reach the server: on the server run `nc -lk 9878`, make a web request to `http://your-server:9878/`, and the `nc` output should show the request. Then quit `nc`.
-- Open the reverse tunnel: `ssh -vNR *:9878:localhost:3000 vpn1`
-  - This tunnel will listen on the server port 9878 and forward all traffic to local port 3000.
-  - If you see a warning like `remote port forwarding failed for listen port 80`, your user on the remote server likely doesn't have permission to listen on that port.
-- Check that HTTP requests reach your local machine: locally run `nc -lk 3000`, make a web request to `http://your-server:9878/`, and the `nc` output should show the request. Then quit `nc`.
-- Start your local server at the desired port (in this case 3000).
-
-Now all requests to `http://your-server:9878/blah` should be forwarded to your local machine at `localhost:3000/blah`.
+- Check that HTTP requests reach the server (`nc -lk 9878`)
+- Open the reverse tunnel: `ssh -vNR *:9878:localhost:3000 - vpn1`.
+- Check that HTTP requests reach your local machine (`nc -lk 3000`)
+- Now all requests to `http://your-server:9878/blah` should be forwarded to your local machine at `localhost:3000/blah`.
 
 
 ## Route web traffic from local machine through a server (VPN over SSH):
 
 - Start with a general-purpose SSH server (see above)
-- `ssh -vND 1024 vpn1` - this opens the SSH tunnel that you'll route traffic through.
+- `ssh -vND 1024 vpn1` - this opens an SSH tunnel to route traffic through.
 - Configure the OSX network interface to use a SOCKS V5 proxy through `localhost:1024`. Add the SSH server's IP to the "bypass" list so that the tunnel itself isn't subject to the proxy rules.
 - Now verify that all your network traffic is proxied:
   - https://whatismyipaddress.com/ should think you're at that location
@@ -56,9 +57,8 @@ Now all requests to `http://your-server:9878/blah` should be forwarded to your l
 
 Caveats:
 
-- Amazon's video streaming service will easily detect that your request is coming through a proxy, and will block access.
-- To make yourself harder to identify, you can bounce between different servers and IPs as proxies.
-- Some traffic (e.g. pings) apparently bypasses the SOCKS proxy regardless of your settings. Not yet sure if it's possible to route these through the tunnel too.
+- Amazon Video will block all requests that appear to come from a VPS.
+- Some traffic (e.g. pings) apparently bypasses / ignores the SOCKS proxy.
 
 
 ## Throttle network speed

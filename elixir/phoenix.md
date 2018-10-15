@@ -123,3 +123,10 @@ By default, a Phoenix app spits all logs to STDOUT. In the test environment etc.
   * Insert `IEx.pry` at the target line
   * Run the tests in iex: `iex -S mix test --trace`
 - You can inspect any Hex dependency code in `deps/`. You can even alter the code of a dependency, run `mix deps.compile`, then restart the Phoenix server, and your changes will be live.
+
+## Tests
+
+Useful diagnostics in integration tests:
+
+- `tail -f log/test.log`
+- `IO.inspect(page_source())`

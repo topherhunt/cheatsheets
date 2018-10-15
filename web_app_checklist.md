@@ -1,17 +1,38 @@
 # Web app production-readiness checklist
 
 * Production app logs 1 line per request, containing: the timestamp, request method, URL, params, time taken, response status, and current logged-in user id & name.
+
 * In production, don't log individual SQL queries, templates rendered, email body content, or other junk.
+
 * UptimeRobot pings every 5m and alerts the webmaster if /health is unreachable (unless it's on Heroku free tier).
-* Webmaster is sent regular digest of # of email failures (e.g. weekly) so that dropped / blocked emails don't go unnoticed.
-* APM monitoring set up (e.g. Skylight), so that webmaster can diagnose traffic patterns & performance problems when needed
+
+* Webmaster is sent a regular digest of # of email failures (e.g. weekly) so that dropped / blocked emails don't go unnoticed. (or alert webmaster via Lambda webhook on each failure)
+
+* APM is set up (e.g. Skylight) so webmaster can monitor traffic patterns and identify needed performance improvements
+
+* The production app is nominally GDPR-compliant (all emails are sent from within the EU; logs are stored within the EU; logs are cleared after 30 days)
+
+* Webmaster is auto-alerted when there's heavy traffic or slow response times, and has an easy pathway to scaling up server resources to meet demand
+
 * Error reporting set up (e.g. Rollbar); webmaster is alerted on any server errors
+
 * Test suite covers all business-critical behavior
+
 * Load-testing harness that makes it easy to assess how the current deployment will stand up to various amounts of traffic
+
+* Customers' bug reports and help requests go directly to the webmaster, so that we feel their pain immediately and have high motivation to eliminate any problems they encounter
+
+* (if Rails) Bullet gem is configured to raise in dev & test if lazy-loaded N+1 queries are detected (forcing us to preload associated data up-front)
+
 * The readme contains:
-  - Instructions on local development setup & testing
-  - Instructions on how to do load testing
-  - Instructions on how to stand up a new app instance
-  - Instructions on how to safely deploy changes (incl. db migrations)
-  - Instructions on how to scale up or scale down servers to accommodate traffic
+  - Overview of the purpose & main components of the app
+  - Overview of code style guidelines (test suite principles etc.)
+  - How to set up for local development & testing
+  - How to do load testing
+  - How to safely deploy changes
+  - Notes on our production environment:
+    * where to find stuff
+    * how to deploy changes
+    * how to scale up & down to accommodate traffic, etc.
+  - How to deploy to a new prod environment
   - A link to this production-readiness checklist
