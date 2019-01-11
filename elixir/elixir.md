@@ -25,8 +25,10 @@ Use Homebrew. Don't install the packages manually, it's super painful.
 
 ## Docs
 
-- `mix hex.docs open --offline [package name]` - this fetches docs for a package (if not already downloaded), then opens them locally in your browser. Run this to cache packages for access when on an airplane.
-- It looks like you can't open the Elixir docs themselves using this method. Instead, download the latest docs at https://elixir-lang.org/docs.html and open `index.html` from that download instead.
+Open docs for a package (download locally if not already downloaded):
+`hexdocs PACKAGE_NAME` (my alias)
+- This works for core packages too, e.g. `elixir`, `eex`, `logger`
+- By default it shows docs for the latest version fetched, but you can specify version.
 
 ## Misc.
 
@@ -43,6 +45,7 @@ Use Homebrew. Don't install the packages manually, it's super painful.
   `"Hello" <> <<0>> => <<104, 101, 197, 130, 197, 0>>`
 - Regex: `~r/foobar/i`
 - List of strings: `~w(item1 item2 item3)`
+- Anytime you do a regex replace on user data, make sure to use the unicode-friendly flag to prevent codepoint corruption: `String.replace(input, ~r/abc/u, "")`
 
 ## Dates & times
 
@@ -142,3 +145,16 @@ end
 ## ETS
 
 is an efficient, scalable data store on the Erlang VM. A useful, built-in alternative to Redis. But don't use this prematurely; often a registry process is enough for storing data.
+
+## File reading & writing
+
+e.g.:
+
+    def load_and_parse_operations_list do
+      File.stream!("./input.txt") |> Enum.map(fn(line) ->
+        cleaned = String.trim(line)
+        op = String.at(cleaned, 0)
+        {amount, _rem} = Integer.parse(String.slice(cleaned, 1..-1))
+        {op, amount}
+      end)
+    end

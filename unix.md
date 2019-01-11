@@ -1,35 +1,73 @@
-# Prevent Mac from sleeping
+# General
 
-- `pmset noidle`
+Prevent Mac from sleeping:
+
+    pmset noidle
+
 
 # Video / image / audio processing
 
+Download a list of songs from Youtube for post-processing:
+- Create a file `urls.txt` with one video URL on each line
+- irb: `File.open("urls.txt").read.each_line { |l| `youtube-dl -f140 #{l}`; sleep 10 }`
+- In another tab: `watch -n5 "ls | grep .m4a | wc -l"`
+
 Convert .png to .jpg, compress size of all .jpgs, and remove the originals:
 (1200 is a better standard than 1024.)
-```
-sips -Z 1200 *.jpg *.JPG; for f in *.png; do sips --matchTo '/System/Library/ColorSync/Profiles/sRGB Profile.icc' -Z 1200 -s format jpeg "$f" --out "${f/.png/.jpg}"; rm "$f"; done
-```
 
-- `sips -Z 1024 *.jpg *.JPG` # resize all images *in-place* (ignoring subfolders)
-- `for f in *.m4a; do ffmpeg -i "$f" "$f.mp3"; done` # convert each m4a file to mp3
-- `ffmpeg -i infile -vcodec copy -af "volume=10dB" outfile` # boost volume of a video file
-- `ffmpeg -i infile -vcodec copy -af "volume=-5dB" outfile` # reduce volume of a video file
+    sips -Z 1200 *.jpg *.JPG; for f in *.png; do sips --matchTo '/System/Library/ColorSync/Profiles/sRGB Profile.icc' -Z 1200 -s format jpeg "$f" --out "${f/.png/.jpg}"; rm "$f"; done
+
+Resize all images in-place (ignoring subfolders):
+
+    sips -Z 1024 *.jpg *.JPG
+
+Convert each m4a file to mp3:
+
+    for f in *.m4a; do ffmpeg -i "$f" "$f.mp3"; done
+
+Boost or reduce volume of a video file:
+
+    ffmpeg -i infile -vcodec copy -af "volume=10dB" outfile # or `-5dB` to reduce
+
+Join each mp3 in a folder into one long mp3 (each must have same codec):
+
+    for f in *.mp3; do echo "file '$f'" >> filesToConcatenate.txt; done
+    ffmpeg -f concat -safe 0 -i filesToConcatenate.txt -c copy concatenated.mp3
+
 
 # Finding
 
-- `find . -name '*erlang*'` # find files by name (* means "0 or more chars")
-- `grep "<br" *.xml` # find all appearances of a text segment in certain files
-- `grep -rnw . -e 'test-manage-custom-fields'` # recursively search for text in this dir
+Find files by name: (* means "0 or more chars")
+
+    find . -name '*erlang*'
+
+Find all appearances of a text segment in certain files:
+
+    grep "<br" *.xml
+
+Recursively search for text in this dir:
+
+    grep -rnw . -e 'test-manage-custom-fields'
+
 
 # Queries & text parsing
 
-- `du -d1 -h .` # show disk space used in this dir and 1 level of subfolders
-- `ls -lat | head` # list most recently modified files / folders
-- `free -m | head -n2 | tail -n1 | awk '{print $4}'`
-  # get output from a column, ignoring varying whitespace
-- `find . \( -iname '*.rb' -o -iname '*.css' -o -iname '*.js' -o -iname '*.erb' -o -iname -o -iname '*.haml' -o -iname '*.scss' -o -iname '*.coffee' -o -iname '*.pl' \) -exec wc -l {} + | sort -n`
-  # count LOC in a Rails project. You can add clauses to catch other filetypes.
-  # For reference, according to the above metrics, BusBk is 40K lines of code and the GrayOwl Rails site is 64K.
+Show disk space used in this dir and 1 level of subfolders
+
+    du -d1 -h .
+
+List most recently modified files / folders
+
+    ls -lat | head
+
+Get output from a column, ignoring varying whitespace:
+
+    free -m | head -n2 | tail -n1 | awk '{print $4}'
+
+Count LOC in a Rails project. You can add clauses to catch other filetypes. For reference, according to the above metrics, BusBk is 40K lines of code and the GrayOwl Rails site is 64K.
+
+    find . \( -iname '*.rb' -o -iname '*.css' -o -iname '*.js' -o -iname '*.erb' -o -iname -o -iname '*.haml' -o -iname '*.scss' -o -iname '*.coffee' -o -iname '*.pl' \) -exec wc -l {} + | sort -n
+
 
 # Background processes
 
@@ -40,7 +78,13 @@ sips -Z 1200 *.jpg *.JPG; for f in *.png; do sips --matchTo '/System/Library/Col
 
 # Looping
 
-- `while : ; do echo "Hi there!"; sleep 1; done` - infinite loop
+Infitine loop:
+
+    while : ; do echo "Hi there!"; sleep 1; done
+
+Run a command for each line in a file:
+
+    cat lines.txt | while read line; do echo "This line is: $line"; done
 
 # Downloads
 

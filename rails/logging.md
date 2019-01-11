@@ -19,7 +19,18 @@ Rails.application.configure do
     }
   end
   config.lograge.formatter = ->(data) {
-    "#{data[:time]} pid=#{data[:pid]} method=#{data[:method]} path=#{data[:path]} controller=#{data[:controller]}##{data[:action]} params=#{data[:params]} status=#{data[:status]} duration=#{data[:duration]}ms ip=#{data[:ip]} user=#{data[:user]}"
+    # Data I'm excluding for brevity:
+    # - controller=#{data[:controller]}##{data[:action]} (I can infer this)
+    # - ip=#{data[:ip]} (Heroku router logs this in case I need it)
+    # - "#{data[:time]} "\
+    # - "pid=#{data[:pid]} "\
+    # Other possible starting chars: █ »
+    "■ [#{data[:method]} #{data[:path]}] "\
+    "params=#{data[:params]} "\
+    "user=#{data[:user]} "\
+    "status=#{data[:status]}"\
+    "#{data[:location] ? " redirected_to="+data[:location] : ""} "\
+    "duration=#{data[:duration]}ms"
   }
 end
 ```
@@ -27,12 +38,12 @@ end
 In ApplicationController, add the missing payload metadata:
 
 ```
-# Add request metadata to Lograge log payload
-def append_info_to_payload(payload)
-  super
-  payload[:ip] = request.remote_ip
-  payload[:user] = current_user&.id || "none"
-end
+  # Add request metadata to Lograge payload (see config/initializers/lograge.rb)
+  def append_info_to_payload(payload)
+    super
+    payload[:ip] = request.remote_ip
+    payload[:user] = current_user ? "#{current_user.id} (#{current_user.name})" : "none"
+  end
 ```
 
 If you use Rack::Timeout, consider disabling its logger:

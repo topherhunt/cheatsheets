@@ -5,7 +5,7 @@ Setting up:
 - `mix phoenix new app_name`
 - `mix deps.get`
 - `mix deps.compile` - recompile deps if you've made manual changes
-- `npm install`
+- `cd assets/ && npm install`
 - `mix ecto.create`
 - `mix ecto.migrate`
 - `mix ecto.rollback`
@@ -69,6 +69,14 @@ Form helpers:
     = select f, :field_name, [{"label", val}, ...], prompt: "Select one", class: "classes"
     = error_tag f, :field_name
     = submit "Submit", class: "classes"
+
+# Contexts
+
+* Every subfolder under lib/[app]/ is a context. There are no longer subfolders here that aren't contexts of your application. It's the new organizing principle (apart from the web sub-app which is its own standard-structure context).
+* Once you get the context boundary and name roughly right, as you call functions on that context from the outside world, you can sense the right-ness; that context feels like the right, expressive way to communicate what the code is trying to do.
+* A high-traffic production Phoenix app (for local event announcements & registrations) has ended up with the following contexts: auth, email, faq, newsletter, pdf, registration, ticketing, support. The lead dev finds those boundaries very clean & natural.
+* Guideline: Only the Context modules should reference Ecto.Query or Repo.
+
 
 ## Ecto, schemas, Repo
 
