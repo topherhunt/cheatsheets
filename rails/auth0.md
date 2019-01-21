@@ -1,6 +1,6 @@
 # How to set up Auth0 integration on Rails
 
-This is a download of my experience switching from Devise self-hosted auth to Auth0 on Thriveability Lab.
+This is a mental download of my experience switching from Devise self-hosted auth to Auth0 on Thriveability Lab.
 
 
 ## Configuring the Auth0 account

@@ -11,6 +11,26 @@ Removing a failed DJ job so it doesn't retry:
 -
 
 
+## Habit support
+
+To reset a person to the 1st HS lesson: See `HabitSupportRecipient#skip_to_lesson!`, there's useful comments there
+
+
+## Proposals & governance meetings
+
+The old proposal builder would often timeout while trying to accept proposals w large side-effects e.g. circle deletions. You can bypass this by accepting from the console:
+
+- Craft the proposal in a real meeting
+- Open the JS console, find the GOV_MTG_PROPOSAL_UPDATE statement, get the proposalId and meetingId
+- In the console:
+  ```
+  p = Proposal.find(proposalId)
+  p.update!(meeting_id: meetingId)
+  p.accept_in_meeting!
+  ```
+- Refresh the meeting page and you should see that the proposal is accepted and its change has been applied.
+
+
 ## Slack usergroup sync
 
 Relevant logs in Papertrail:
