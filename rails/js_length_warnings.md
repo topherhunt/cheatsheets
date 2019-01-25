@@ -2,7 +2,7 @@
 
 ### In application_helper.rb:
 
-```
+```ruby
 def warn_of_length_limit(field_selector, max_length)
   "<div class='js-length-limit-warning' data-target-field='#{field_selector}' data-max-length='#{max_length}'>
     <div class='js-length-90pct text-warning js-hidden'>Close to the maximum length</div>
@@ -13,7 +13,7 @@ end
 
 ### In text_length_warning.js:
 
-```
+```java
 $(function(){
   $('.js-length-limit-warning').each(function(){
     var field_selector = $(this).data('target-field');

@@ -1,30 +1,28 @@
 # Testing
 
+
 ## General philosophy
 
-- Tests should give cursory coverage of all code pathways, but shouldn't aim to check every little behavior that we're delivering. The primary purpose of tests is to sanity check the main code pathways and catch regressions. e.g. we test that a user can update their profile, but we don't care to individually check that each field in the profile form works.
-- The test suite does not replace manual smoke testing & sanity checks.
-- Aim for a consistent, well-organized, and easy-to-read test suite with a reasonable, even, and concise level of coverage. Don't aim for 100% coverage of every detail. But do add more thorough coverage for any logic or failure cases that you're specifically worried about.
-- The test suite should be structured intentionally and have a consistent approach & philosophy. It shouldn't be grown organically. An organically-grown test suite is messy, inconsistent, and hard to navigate.
-- Use helper methods / modules liberally to keep tests brief and readable.
+- Don't aim for 100% coverage. Aim for a *consistent* high level of coverage and a *predictable*, easy-to-navigate test suite.
+- The test suite should be structured intentionally, not grown organically. Maintain it at a consistent level.
+- Use helper methods & helper modules liberally to optimize for readability & conciseness in the tests.
+
 
 ## Controller tests
 
-Controller / request tests are the main focus of my test suite. There should be a test for every controller endpoint and for each main path available to it.
+- Are the most consistent & thorough testing boundary
+- Should cover every endpoint, every pathway, and every important outcome / side effect
 
-Tests should cover each pathway, and each important side effect, of each endpoint.
 
 ## Unit tests
 
-Test judiciously, focusing on non-trivial custom logic.
+- Test judiciously to cover any complex logic and any code you're particularly worried about
+- In Phoenix, just testing each context's public API should be enough. No need to test the contained schemas etc. directly.
 
-In Phoenix, just testing each context's public API should be enough.
 
 ## Integration / feature tests
 
-Feature tests are brief, high-level "client demos" that smoke-test each notable feature or area in the application. Structure each one as though you're giving a one-minute demo to Elon Musk: only show off the most important behavior, and keep it as brief as possible.
-
-Put each feature test in its own file. Generally there will be one (often multiple-paragraph) feature test per CRUD interface / major controller.
-
-Every feature test should start by navigating to the homepage. Don't navigate directly to other pages unless necessary.
-
+- Should cover each form, filling in then checking the result of *each field* (there's no other way to confirm that a form is wired up properly)
+- Should exercise any critical-path JS logic
+- Should always start from the homepage (so navigation is nominally exercised)
+- Should otherwise be as brief, minimal, standard, and boring as possible
