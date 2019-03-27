@@ -67,5 +67,9 @@ Delete all tables from a dev database:
 (This is helpful if migrations keep failing)
 - `topher.ignore/ssh-utility eu-development-N`
 - `psql -U postgres -c '\dt' | grep public | cut -d' ' -f4 | while read table; do psql -U postgres -c "DROP TABLE $table CASCADE;"; done`
-- `SELECT 'DROP TABLE "' || tablename || '" CASCADE;' FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;`
 - `k8s/update-database` (this will re-populate tables from production)
+
+
+## Troubleshooting
+
+If `k8s/update-releases` is giving intermittent failures, it may be that you're running out of disk space for your Docker images. Run `docker rmi -f $(docker images -a -q)` to clear out the old ones.

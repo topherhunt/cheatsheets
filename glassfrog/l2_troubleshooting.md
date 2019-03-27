@@ -34,7 +34,13 @@ The old proposal builder would often timeout while trying to accept proposals w 
 ## Slack usergroup sync
 
 Relevant logs in Papertrail:
-`production (SlackSyncUsergroup OR SlackApiWrapper)`
+```
+# All activity
+production[ (SlackSyncUsergroup OR SlackRemoveUsergroup OR SlackApiWrapper OR SlackUsergroupsManager)
+
+# Slack UG sync related errors
+production[ "ERROR --" slack usergroup -ddtrace
+```
 
 
 ## Tactical outputs & EmailIntegration notifications

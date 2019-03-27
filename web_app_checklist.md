@@ -17,9 +17,13 @@
   - How to deploy to a new prod environment
   - A link to this production-readiness checklist
 
+Security:
+
+  * All file upload vectors are validated for attachment size, or post-processed to protect against huge images, as relevant
+
 Database:
 
-  * DB is auto backed upn on a regular basis
+  * DB is auto backed up regularly
 
   * DB migrations are small, focused, and safe against table locking risks (see https://github.com/LendingHome/zero_downtime_migrations) unless downtime is expected
 
@@ -29,17 +33,27 @@ Testing:
 
   * All tests are passing with network access disabled.
 
+Performance:
+
+  * Page loads reviewed. (target under 100KB for most pages)
+
   * Load-testing harness that makes it easy to assess how the current deployment will stand up to various amounts of traffic
 
 Logging:
 
-  * Production app logs 1 line per request, containing: the timestamp, request method, URL, params, time taken, response status, redirected_to (if redirected), and current logged-in user id + name.
+  * Log 1 line per request, containing: the timestamp, request method, URL, params, time taken, response status, redirected_to (if redirected), and current logged-in user id + name.
+
+  * Log thorough details on each email being sent out, e.g. "Sending mail AssessmentMailer.ready_for_stem_scoring ("MAP ID # 103 is ready for scoring") to scorer@example.com" (see MAPP as example)
 
   * In production, don't log individual SQL queries, templates rendered, email body content, or other junk.
 
   * All timestamps in all logging & other analytics are in UTC.
 
 Monitoring:
+
+  * Error reporting set up (e.g. Rollbar); webmaster is alerted on any server exceptions **or error log statements**
+
+  * Google Analytics
 
   * UptimeRobot pings every 5m and alerts the webmaster if /health is unreachable (every 24h if it's on Heroku free tier). This health-check endpoint makes a trivial DB call to ensure we have db access.
 
@@ -48,8 +62,6 @@ Monitoring:
   * APM is set up (e.g. Skylight) so webmaster can monitor traffic patterns and identify needed performance improvements
 
   * Webmaster is auto-alerted when there's heavy traffic or slow response times, and has an easy pathway to scaling up server resources to meet demand
-
-  * Error reporting set up (e.g. Rollbar); webmaster is alerted on any server errors
 
 Compliance:
 

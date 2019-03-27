@@ -1,43 +1,11 @@
-## Commands
+# Phoenix: Structure, components, tips
 
-Setting up:
-
-- `mix phoenix new app_name`
-- `mix deps.get`
-- `mix deps.compile` - recompile deps if you've made manual changes
-- `cd assets/ && npm install`
-- `mix ecto.create`
-- `mix ecto.migrate`
-- `mix ecto.rollback`
-- `mix ecto.drop`
-- `MIX_ENV=test mix ecto.reset`
-
-Generating code:
-
-- `mix ecto.gen.migration create_user`
-- `mix phx.gen.html Accounts User users name:string email:string password_hash:string last_signed_in_at:utc_datetime`
-
-Running things:
-
-- `mix phx.server`
-- `iex -S mix`
-- `mix run priv/repo/seeds.exs` (or pass in any .exs script)
-- `mix run -e MyApp.Module.execute_some_function("one")` - run arbitrary function
-- `mix test` - runs test suite (auto migrates db first)
-- `iex -S mix test --trace` - run test suite, with pry debugging enabled
-- `mix test path/to/folder/or/file.exs` - run just a single test file
-- `mix test path/to/folder/or/file.exs:31` - run just a single test
-
-
-Help & docs:
-
-- `mix help`
-- `hexdocs PACKAGE_NAME` (aliased to: `mix hex.docs open --offline PACKAGE_NAME`)
 
 ## Env
 
 - A default Phoenix app has 3 environments: dev, test, prod. Any dependency applications (e.g. Logger) are always run in `:prod` even if your Phoenix app is in `:dev`. Check the current env with `Mix.env`.
 - Override the mix env: `MIX_ENV=test mix run blah/blah.exs`
+
 
 ## Controller
 
@@ -47,6 +15,7 @@ Help & docs:
 - Avoid nested conditionals & complex logic in controller actions using `with` and by extracting most operations to one or more Context module.
 - When referencing request `params`, use strings for keys. Only use atoms internally where I'm guaranteed to have a finite number of them; atoms aren't garbage-collected.
 - Web development should be supremely boring. There should be no sexy, interesting, intricate controllers; controllers should mostly tell subtle variations of the same story (e.g. CRUD).
+
 
 ## Views & templates
 
@@ -69,6 +38,7 @@ Form helpers:
     = select f, :field_name, [{"label", val}, ...], prompt: "Select one", class: "classes"
     = error_tag f, :field_name
     = submit "Submit", class: "classes"
+
 
 # Contexts
 
@@ -98,6 +68,7 @@ Associations:
 - `videos = Ecto.assoc(user, :videos)` - returns the associations as a list
 - Fetching nested associations: `Ecto.assoc(post, [:comments, :author]`
 
+
 ## Assets & Brunch
 
 - See http://www.phoenixframework.org/docs/static-assets
@@ -107,19 +78,23 @@ Associations:
 - `web/static/vendor` is for 3rd-party dependencies. These are all auto included at the bottom of layout.html.eex.
 - `brunch watch` - auto-runs when you start the phoenix server
 
+
 ## Email
 
 - Use Bamboo and Bamboo.Test
 - See the Zb app for thorough examples of mail templates, sending, and both unit tests and integration tests (which turned out to be easy to set up).
+
 
 ## Background jobs
 
 - Verk (https://github.com/edgurgel/verk) is the equivalent of Sidekiq. It builds an abstraction on Elixir's processes system and provides a high-level interface for enqueuing or scheduling jobs backed in Redis, handling errors with exponential backoff, web dashboard, etc.
 - Scheduled jobs MUST be idempotent.
 
+
 ## Logging
 
 By default, a Phoenix app spits all logs to STDOUT. In the test environment etc., you can use the `logger_file_backend` library to route logs to a file.
+
 
 ## Debugging
 
@@ -131,6 +106,8 @@ By default, a Phoenix app spits all logs to STDOUT. In the test environment etc.
   * Insert `IEx.pry` at the target line
   * Run the tests in iex: `iex -S mix test --trace`
 - You can inspect any Hex dependency code in `deps/`. You can even alter the code of a dependency, run `mix deps.compile`, then restart the Phoenix server, and your changes will be live.
+- Print a query as SQL: `Ecto.Adapters.SQL.to_sql(:all, Repo, query)`
+
 
 ## Tests
 

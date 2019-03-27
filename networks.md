@@ -1,3 +1,9 @@
+## Quick reference
+
+```
+ssh -vND 1024 vpn1
+```
+
 
 ## Set up a general-purpose SSH server
 
