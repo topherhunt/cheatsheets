@@ -28,6 +28,12 @@
     # recompile deps if you've manually modified their code
     mix deps.compile
 
+    # recompile a dependency (useful if you're hacking the dep code to troubleshoot)
+    mix deps.compile ueberauth_auth0
+
+    # Force-recompile all deps (can fix some weird undefined func errors)
+    mix deps.compile --force
+
 
 ## Code formatting
 

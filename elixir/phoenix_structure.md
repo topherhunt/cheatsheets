@@ -68,6 +68,13 @@ Associations:
 - `videos = Ecto.assoc(user, :videos)` - returns the associations as a list
 - Fetching nested associations: `Ecto.assoc(post, [:comments, :author]`
 
+**Floats & Decimals**:
+
+- Use Float when you can get away with it. Only use Decimal when you need absolute precision of values.
+- Elixir has no built-in support for decimals, you need to add the Decimal dep for that. Decimal has a somewhat verbose api since the standard arithmetic functions aren't compatible with this numeric type.
+- For more docs on using floats & decimals in Ecto, see docs for Ecto.Schema.html#module-primitive-types.
+- **Watch out:** If using Decimals, use `Decimal.cmp/2` to compare values. Never use kernel comparators like `>=`; this appears to work, but will use Erlang term comparison, and won't compare based on the actual numeric values.
+
 
 ## Assets & Brunch
 

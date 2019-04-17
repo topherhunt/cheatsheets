@@ -5,7 +5,7 @@ This is a mental download of my experience switching from Devise self-hosted aut
 
 ## Configuring the Auth0 account
 
-- Sign up on Auth0, create a namespace ("tenant"), and create an application
+- Sign up on Auth0, create a namespace ("tenant"), and create an application. For app type, select "Regular web app (with page refresh)".
 
 - Referring to the Auth0 application's settings page, set three env vars in the Rails app: `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, and `AUTH0_CLIENT_SECRET`
 
@@ -16,7 +16,7 @@ This is a mental download of my experience switching from Devise self-hosted aut
 - In the Auth0 dashboard, under Connections, enable the Social connections for Google and Facebook. For each, make sure you enable the email scope (if email address is needed by the app). For each provider, you'll need to create a developer app integration then fill in the "Client ID" and "Client Secret". See the link, "How to obtain a client ID".
 
 
-## The Rails code
+## The code
 
 
 ### Model & dependencies
@@ -220,16 +220,22 @@ module Services
 end
 ```
 
-- Add the login & logout links in the navbar (adjust markup as needed):
+Add the login & logout links in the navbar (adjust markup as needed):
 
-```
-- if current_user
-  %div= current_user.name
-  %div= link_to "My Profile", user_path(current_user)
-  %div= link_to "Log out", logout_url, class: "text-danger"
-- else
-  %div= link_to "Log in", auth0_login_url
-```
+    - if current_user
+      %div= current_user.name
+      %div= link_to "My Profile", user_path(current_user)
+      %div= link_to "Log out", logout_url, class: "text-danger"
+    - else
+      %div= link_to "Log in", auth0_login_url
+
+And ensure that auth0_login_url is defined in some helper somewhere:
+
+    def login_url
+      # This redirect to topherhunt.auth0.com/authorize is invisibly defined when
+      # the OmniAuth provider is defined (see config/initializers/omniauth.rb)
+      "/auth/auth0"
+    end
 
 
 ### Tests
