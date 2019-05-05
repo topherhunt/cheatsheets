@@ -102,6 +102,8 @@ Associations:
 
 By default, a Phoenix app spits all logs to STDOUT. In the test environment etc., you can use the `logger_file_backend` library to route logs to a file.
 
+See: https://github.com/onkel-dirtus/logger_file_backend
+
 
 ## Debugging
 

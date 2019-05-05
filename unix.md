@@ -19,11 +19,12 @@ Convert .png to .jpg, compress size of all .jpgs, and remove the originals:
 
 Resize all images in-place (ignoring subfolders):
 
-    sips -Z 1024 *.jpg *.JPG
+    sips -Z 1200 *.jpg *.JPG
 
-Convert each m4a file to mp3:
+Convert each mp4 file to mp3:
 
-    for f in *.m4a; do ffmpeg -i "$f" "$f.mp3"; done
+    # will also work with .m4a etc.
+    mkdir mp3; for f in *.mp4; do ffmpeg -i "$f" "mp3/$f.mp3"; done
 
 Boost or reduce volume of a video file:
 

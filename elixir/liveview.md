@@ -20,25 +20,62 @@ Example LiveView apps:
 - https://github.com/smeade/phoenix_live_view_example
 
 
-## How to use a JS confirmation dialog with a LiveView phx-click element
+## Tips & notes
 
-LiveView listens for click events on the highest possible priority which makes it hard to override / stop propagation of click events on phx-click targets. Instead, I found it easier to make the phx-click target hidden, so that I can trigger the click event from my JS wherever I want. Here's how I did it.
+- LiveView pubsub broadcasts should include the changed object so receivers don't each have to re-fetch the same record.
 
-In the LiveView template, I needed two targets: a visible clickable one, and a hidden one which is bound to the actual phx-click events (which must be adjacent / sibling to it in the DOM):
+- Don't do LiveView partials on static pages. If I need LV on a page, make the whole page the LV.
 
-    <span>
-      <%= link icon("trash"), to: "#", class: "text-danger", "phx-click-after-confirmation": "Are you sure you want to delete this video and its coding data?" %>
-      <a href="#" class="js-hidden" phx-click="delete_video" phx-value="<%= video.id %>">the actual phx-click link</a>
-    </span>
 
-Then I wrote a standard jquery listener on the visible target that shows the confirmation message, and on confirm, emits a click event on the hidden target:
+## Code samples
 
-    $(document).on("click", "[phx-click-after-confirmation]", function(e){
-      e.preventDefault();
-      var question = $(this).attr("phx-click-after-confirmation");
-      if (confirm(question)) {
-        var hiddenTarget = $(this).siblings("[phx-click]")[0];
-        console.log("Now triggering click on element: ", hiddenTarget);
-        hiddenTarget.dispatchEvent(new Event('click'));
-      }
-    });
+
+### A LiveView from RTL (no longer needed):
+
+```ruby
+    defmodule RTLWeb.Manage.ProjectsListLiveview do
+      use Phoenix.LiveView
+      use Phoenix.HTML
+      require Logger
+
+      def mount(%{current_user: current_user}, socket) do
+        if connected?(socket), do: RTL.Projects.subscribe_to_all_projects()
+
+        socket = socket
+        |> assign(:current_user, current_user)
+        |> assign(:projects, get_projects(socket))
+
+        {:ok, socket}
+      end
+
+      def render(assigns) do
+        RTLWeb.Manage.ProjectView.render("list.html", assigns)
+      end
+
+      # Listen for a client-side event
+      # def handle_event("delete_video" = type, id, socket) do
+      #   log "handle_event called with #{type}, #{id}."
+      #   Videos.get_video!(id) |> Videos.delete_video!()
+      #   {:noreply, socket}
+      # end
+
+      # Listen for any relevant pubsub notifications
+      def handle_info({RTL.Projects, _event} = payload, socket) do
+        log "handle_info called with #{inspect(payload)}."
+        {:noreply, assign(socket, :projects, get_projects(socket))}
+      end
+
+      defp get_projects(socket) do
+        user = socket.assigns.current_user
+
+        if RTL.Accounts.is_superadmin?(user) do
+          RTL.Projects.get_projects()
+        else
+          RTL.Projects.get_projects(having_admin: user)
+        end
+      end
+
+      defp log(message), do: Logger.info("Manage.ProjectsListLiveview: #{message}")
+    end
+```
+

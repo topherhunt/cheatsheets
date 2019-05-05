@@ -250,7 +250,7 @@ Most aggregate dataframe functions will ignore / exclude missing values.
 
 Sort a DF by desired column(s):
 
-    df.sort_values(by=['POPESTIMATE2015'], inplace=True, ascending=False)
+    df = df.sort_values(by=['POPESTIMATE2015'], ascending=False)
 
 
 ### DataFrames: Adding columns & merging DFs
@@ -474,6 +474,7 @@ Get the Pearson correlation btw two serieses:
 
 Render a scatter plot of two columns:
 
+```python
     import matplotlib as plt
     %matplotlib inline
 
@@ -481,4 +482,94 @@ Render a scatter plot of two columns:
     Top15['PopEst'] = Top15['Energy Supply'] / Top15['Energy Supply per Capita']
     Top15['Citable docs per Capita'] = Top15['Citable documents'] / Top15['PopEst']
     Top15.plot(x='Citable docs per Capita', y='Energy Supply per Capita', kind='scatter', xlim=[0, 0.0006])
+```
+
+
+## Distributions
+
+You can use Numpy and Scipy to answer many probability questions via simulation rather than having to work out the math.
+
+Distribution theory:
+
+- A distribution is just a shape that describes the probability of any particular value being pulled when we sample the distribution.
+- Distribution: a chart of all values for a set of samples (or for a whole population)
+- Binomial distribution: when there's only 2 outcomes
+- Discrete distribution: when all values are categories, not numbers on a scale
+- Uniform distribution: when each value in the range are equally likely (numeric scale)
+- Normal (gaussian) distribution: symmetrical bell curve
+
+- The *sample mean* versus the *expected value* of a distribution (sample means converge on the distribution's expected value as the sample size approaches infinite)
+- Central tendency of a distribution (mean, median, and mode)
+- Variability of a distribution (standard deviation, and interquartile range)
+
+Numpy lets you compute the average outcome from a random binomial distribution:
+
+```python
+    np.random.binomial(1, 0.5)
+    # => either 0 or 1
+
+    np.random.binomial(1000, 0.5)
+    # => 511 (the # of heads returned)
+```
+
+Simulate 20 coin flips, 10,000 times, and get the # of heads for each trial:
+
+```python
+    array = np.random.binomial(20, 0.5, 10000)
+    # What's the proportion of trials having 15+ heads?
+    (array >= 15).sum() * 1.0 / 10000
+    # => 0.0223
+    # You can also use .mean():
+    (array >= 15).mean()
+```
+
+Measure the kurtosis of a distribution:
+
+```python
+    import scipy.stats as stats
+    # Generate a random sampling from a normal distribution
+    sample = np.random.normal(0.75,size=1000)
+    stats.kurtosis(sample)
+    # negative value = this sample's curve is more flat than normal.
+    # positiive value = this sample's curve is more pointy than a normal curve
+```
+
+Measure the skew of a distribution:
+
+```python
+    # Generate a random highly-skewed distribution
+    sample = np.random.chisquare(4, size=10000)
+    stats.skew(sample)
+    # A normal distribution has skew = 0.
+    # A positive skew means the curve peak is "tilted" to the left.
+```
+
+
+## Hypothesis testing
+
+You can use basic numpy & scipy tools to evaluate whether the data supports a certain hypothesis. For example, you can do simple A/B tests of two website layouts, then analyze the outcomes associated with each layout.
+
+Let's say you have 2 *independent* datasets, one for grades of early students and one for grades of last-minute students. You notice that the mean grades of the early students is higher. Is it *enough* higher that you can confidently say "the early students perform better, it's not just random chance"? Run `scipy.stats.ttest_ind` to get the T-statistic and P-value that tells you whether the difference appears significant:
+
+```python
+    from scipy import stats
+    # Load some data source
+    df = pandas.read_csv('grades.csv')
+    # Identify two samples to compare (must be INDEPENDENT for this test to be valid!)
+    early = df[ df['assignment1_submission'] <= '2015-12-31' ]
+    late = df[ df['assignment1_submission'] > '2015-12-31' ]
+    # We notice that the assignment 1 grade is higher for early students.
+    early['assignment1_grade'].mean() # => 74.9727
+    late['assignment1_grade'].mean() # => 74.0174
+    # Is the difference sufficiently unlikely by chance?
+    stats.ttest_ind(early['assignment1_grade'], late['assignment1_grade'])
+    # => statistic=1.400549944897566, pvalue=0.16148283016060577
+    # No, a p-value of 0.16 isn't significant (could easily be explained by chance).
+    stats.ttest_ind(early['assignment3_grade'], late['assignment3_grade'])
+    # => statistic=1.7116160037010733, pvalue=0.087101516341556676
+    # Closer, but still not a difference we can be confident in.
+    # Use a P threshold of .01 (only 1 in 100 times would we get this result by chance).
+```
+
+WARNING: The T-test assumes that: a) each of the two populations being compared is a roughly normal distribution. If your sample doesn't look at all like a normal curve, the T-test may give invalid results. and b) the two samples are roughly the same size. If sample sizes differ greatly, consider the Mann-Whitney U test.
 
