@@ -212,3 +212,4 @@ TODO
   * Copy helpers module from RTL.Helpers.
   * Rename PageController to HomeController. (controller, route, view, template, test)
   * Copy RTL.Factory. (maybe leave one insert_* func commented out for later)
+  * Copy **Grassflog's** ErrorHelpers.error_tag/2 for easier controller test assertions
