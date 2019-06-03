@@ -1,5 +1,11 @@
 # React
 
+
+## Installing
+
+Use https://hexdocs.pm/react_phoenix/readme.html as a starting point.
+
+
 ## Vue.js
 
 Prefer Vue.js over React:

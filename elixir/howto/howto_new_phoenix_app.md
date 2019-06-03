@@ -96,6 +96,8 @@ Install Jquery and Bootstrap:
 
 (Webpack primer: https://what-problem-does-it-solve.com/webpack/intro.html)
 
+Install SCSS support by more or less following the steps at https://github.com/webpack-contrib/sass-loader.
+
 Replace `lib/my_app_web/templates/layout/app.html.eex` with a simple Bootstrap template:
 
 ```
@@ -197,13 +199,6 @@ To test that it's all wired up properly, replace `index.html.eex` and load the p
 
     <h3>An icon: <i class="icon">face</i></h3>
 ```
-
-
-## Install scss support
-
-TODO
-
-(see https://getbootstrap.com/docs/4.0/getting-started/webpack/ for hints)
 
 
 ## Misc.
