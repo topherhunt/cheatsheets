@@ -3,29 +3,25 @@
 
 ## Orienting concepts & numbers
 
-Important concepts:
+Important concepts (with some orienting numbers from my hobby app, RTL):
 
-  * **RPS**: server requests per second. In my benchmarks, RTL (Hobby dyno) can handle 30-45 RPS. Keep in mind that load testing scripts are an artificial environment and don't account for added sources of load like serving assets.
+  * **RPS**: server requests per second. In my tests, RTL can handle 30-45 page loads per second, but that seems unusually high. [Scout APM](https://scoutapm.com/info/pricing) considers 2 rps (167k req / day) a "small" amount of traffic and 8 rps (690k req / day) a "large" amount.
+    * Keep in mind that there's various kinds of requests and they have different performance implications: page loads (which often invoke lots of db queries, then render a complex HTML page), AJAX and API requests (often more lightweight and have less to render), and assets such as images/JS/CSS (which can be much larger in size, but are usually cached by the browser). A single full page load is often accompanied by 10+ asset requests, more if the site isn't well optimized. Also, consider that cached pages are much less expensive to serve than pages that need to be recomputed from scratch. The APM metrics above refer to just page loads / ajax / api requests, and exclude assets.
   * **Think time**: how long users look at a screen between actual server requests. 10s is a reasonable starting assumption.
   * **Concurrent users**: The # of users actively doing stuff on the site. Concurrent users = RPS x avg think time (in secs). RPS = concurrent users / think time. Assuming a think time of 10s, RTL's 30-45 RPS will support 300-450 concurrent users.
   * **Peak traffic**: To be safe, assume that website traffic will routinely spike to ~ 10x the average. So if RTL can safely handle up to 45rps, I should be alarmed if I see the average grow above 5rps.
-
-Some orienting RPS numbers:
-
-  * Per Scout APM's pricing benchmarks, a "small" app serves up to 2 rps (167k requests / day). A "large" app serves up to 8 rps.
-
-  * 70 rps (6m requests / day) is considered a large amount of traffic for most sites. For reference, AppSignal APM would cost €500/month for that volume, and Scout APM's largest plan only supports up to 8 rps.
 
 
 ## Writing a load testing script
 
   * I'm using `k6` for load testing. See https://docs.k6.io/docs/welcome and my proof-of-concept script: `sample_k6_load_testing_script.js`
   * Identify a common workflow / pathway that users will follow. Write the script to follow this pathway, touching on each page request made in the process.
+  * If your server will also serve assets, it's important to include those in the test. Note all requests that your browser makes (most assets will be cached across page requests) and mimic them.
 
-Keep in mind, k6 has some helpful default behavior:
+K6 has some helpful behavior that makes your life easier:
 
   * When k6 receives a 3** redirect, it will follow it unless you explicitly disable it.
-  * Each VU remembers and re-sends its cookie data (incl. encrypted session) so you don't have to worry about manually providing this with each page request.
+  * Each VU remembers and re-sends its cookie data (eg. encrypted session) so you don't have to worry about manually providing this with each page request.
 
 
 ## Running the script
@@ -38,10 +34,15 @@ Run the same script for a fixed duration, increasing the number of VUs each time
   * `k6 run k6_script.js --vus=50 --duration=60s`
   * `k6 run k6_script.js --vus=100 --duration=60s`
 
+If you have trouble running k6 locally, they also have a Docker image:
+
+  * `docker pull loadimpact/k6`
+  * `docker run -i loadimpact/k6 run --vus=50 --duration=60s -< k6_script.js`
+
 
 ## Running load tests from an Amazon EC2 instance
 
-If you do load testing from your local machine, the bandwidth between your computer and the server might interfere with the accuracy of the test and give you poorer results than what your server can actually . Run your load tests on an EC2 instance to eliminate this variable.
+If you have a solid internet connection, you can run the load testing script from your local machine and expect insightful results. But the bandwidth & delay between your computer and the server will always be an intervening variable; for purest results, run the script on a cloud vps. Here's how to run it on an EC2 instance:
 
   * Spin up an EC2 instance with 8GB+ of memory. I'm using Amazon Linux AMI.
   * SSH in: `ssh YOUR_EC2_INSTANCE_ADDRESS -i ~/.ssh/YOUR_KEYPAIR_FILE`
@@ -55,9 +56,10 @@ If you do load testing from your local machine, the bandwidth between your compu
   * `docker pull loadimpact/k6`
   * `docker run -i loadimpact/k6 run --vus=50 --duration=60s -< k6_script.js`
 
+
 ## Analyzing the results
 
-Compare results across the different # of VUs:
+Compare results across the different # of Virtual Users:
 
   * **Avg request duration**: How does this change as # VUs grows? At what point does it become intolerable?
   * **RPS**: How does this change as # VUs grows? At what point do more VUs result in lower RPS?
@@ -66,7 +68,7 @@ Compare results across the different # of VUs:
 
 Also check your Heroku / APM stats after doing load testing. Does memory usage grow as the # of virtual users grows? At what point do you start to hit memory constraints? How do response times change? RPS? (note: RPS should grow proportionately but won't be accurate, since the load tests are running in between periods of relative downtime)
 
-Keep in mind, # VUs is not the same as "concurrent users". The virtual users in your load testing script likely have zero "think time".
+Keep in mind, # VUs is not the same as "concurrent users". The virtual users in your load testing script likely have zero "think time", meaning they make another request as soon as the previous request is served, whereas real users will often taken 10+ seconds to do stuff on a page before making another request.
 
 
 ## Example: Load testing RTL
