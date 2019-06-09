@@ -5,6 +5,20 @@ ssh -vND 1024 vpn1
 ```
 
 
+## Network debugging
+
+- `nc -vz 52.87.50.47 8008` # test whether a remote host is accessible at a port
+- `nc -lk 0.0.0.0 8008 > netcat_listen.txt` # listen on a port, log all cxs to a text file
+- List all listening ports and the responsible PIDs:
+  - `netstat -tuplen` # (Linux)
+  - `lsof -Pn -i4` # (OSX)
+- `echo '{"text": "Test content"}' | curl -d @- http://domain.com:8000/queries.json`
+  # send a test request with JSON data to verify that a JSON service is accessible
+
+Monitor my public IP every second:
+`while : ; do dig TXT +short o-o.myaddr.l.google.com @ns1.google.com ; sleep 1 ; done`
+
+
 ## Set up a general-purpose SSH server
 
 - Launch a tiny VPS (eg. EC2 nano Ubuntu). Ensure you can access port 22 (for SSH) plus the port where the server will receive HTTP requests (e.g. 9878).

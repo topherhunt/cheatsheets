@@ -5,8 +5,9 @@
 
 Important concepts (with some orienting numbers from my hobby app, RTL):
 
-  * **RPS**: server requests per second. In my tests, RTL can handle 30-45 page loads per second, but that seems unusually high. [Scout APM](https://scoutapm.com/info/pricing) considers 2 rps (167k req / day) a "small" amount of traffic and 8 rps (690k req / day) a "large" amount.
+  * **RPS**: server requests per second. [Scout APM](https://scoutapm.com/info/pricing) considers 2 rps (167k req / day) a "small" amount of traffic and 8 rps (690k req / day) a "large" amount.
     * Keep in mind that there's various kinds of requests and they have different performance implications: page loads (which often invoke lots of db queries, then render a complex HTML page), AJAX and API requests (often more lightweight and have less to render), and assets such as images/JS/CSS (which can be much larger in size, but are usually cached by the browser). A single full page load is often accompanied by 10+ asset requests, more if the site isn't well optimized. Also, consider that cached pages are much less expensive to serve than pages that need to be recomputed from scratch. The APM metrics above refer to just page loads / ajax / api requests, and exclude assets.
+    * In my tests, RTL can handle 30-60 HTML page requests per second. But if I also request the assets that the browser would normally request (images/JS/CSS), then it can only handle ~ 6 rps. So if you're serious about throughput, the first thing to do is to offload all assets (incl. JS and CSS) to a CDN of some sort.
   * **Think time**: how long users look at a screen between actual server requests. 10s is a reasonable starting assumption.
   * **Concurrent users**: The # of users actively doing stuff on the site. Concurrent users = RPS x avg think time (in secs). RPS = concurrent users / think time. Assuming a think time of 10s, RTL's 30-45 RPS will support 300-450 concurrent users.
   * **Peak traffic**: To be safe, assume that website traffic will routinely spike to ~ 10x the average. So if RTL can safely handle up to 45rps, I should be alarmed if I see the average grow above 5rps.
@@ -16,7 +17,7 @@ Important concepts (with some orienting numbers from my hobby app, RTL):
 
   * I'm using `k6` for load testing. See https://docs.k6.io/docs/welcome and my proof-of-concept script: `sample_k6_load_testing_script.js`
   * Identify a common workflow / pathway that users will follow. Write the script to follow this pathway, touching on each page request made in the process.
-  * If your server will also serve assets, it's important to include those in the test. Note all requests that your browser makes (most assets will be cached across page requests) and mimic them.
+  * If your server will also serve assets, it's important to include those in the test. Note all requests that your browser makes (most assets will be cached across page requests) and mimic them. This will make your results much more realistic.
 
 K6 has some helpful behavior that makes your life easier:
 

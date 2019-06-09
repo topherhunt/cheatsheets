@@ -2,14 +2,41 @@ _*TODO: This is cluttered and probably has lots of duplicates. Clean it up.*_
 
 ## Basics
 
-- `vagrant init hashicorp/precise32`
+- `vagrant init ubuntu/xenial64`
 - `vagrant up`
 - `vagrant ssh`
 - Now you're in a brand new Ubuntu VM. Do any additional install and add it to a provisioning shell script in the generated Vagrantfile.
 - You can put your provisioning commands in a dedicated file and point to it like this: `config.vm.provision "shell", path: "./vagrant_files/provision.sh", privileged: false`. **Disable privileged mode** so the script runs as the `vagrant` user rather than `root` (sudo still works fine).
-- Vagrant performance will be *slow* by default. It looks like people have had great success improving performance by orders of magnitude, but I haven't figured out how yet:
+- Vagrant VMs have slow performance by default. You can tune performance, see these guides:
   - https://stefanwrobel.com/how-to-make-vagrant-performance-not-suck
   - http://stackoverflow.com/questions/31742264/php-on-vagrant-virtualbox-on-linux
+
+
+## Packaging up a box
+
+Instead of expecting each user to download a base box then run the full setup script which can be time-consuming, you can set up the box (manually or via script) then package it
+
+Steps:
+
+  * Init a VM from a base box
+  * Set it up the way you want, possibly saving the steps in a bash script for reproducibility later
+  * Exit and halt the VM
+  * `vagrant package --output my_box_name` - this takes a long time, then creates `my_box_name.box`
+  * Upload `my_box_name.box` to S3
+  * In your final Vagrantfile, specify the box name and url where it can be downloaded. Then whenever someone calls `vagrant up`, they'll download this box and start up a VM in identical state.
+
+```
+config.vm.box = 'NAME'
+config.vm.box_url = 'https://s3.amazonaws.com/BUCKET/vagrant/NAME.box'
+```
+
+Thanks to: https://stefanwrobel.com/how-to-make-vagrant-performance-not-suck.
+
+
+## Rails
+
+By default, a Rails dev server only binds to `localhost`, but in Vagrant you need to listen for _external_ incoming connections. Fix this (in Rails 5) by setting `HOST=0.0.0.0`; this will cause Rails to listen for incoming requests, not just local ones.
+
 
 ## Mysql install & setup
 

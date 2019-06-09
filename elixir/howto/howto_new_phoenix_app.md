@@ -59,25 +59,108 @@ Fetch dependencies: `mix deps.get`
 Create the db: `mix ecto.create`
 
 
-## Logging
+## Request logging
 
-Reference:
+Useful references for logging in Elixir & Phoenix:
 
+  * https://hexdocs.pm/logger/1.8/Logger.html
+  * https://github.com/elixir-plug/plug/blob/v1.8.0/lib/plug/logger.ex
   * https://www.verypossible.com/blog/thoughtful-logging-in-elixir-a-phoenix-story
-  * The following will at least ensure all important data is logged in prod, but not on one line. If I really want one-line logging, I might be able to write a plug for it, but it will take some digging into Plug internals. See Phoenix.Logger.phoenix_controller_call/3 (which logs the "Processing with..." line) and Plug.Logger.call/2 (which is responsible for the "GET /path" and "Sent 200 in 10ms" log lines).
 
-In `config.exs`, add the :filter_parameters option:
+Follow these steps to set up one-line logging for a Phoenix app.
 
-    # Scrub these params from the logs
-    config :phoenix, :filter_parameters, ["password", "admin_password"]
+In `config.exs`, ensure that all sensitive params are filtered out of the logs:
 
-In `rtl_web.ex`, set controller logging to :info:
-(this more clearly shows logged params in dev, and ensures they're visible in prod)
+```ruby
+# Scrub these params from the logs
+config :phoenix, :filter_parameters, ["password", "admin_password"]
+```
 
-    def controller do
-      quote do
-        use Phoenix.Controller, namespace: RTLWeb, log: :info
-        ...
+In `lib/my_app_web.ex`, in the `controller` quote block, disable Phoenix.Controller logging:
+
+```ruby
+def controller do
+  quote do
+    use Phoenix.Controller, namespace: MyAppWeb, log: false
+    ...
+```
+
+In `lib/my_app_web/endpoint.ex`, remove `plug(Plug.Logger)` and replace it with a new plug:
+
+```ruby
+  # Custom one-line request logging
+  plug MyAppWeb.RequestLogger
+```
+
+And finally create `lib/my_app_web/plugs/request_logger.ex` with the following content:
+
+```ruby
+# One-line full request logging inspired by Plug.Logger.
+# See https://github.com/elixir-plug/plug/blob/v1.8.0/lib/plug/logger.ex
+# Need to restart the server after updating this file.
+defmodule RTLWeb.RequestLogger do
+  require Logger
+
+  @behaviour Plug
+
+  def init(opts) do
+    %{log_level: opts[:log_level] || :info}
+  end
+
+  def call(conn, opts) do
+    start_time = System.monotonic_time()
+
+    Plug.Conn.register_before_send(conn, fn(conn) ->
+      # Uses a func so the string doesn't need to be computed unless log_level is active.
+      # Charlist would be more performant, but I'm not pro enough to worry about that.
+      # Other data I could include, but feels redundant: remote_ip, port, owner (PID).
+      Logger.log(
+        opts.log_level,
+        fn ->
+          "■ [#{conn.method} #{conn.request_path}] "<>
+          "params=#{inspect(Phoenix.Logger.filter_values(conn.params))} "<>
+          "user=#{print_user(conn)} "<>
+          "status=#{conn.status}#{print_redirect(conn)} "<>
+          "duration=#{print_time_taken(start_time)}"
+        end)
+      conn
+    end)
+  end
+
+  defp print_user(conn) do
+    if conn.assigns.current_user do
+      "#{conn.assigns.current_user.id} (#{conn.assigns.current_user.full_name})"
+    else
+      "(none)"
+    end
+  end
+
+  defp print_redirect(conn) do
+    if conn.status == 302 do
+      " redirected_to=#{Plug.Conn.get_resp_header(conn, "location")}"
+    else
+      ""
+    end
+  end
+
+  defp print_time_taken(start_time) do
+    stop_time = System.monotonic_time()
+    microsecs = System.convert_time_unit(stop_time - start_time, :native, :microsecond)
+
+    if microsecs > 1000 do
+      [microsecs |> div(1000) |> Integer.to_string(), "ms"]
+    else
+      [Integer.to_string(microsecs), "µs"]
+    end
+  end
+end
+```
+
+Now restart your server and you should see each request generate one log entry with all the basic info present (and no redundant chaff lines):
+
+```
+2019-06-09 18:18:51.410 [info] ■ [PUT /manage/projects/7qDjSk/prompts/3tUrF9] params=%{"_csrf_token" => "dDVjGiIiHWUWADphMS48EXAZP34VAAAADFRcXaw/ZTx8kKPFCHr2PQ==", "_method" => "put", "_utf8" => "✓", "project_uuid" => "7qDjSk", "prompt" => %{"html" => "<div>Test question 3</div>"}, "prompt_uuid" => "3tUrF9"} user=1 (Topher Hunt) status=302 redirected_to=/manage/projects/7qDjSk duration=21ms
+```
 
 
 ## Assets & layout

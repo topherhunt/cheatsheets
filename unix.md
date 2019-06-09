@@ -36,7 +36,11 @@ Join each mp3 in a folder into one long mp3 (each must have same codec):
     ffmpeg -f concat -safe 0 -i filesToConcatenate.txt -c copy concatenated.mp3
 
 
-# Finding
+# Searching & listing files
+
+List most recently modified files / folders
+
+    ls -lat | head
 
 Find files by name: (* means "0 or more chars")
 
@@ -51,15 +55,14 @@ Recursively search for text in this dir:
     grep -rnw . -e 'test-manage-custom-fields'
 
 
-# Queries & text parsing
+# Resources
 
 Show disk space used in this dir and 1 level of subfolders
 
     du -d1 -h .
 
-List most recently modified files / folders
 
-    ls -lat | head
+# Text parsing
 
 Get output from a column, ignoring varying whitespace:
 
@@ -90,16 +93,3 @@ Run a command for each line in a file:
 # Downloads
 
 - `wget -c <url>` - download a resource, resuming from partial progress if interrupted
-
-# Network
-
-- `nc -vz 52.87.50.47 8008` # test whether a remote host is accessible at a port
-- `nc -l 0.0.0.0 8008 > netcat_listen.txt` # listen on a port, log all cxs to a text file
-- List all listening ports and the responsible PIDs:
-  - `netstat -tuplen` # (Linux)
-  - `lsof -Pn -i4` # (OSX)
-- `echo '{"text": "Test content"}' | curl -d @- http://domain.com:8000/queries.json`
-  # send a test request with JSON data to verify that a JSON service is accessible
-
-Monitor my public IP every second:
-`while : ; do dig TXT +short o-o.myaddr.l.google.com @ns1.google.com ; sleep 1 ; done`
