@@ -59,7 +59,7 @@ Fetch dependencies: `mix deps.get`
 Create the db: `mix ecto.create`
 
 
-## Request logging
+## One-line request logging
 
 Useful references for logging in Elixir & Phoenix:
 
@@ -161,6 +161,50 @@ Now restart your server and you should see each request generate one log entry w
 ```
 2019-06-09 18:18:51.410 [info] ■ [PUT /manage/projects/7qDjSk/prompts/3tUrF9] params=%{"_csrf_token" => "dDVjGiIiHWUWADphMS48EXAZP34VAAAADFRcXaw/ZTx8kKPFCHr2PQ==", "_method" => "put", "_utf8" => "✓", "project_uuid" => "7qDjSk", "prompt" => %{"html" => "<div>Test question 3</div>"}, "prompt_uuid" => "3tUrF9"} user=1 (Topher Hunt) status=302 redirected_to=/manage/projects/7qDjSk duration=21ms
 ```
+
+
+## One-line SQL logging
+
+One-line SQL logging is also easy to set up.
+
+In `config.exs`, configure MyApp.Repo to use a new custom logger function:
+
+```ruby
+config :my_app, MyApp.Repo,
+  # ...
+  loggers: [{MyApp.Repo, :log_query, []}]
+```
+
+In `lib/my_app/repo.ex`, define the `log_query` function:
+
+```ruby
+  # ...
+  require Logger
+
+  # Inspired by https://github.com/elixir-ecto/ecto/blob/v2.2.11/lib/ecto/log_entry.ex
+  def log_query(entry) do
+    Logger.log(:debug, fn ->
+      {ok, _} = entry.result
+      source = if entry.source, do: " source=#{inspect(entry.source)}", else: ""
+      time_us = System.convert_time_unit(entry.query_time, :native, :microsecond)
+      time_ms = div(time_us, 100) / 10
+
+      params = Enum.map(entry.params, fn
+        %Ecto.Query.Tagged{value: value} -> value
+        value -> value
+      end)
+
+      "SQL query: #{ok}#{source} db=#{time_ms}ms   #{entry.query}   params=#{inspect(params)}"
+    end)
+  end
+```
+
+In `config/dev.exs`, optionally set log_level to `:debug` to include these logs:
+
+```ruby
+config :logger, level: :debug
+```
+
 
 
 ## Assets & layout

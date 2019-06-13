@@ -14,3 +14,8 @@ See:
 
   * https://stackoverflow.com/a/56019718/1729692
   * https://github.com/elixir-lang/elixir/issues/6357
+
+
+## (Phoenix) Uncaught TypeError: Cannot assign to read only property '0' of string
+
+If on re-render you get a JS error about "Uncaught TypeError: Cannot assign to read only property '0' of string 'some dom fragment being rendered', it's likely that your LiveView `.leex` template markup is invalid. Check for misplaced div tags, especially around any nested if / end statements.

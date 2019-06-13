@@ -68,9 +68,9 @@ Get output from a column, ignoring varying whitespace:
 
     free -m | head -n2 | tail -n1 | awk '{print $4}'
 
-Count LOC in a Rails project. You can add clauses to catch other filetypes. For reference, according to the above metrics, BusBk is 40K lines of code and the GrayOwl Rails site is 64K.
+Count LOC in all source code files. For reference: BusBK is 40K loc; GrayOwl is 64K; GlassFrog is 99K (as of 2019-04) and was 141K (as of 2017-01);  RTL is 8.5K (as of 2019-06).
 
-    find . \( -iname '*.rb' -o -iname '*.css' -o -iname '*.js' -o -iname '*.erb' -o -iname -o -iname '*.haml' -o -iname '*.scss' -o -iname '*.coffee' -o -iname '*.pl' \) -exec wc -l {} + | sort -n
+    git ls-files | egrep "\.(txt|md|sh|rb|erb|html|haml|ex|exs|eex|js|jsx|json|css|scss|lock|yml)$" | egrep -v "/vendor/|package-lock\.json|schema\.json|yarn\.lock|Gemfile\.lock|cdn_backup|third_party" | sed 's/.*/"&"/' | xargs wc -l
 
 
 # Background processes
