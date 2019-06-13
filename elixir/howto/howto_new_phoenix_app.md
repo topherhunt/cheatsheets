@@ -98,7 +98,7 @@ And finally create `lib/my_app_web/plugs/request_logger.ex` with the following c
 # One-line full request logging inspired by Plug.Logger.
 # See https://github.com/elixir-plug/plug/blob/v1.8.0/lib/plug/logger.ex
 # Need to restart the server after updating this file.
-defmodule RTLWeb.RequestLogger do
+defmodule MyAppWeb.RequestLogger do
   require Logger
 
   @behaviour Plug
@@ -129,7 +129,7 @@ defmodule RTLWeb.RequestLogger do
 
   defp print_user(conn) do
     if conn.assigns.current_user do
-      "#{conn.assigns.current_user.id} (#{conn.assigns.current_user.full_name})"
+      "#{conn.assigns.current_user.id} (#{conn.assigns.current_user.name})"
     else
       "(none)"
     end
@@ -165,7 +165,10 @@ Now restart your server and you should see each request generate one log entry w
 
 ## One-line SQL logging
 
-One-line SQL logging is also easy to set up.
+One-line SQL logging is easy to set up, but the steps change depending on whether you're on Ecto v2 or v3.
+
+
+### For Ecto v2
 
 In `config.exs`, configure MyApp.Repo to use a new custom logger function:
 
@@ -177,7 +180,7 @@ config :my_app, MyApp.Repo,
 
 In `lib/my_app/repo.ex`, define the `log_query` function:
 
-```ruby
+```
   # ...
   require Logger
 
@@ -188,13 +191,14 @@ In `lib/my_app/repo.ex`, define the `log_query` function:
       source = if entry.source, do: " source=#{inspect(entry.source)}", else: ""
       time_us = System.convert_time_unit(entry.query_time, :native, :microsecond)
       time_ms = div(time_us, 100) / 10
+      query = Regex.replace(~r/(\d\.)"([^"]+)"/, entry.query, "\\1\\2")
 
       params = Enum.map(entry.params, fn
         %Ecto.Query.Tagged{value: value} -> value
         value -> value
       end)
 
-      "SQL query: #{ok}#{source} db=#{time_ms}ms   #{entry.query}   params=#{inspect(params)}"
+      "SQL query: #{ok}#{source} db=#{time_ms}ms   #{query}   params=#{inspect(params)}"
     end)
   end
 ```
@@ -205,6 +209,53 @@ In `config/dev.exs`, optionally set log_level to `:debug` to include these logs:
 config :logger, level: :debug
 ```
 
+
+### For Ecto v3
+
+In `lib/my_app/application.ex` `MyApp.Application.start/2`, you need to set up the telemetry event. Add this snippet just before the `Supervisor.start_link/2` call:
+
+```ruby
+    # Subscribe to Ecto queries for logging
+    # See https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events
+    # and https://github.com/beam-telemetry/telemetry
+    handler = &MyApp.Telemetry.handle_event/4
+    :ok = :telemetry.attach("my_app-ecto", [:my_app, :repo, :query], handler, %{})
+```
+
+Then define your Telemetry module which for now will only have this one event handler:
+
+```
+defmodule MyApp.Telemetry do
+  require Logger
+
+  # Thanks to https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events
+  def handle_event([:my_app, :repo, :query], measurements, metadata, _config) do
+    Logger.log(:debug, fn ->
+      {ok, _} = metadata.result
+      source = metadata.source || "?"
+      query_time = div(measurements.query_time, 100) / 10
+      query = Regex.replace(~r/(\d\.)"([^"]+)"/, metadata.query, "\\1\\2")
+      params = metadata.params
+
+      "SQL query: #{ok} source=\"#{source}\" db=#{query_time}ms   #{query}   params=#{inspect(params)}"
+    end)
+  end
+end
+```
+
+In `config/config.exs`, configure MyApp.Repo to disable the standard Ecto logging:
+
+```ruby
+config :my_app, MyApp.Repo,
+  # ...
+  log: false
+```
+
+Finally, in `config/dev.exs`, optionally set log_level to `:debug` to include these logs:
+
+```ruby
+config :logger, level: :debug
+```
 
 
 ## Assets & layout
