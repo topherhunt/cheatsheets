@@ -1,5 +1,6 @@
 # PostgreSQL
 
+
 ## Basic navigation
 
 - `\q` - exit
@@ -8,14 +9,17 @@
 - `\conninfo` - list info about current connection
 - `\connect [database name]` - connect to a database
 
+
 ## Managing databases, users, roles
 
 - `createdb $(whoami)` - create a default database for this user
 - `CREATE ROLE postgres SUPERUSER CREATEDB LOGIN PASSWORD 'postgres';`
 
+
 ## Connecting to a remote database
 
 - `psql -h grayowlnetwork.czo1pb6i4lc0.us-east-1.rds.amazonaws.com -U grayowlmaster -d grayowl_staging --password` (specifies host, user, database, and password (supplied in a subsequent prompt))
+
 
 ## Exporting & importing SQL dumps
 
@@ -23,12 +27,14 @@
 - You can also *export a SQL dump through SSH*, which eliminates the SCP step and is handy if the server has no free disk space: `ssh grayowl "pg_dump -h hostname -U username -d database_name --password" > 2016-09-27-dumpfile.psql` (will prompt for password as normal)
 - `psql -h localhost -U grayowlmaster --password grayowl_development < 2016-06-01_grayowl_staging.psql` (imports / executes a sql dump against a specified environment)
 
-# Full-text search
+
+## Full-text search
 
 - https://youtu.be/YWj8ws6jc0g?t=23m30s
 - https://www.postgresql.org/docs/current/static/textsearch.html
 
-# Regex substitution
+
+## Regex substitution
 
 - Advanced regex replacement in Postgres:
   `regexp_replace(url, 'https?://([^\/]+\.)*([\w\d\-\_]+\.[\w]+).*', '\2')`
@@ -47,7 +53,8 @@ GROUP BY DATE(found_at), regexp_replace(url, 'https?://([^\/]+\.)*([\w\d\-\_]+\.
 LIMIT 100;
 ```
 
-# Disk space usage
+
+## Disk space usage
 
 - `pg_size_pretty(value)` - formats a number as KB, MB, GB etc.
 - The following query returns disk usage info on the current db:
