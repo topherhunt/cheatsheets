@@ -1,7 +1,11 @@
+# Git
+
+
 ## Log
 
 Roman's git log output format with the graph on left side:
 `git log --pretty=tformat:"%C(yellow)%h%Creset | %s %C(red)%d%Creset %C(green)(%ar)%Creset %C(yellow)[%an]%Creset " --graph --date=short`
+
 
 ## Remotes
 
@@ -12,10 +16,12 @@ Roman's git log output format with the graph on left side:
 - Push to a specific remote and specific branch:
   `git push [remote] [local_branch]:[remote_branch]`
 
+
 ## Config
 
 - `git config --global core.editor` # get the current config value
 - `git config --global core.editor "atom --wait"` # set the value
+
 
 ## Queries
 
@@ -31,12 +37,14 @@ List the last 10 branches I worked on:
 List the top committers with # of commits:
 `git shortlog -sn --all --no-merges --since='12 weeks'`
 
+
 ## Diff
 
 - `gd`
 - `gd HEAD`
 - `gd -w` - ignore whitespace changes (only show substantial changes)
 - `gd --cached` - only show staged changes
+
 
 ## Staging
 

@@ -26,7 +26,24 @@ Create it:
     git add .
     git commit -m "Initial commit"
 
-Review `mix.exs` and compare against RTL. Add any deps you need.
+Review `mix.exs`:
+
+  * Add any deps you need
+  * Review / compare to my other apps
+  * Set the Elixir version
+
+Update `.formatter.exs`, if you care to
+
+Ensure the following are in .gitignore:
+
+```
+# Sensitive env vars
+config/secrets.exs
+
+# Temp files
+.DS_Store
+*.log
+```
 
 Set up the `config/` files to use env vars: (see RTL for reference)
 (Note: Env var usage isn't compatible with Distillery releases.)
@@ -38,21 +55,14 @@ Files and topics to consider:
     - use H.env! everywhere
     - Repo
     - oauth & ueberauth
-    - filter_parameters
     - review config
   * dev.exs: review config, live_reload liveviews path, rollbax
   * test.exs: review config, Repo, Mailer, LoggerFileBackend
-  * prod.exs: update prod config as relevant
+  * prod.exs: update prod config as relevant; remove mention of `prod.secrets.exs`
   * secrets.exs: copy this file and set up all dev secrets
-  * copy secrets.exs to secrets.exs.template, sanitize it, and commit it to Git
+  * copy secrets.exs to secrets.exs.template, sanitize it
 
-Ensure the following are in .gitignore:
-
-    config/secrets.exs
-    .DS_Store
-    *.log
-
-Update `.formatter.exs`, if you care to
+Then commit all these changes to git. Ensure `config.secrets.exs` is ignored!
 
 Fetch dependencies: `mix deps.get`
 
@@ -69,13 +79,6 @@ Useful references for logging in Elixir & Phoenix:
 
 Follow these steps to set up one-line logging for a Phoenix app.
 
-In `config.exs`, ensure that all sensitive params are filtered out of the logs:
-
-```ruby
-# Scrub these params from the logs
-config :phoenix, :filter_parameters, ["password", "admin_password"]
-```
-
 In `lib/my_app_web.ex`, in the `controller` quote block, disable Phoenix.Controller logging:
 
 ```ruby
@@ -85,14 +88,15 @@ def controller do
     ...
 ```
 
-In `lib/my_app_web/endpoint.ex`, remove `plug(Plug.Logger)` and replace it with a new plug:
+In `lib/my_app_web/endpoint.ex`, remove `plug(Plug.Logger)` (more redundant stuff) and replace it with a new plug. Notice that the plug is inserted _before_ the Router plug, but uses a `register_before_send` call to run the log statement just before the response is sent to the client.
 
 ```ruby
   # Custom one-line request logging
+  # Must come before the session & router plugs.
   plug MyAppWeb.RequestLogger
 ```
 
-And finally create `lib/my_app_web/plugs/request_logger.ex` with the following content:
+Finally create `lib/my_app_web/plugs/request_logger.ex` with the following content:
 
 ```ruby
 # One-line full request logging inspired by Plug.Logger.
@@ -103,60 +107,46 @@ defmodule MyAppWeb.RequestLogger do
 
   @behaviour Plug
 
-  def init(opts) do
-    %{log_level: opts[:log_level] || :info}
-  end
+  def init(opts), do: opts
 
-  def call(conn, opts) do
+  def call(conn, _opts) do
     start_time = System.monotonic_time()
 
     Plug.Conn.register_before_send(conn, fn(conn) ->
-      # Uses a func so the string doesn't need to be computed unless log_level is active.
-      # Charlist would be more performant, but I'm not pro enough to worry about that.
-      # Other data I could include, but feels redundant: remote_ip, port, owner (PID).
-      Logger.log(
-        opts.log_level,
-        fn ->
-          "■ [#{conn.method} #{conn.request_path}] "<>
-          "params=#{inspect(Phoenix.Logger.filter_values(conn.params))} "<>
-          "user=#{print_user(conn)} "<>
-          "status=#{conn.status}#{print_redirect(conn)} "<>
-          "duration=#{print_time_taken(start_time)}"
-        end)
+      Logger.log(:info, fn ->
+        # We don't want passwords etc. being logged
+        params = inspect(Phoenix.Logger.filter_values(conn.params))
+        # Clean up GraphQL query params for easier readability
+        params = Regex.replace(~r/\\n/, params, " ")
+        params = Regex.replace(~r/ +/, params, " ")
+
+        ip = conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
+
+        # Log any important session data eg. logged-in user
+        user = conn.assigns[:current_user]
+        user_string = if user, do: "#{user.id} (#{user.name})", else: "(none)"
+
+        # Note redirect, if any
+        redirect = Plug.Conn.get_resp_header(conn, "location")
+        redirect_string = if redirect != [], do: " redirected_to=#{redirect}", else: ""
+
+        # Calculate time taken (always in ms for consistency
+        stop_time = System.monotonic_time()
+        time_us = System.convert_time_unit(stop_time - start_time, :native, :microsecond)
+        time_ms = div(time_us, 100) / 10
+
+        "■ method=#{conn.method} path=#{conn.request_path} params=#{params} "<>
+        "ip=#{ip} user=#{user_string} "<>
+        "status=#{conn.status}#{redirect_string} duration=#{time_ms}ms"
+      end)
+
       conn
     end)
-  end
-
-  defp print_user(conn) do
-    if conn.assigns.current_user do
-      "#{conn.assigns.current_user.id} (#{conn.assigns.current_user.name})"
-    else
-      "(none)"
-    end
-  end
-
-  defp print_redirect(conn) do
-    if conn.status == 302 do
-      " redirected_to=#{Plug.Conn.get_resp_header(conn, "location")}"
-    else
-      ""
-    end
-  end
-
-  defp print_time_taken(start_time) do
-    stop_time = System.monotonic_time()
-    microsecs = System.convert_time_unit(stop_time - start_time, :native, :microsecond)
-
-    if microsecs > 1000 do
-      [microsecs |> div(1000) |> Integer.to_string(), "ms"]
-    else
-      [Integer.to_string(microsecs), "µs"]
-    end
   end
 end
 ```
 
-Now restart your server and you should see each request generate one log entry with all the basic info present (and no redundant chaff lines):
+Now restart your server and you should see each request generate one log entry (and only one), with all the basic info present:
 
 ```
 2019-06-09 18:18:51.410 [info] ■ [PUT /manage/projects/7qDjSk/prompts/3tUrF9] params=%{"_csrf_token" => "dDVjGiIiHWUWADphMS48EXAZP34VAAAADFRcXaw/ZTx8kKPFCHr2PQ==", "_method" => "put", "_utf8" => "✓", "project_uuid" => "7qDjSk", "prompt" => %{"html" => "<div>Test question 3</div>"}, "prompt_uuid" => "3tUrF9"} user=1 (Topher Hunt) status=302 redirected_to=/manage/projects/7qDjSk duration=21ms
@@ -178,35 +168,26 @@ config :my_app, MyApp.Repo,
   loggers: [{MyApp.Repo, :log_query, []}]
 ```
 
-In `lib/my_app/repo.ex`, define the `log_query` function:
+In `lib/my_app/repo.ex`, define the `log_query` function: (note: in my case I've hard-coded the `:debug` log level.)
 
 ```
-  # ...
+  ...
   require Logger
 
   # Inspired by https://github.com/elixir-ecto/ecto/blob/v2.2.11/lib/ecto/log_entry.ex
   def log_query(entry) do
     Logger.log(:debug, fn ->
       {ok, _} = entry.result
-      source = if entry.source, do: " source=#{inspect(entry.source)}", else: ""
+      source = inspect(entry.source)
       time_us = System.convert_time_unit(entry.query_time, :native, :microsecond)
       time_ms = div(time_us, 100) / 10
+      # Strip out unnecessary quotes from the query for readability
       query = Regex.replace(~r/(\d\.)"([^"]+)"/, entry.query, "\\1\\2")
+      params = inspect(entry.params, charlists: false)
 
-      params = Enum.map(entry.params, fn
-        %Ecto.Query.Tagged{value: value} -> value
-        value -> value
-      end)
-
-      "SQL query: #{ok}#{source} db=#{time_ms}ms   #{query}   params=#{inspect(params)}"
+      "SQL query: #{ok} source=#{source} db=#{time_ms}ms   #{query}   params=#{params}"
     end)
   end
-```
-
-In `config/dev.exs`, optionally set log_level to `:debug` to include these logs:
-
-```ruby
-config :logger, level: :debug
 ```
 
 
@@ -219,10 +200,10 @@ In `lib/my_app/application.ex` `MyApp.Application.start/2`, you need to set up t
     # See https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events
     # and https://github.com/beam-telemetry/telemetry
     handler = &MyApp.Telemetry.handle_event/4
-    :ok = :telemetry.attach("my_app-ecto", [:my_app, :repo, :query], handler, %{})
+    :ok = :telemetry.attach("my_app_ecto", [:my_app, :repo, :query], handler, %{})
 ```
 
-Then define your Telemetry module which for now will only have this one event handler:
+Then define your Telemetry module which for now will only have this one event handler. I saved mine in `lib/my_app/telemetry.ex`:
 
 ```
 defmodule MyApp.Telemetry do
@@ -232,12 +213,13 @@ defmodule MyApp.Telemetry do
   def handle_event([:my_app, :repo, :query], measurements, metadata, _config) do
     Logger.log(:debug, fn ->
       {ok, _} = metadata.result
-      source = metadata.source || "?"
-      query_time = div(measurements.query_time, 100) / 10
+      source = inspect(metadata.source)
+      time = div(measurements.query_time, 100_000) / 10
+      # Strip out unnecessary quotes from the query for readability
       query = Regex.replace(~r/(\d\.)"([^"]+)"/, metadata.query, "\\1\\2")
-      params = metadata.params
+      params = inspect(metadata.params, charlists: false)
 
-      "SQL query: #{ok} source=\"#{source}\" db=#{query_time}ms   #{query}   params=#{inspect(params)}"
+      "SQL query: #{ok} source=#{source} db=#{time}ms   #{query}   params=#{params}"
     end)
   end
 end
@@ -260,6 +242,28 @@ config :logger, level: :debug
 
 ## Assets & layout
 
+In `dev.exs`, configure the `node` watcher so errors are easier to diagnose:
+
+```
+  ...
+  "--watch-stdin",
+  "--color",                 # <<< ADD THIS
+  "--display-error-details", # <<< ADD THIS
+  cd: Path.expand("../assets", __DIR__)
+  ...
+```
+
+Make sure `webpack.config.js` knows where to look for modules referenced by JS that you include from hex deps:
+
+```
+  // ... after the plugins setting ...
+  // Make sure webpack checks here when looking for modules required by another module
+  // (react-phoenix was giving errors until I added this)
+  resolve: {
+    modules: [path.join(__dirname, "node_modules")]
+  }
+```
+
 Install Jquery and Bootstrap:
 
   * `cd assets`
@@ -274,71 +278,85 @@ Install Jquery and Bootstrap:
 
 (Webpack primer: https://what-problem-does-it-solve.com/webpack/intro.html)
 
-Install SCSS support by more or less following the steps at https://github.com/webpack-contrib/sass-loader.
+Install SCSS support:
+(based on install steps at https://github.com/webpack-contrib/sass-loader)
+
+  * `npm i --save sass-loader node-sass`
+  * Add a .scss rule to `webpack.config.js`:
+
+    ```
+    {
+      test: /\.scss$/,
+      use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
+    }
+    ```
+
+  * Rename `app.css` to `app.scss`. This lets you `@import` either css or scss into app.scss. Remember to also update this file's reference in `app.js`. (If `app.scss` is your only css entrypoint, this makes the .css rule in webpack.config.js obsolete, but there's no harm in leaving it there.)
+  * In `dev.exs`, configure `live_reload` to also watch for `scss` extension.
 
 Replace `lib/my_app_web/templates/layout/app.html.eex` with a simple Bootstrap template:
 
-```
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="">
-        <meta name="author" content="">
-        <title>Grassflog</title>
-        <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>">
-      </head>
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Grassflog</title>
+    <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>">
+  </head>
 
-      <body>
-        <nav class="navbar navbar-expand-sm navbar-light bg-light">
-          <%= link "My Site", to: "#", class: "navbar-brand" %>
-          <button class="navbar-toggler" data-toggle="collapse" data-target="#navbar-content">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div id="navbar-content" class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto"></ul>
-            <ul class="navbar-nav">
-              <li class="nav-item"><%= link "Log in", to: "#", class: "nav-link" %></li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
-                  <i class="icon">settings</i> <span class="caret"></span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right">
-                  <div class="dropdown-item em small">Dropdown text</div>
-                  <%= link "A link", to: "#", class: "dropdown-item text-danger" %>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </nav>
+  <body>
+    <nav class="navbar navbar-expand-sm navbar-light bg-light">
+      <%= link "My Site", to: "#", class: "navbar-brand" %>
+      <button class="navbar-toggler" data-toggle="collapse" data-target="#navbar-content">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div id="navbar-content" class="collapse navbar-collapse">
+        <ul class="navbar-nav mr-auto"></ul>
+        <ul class="navbar-nav">
+          <li class="nav-item"><%= link "Log in", to: "#", class: "nav-link" %></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+              <i class="icon">settings</i> <span class="caret"></span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+              <div class="dropdown-item em small">Dropdown text</div>
+              <%= link "A link", to: "#", class: "dropdown-item text-danger" %>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
 
-        <main class="container-fluid">
-          <%= if get_flash(@conn, :info) do %>
-            <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-          <% end %>
+    <main class="container-fluid">
+      <%= if get_flash(@conn, :info) do %>
+        <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
+      <% end %>
 
-          <%= if get_flash(@conn, :error) do %>
-            <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
-          <% end %>
+      <%= if get_flash(@conn, :error) do %>
+        <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
+      <% end %>
 
-          <%= render @view_module, @view_template, assigns %>
-        </main>
+      <%= render @view_module, @view_template, assigns %>
+    </main>
 
-        <footer class="text-center small">
-          Built by <%= link "Topher Hunt", to: "http://topherhunt.com", target: "_blank" %>
-        </footer>
+    <footer class="text-center small">
+      Built by <%= link "Topher Hunt", to: "http://topherhunt.com", target: "_blank" %>
+    </footer>
 
-        <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
-      </body>
-    </html>
+    <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
+  </body>
+</html>
 ```
 
 Copy my custom css from RTL, as relevant:
 
-  * layout.css (contains styles for the sticky footer)
-  * bootstrap_fixes.css
+  * layout.scss (contains styles for the sticky footer)
+  * overrides.scss
   * utilities.css
   * (ensure each one is declared in app.css)
 
@@ -350,32 +368,32 @@ Install the Google Material iconset: https://material.io/tools/icons/?style=base
 To test Jquery, add `assets/js/utilities.js` and declare it in `app.js`:
 
 ```js
-    import $ from "jquery"
+import $ from "jquery"
 
-    $(function(){
+$(function(){
 
-      $(".js-fade-on-click").click(function(e) {
-        e.preventDefault()
-        $(this).fadeToggle(500)
-      })
+  $(".js-fade-on-click").click(function(e) {
+    e.preventDefault()
+    $(this).fadeToggle(500)
+  })
 
-    })
+})
 ```
 
 To test that it's all wired up properly, replace `index.html.eex` and load the page:
 
 ```
-    <h1>Title</h1>
+<h1>Title</h1>
 
-    <div class="alert alert-success">An alert</div>
+<div class="alert alert-success">An alert</div>
 
-    <div class="u-card">
-      A div with the "u-card" class
-    </div>
+<div class="u-card">
+  A div with the "u-card" class
+</div>
 
-    <div class="u-card js-fade-on-click">Jquery test: click me to fade</div>
+<div class="u-card js-fade-on-click">Jquery test: click me to fade</div>
 
-    <h3>An icon: <i class="icon">face</i></h3>
+<h3>An icon: <i class="icon">face</i></h3>
 ```
 
 

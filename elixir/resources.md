@@ -1,25 +1,23 @@
-## Resources
+# Elixir / Phoenix resources
 
-- Good starting ebook: Learn functional programming with Elixir
-- https://startlearningelixir.com/
-- http://elixir-lang.org/getting-started/introduction.html
-- http://elixir-lang.org/docs/stable/elixir/api-reference.html
-- http://www.phoenixframework.org/docs/overview
-- https://shift.infinite.red/beyond-10-000-lines-ba1adc17cc7b
-- https://medium.com/@stueccles/what-i-learned-migrating-a-rails-app-to-elixir-phoenix-f707436749aa
 
-## Example apps
+## Reference
 
-- https://github.com/phoenix-examples/sprint-poker
-- https://github.com/thechangelog/changelog.com
-- https://github.com/hexpm/hex_web
+  * The base Elixir hexdocs: https://hexdocs.pm/elixir/Kernel.html
+  * (Hexdocs is the best api reference on almost any hex package, too)
 
-## To read/watch
 
-- http://confreaks.tv/videos/elixirconf2016-code-spelunking-for-knowledge-and-profit
-- http://confreaks.tv/videos/elixirconf2016-closing-keynote
+## Tutorials
 
-## Useful libraries
+  * ElixirLang intro to Elixir: http://elixir-lang.org/getting-started/introduction.html
+  * (Once you've mastered the basic syntax, complete a few basic Exercism challenges to get comfortable solving problems in Elixir.)
+  * Phoenix intro guide: https://hexdocs.pm/phoenix/overview.html
+  * ElixirLang Mix & OTP tutorial: https://elixir-lang.org/getting-started/mix-otp/introduction-to-mix.html
+  * ElixirLang metaprogramming tutorial: https://elixir-lang.org/getting-started/meta/quote-and-unquote.html
+  * Minimum Viable Phoenix: http://www.petecorey.com/blog/2019/05/20/minimum-viable-phoenix/ - helps conceptually bridge between a single-file Elixir script, a Mix project, and a full-blown Phoenix app.
 
-- https://github.com/nccgroup/sobelow
-- CSV import: https://underthehood.meltwater.com/blog/2018/08/08/excel-friendly-csv-exports-with-elixir/
+
+## Useful tools
+
+- Security static analysis: https://github.com/nccgroup/sobelow
+
