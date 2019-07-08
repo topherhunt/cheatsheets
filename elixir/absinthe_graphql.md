@@ -26,7 +26,7 @@ Authentication & Contexts:
 
 Best practices:
 
-  * Don't write GQL queries directly in components. Instead define all queries in a queries.js and import the relevant query in the component where you need it. This makes it easier to
+  * Don't write GQL queries directly in components. Instead define all queries in a queries.js and import the relevant query in the component where you need it. This makes it easier to reuse your queries, e.g. when doing manual update after a mutation.
 
 Mutations:
 
