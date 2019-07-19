@@ -1,4 +1,6 @@
-# Absinthe & GraphQL & Apollo
+# GraphQL, Absinthe, & Apollo
+
+Here are tips for writing GraphQL apis and consumers. Focused on using Absinthe (server-side) and Apollo (client-side).
 
 
 ## References

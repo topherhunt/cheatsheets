@@ -1,12 +1,19 @@
-# ActiveRecord & migrations
+# Rails
 
-## Validations
+http://www.codefellows.org/blog/this-is-why-learning-rails-is-hard/
+
+## Cache
+
+- I love the low-level cache. Works with any kind of object.
+- `Rails.cache.fetch(key, expires_in: 1.month) { ...heavy expression... }`
+
+## ActiveRecord: validations
 
 * Keep validations field-focused rather than association-focused. If you `validate :author, presence: true` etc., then you're forcing the association to load every time you try to make changes on this record. That's unperformant.
 
-## Migrations
+## ActiveRecord: migrations
 
-Add FK references like this:
+Adding FK references:
 
 ```
 add_integer :conversations, :creator_id, null: false

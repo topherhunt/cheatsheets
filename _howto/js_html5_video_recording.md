@@ -1,11 +1,11 @@
-# How to record video via webcam, preview it, and capture it for upload
+# How to record webcam video via HTML5, preview it, and capture it for upload
 
 This guide is mostly a fleshing-out of https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API/Using_the_MediaStream_Recording_API.
 
 Notes:
 
 - This approach only works on Chrome & FF (as of Mar 2019).
-- See RTL for the latest version of the following code.
+- See RTL for the latest version of this code.
 
 
 ## Steps

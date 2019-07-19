@@ -3,18 +3,8 @@
 
 ## Installing
 
-Use https://hexdocs.pm/react_phoenix/readme.html as a starting point.
-
-
-## Vue.js
-
-Prefer Vue.js over React:
-
-  * Simpler codebase
-  * Easier learning curve
-  * Simpler mental model of change propagation
-  * Simpler pipeline (doesn't require ES6, JSX, etc.)
-  * Templates are more designer-friendly than JSX
+  * Follow the steps at https://hexdocs.pm/react_phoenix/readme.html.
+  * See also `_howto/phoenix_react_redux.md`.
 
 
 ## `.setState()`

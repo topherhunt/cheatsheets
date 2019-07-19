@@ -10,17 +10,16 @@ See also:
 
   * Ensure Erlang & Elixir are installed
   * Ensure you have the latest phx_new archive:
-    `mix archive.install hex phx_new 1.4.3`
+    `mix archive.install hex phx_new 1.4.9`
 
 
 ## Create the app
 
 Create it:
 
-    mix phx.new my_app
-    # Don't install NPM packages. We'll use yarn instead of npm.
+    mix phx.new my_app # DO fetch and install dependencies.
     cd my_app
-    cd assets && yarn && cd ..
+    cd assets && npm i && cd ..
     subl .
     git init .
     git add .
@@ -28,9 +27,10 @@ Create it:
 
 Review `mix.exs`:
 
+  * Set the Elixir version
+  * Ensure Phoenix is <= 1.4.6 to avoid the Phoenix.Controller log config bug
   * Add any deps you need
   * Review / compare to my other apps
-  * Set the Elixir version
 
 Update `.formatter.exs`, if you care to
 
@@ -81,16 +81,17 @@ Follow these steps to set up one-line logging for a Phoenix app.
 
 In `lib/my_app_web.ex`, in the `controller` quote block, disable Phoenix.Controller logging:
 
-```ruby
+```rb
 def controller do
   quote do
+    # NOTE: This doesn't work in phoenix 1.4.7+. Stick with v1.4.6 for now.
     use Phoenix.Controller, namespace: MyAppWeb, log: false
     ...
 ```
 
-In `lib/my_app_web/endpoint.ex`, remove `plug(Plug.Logger)` (more redundant stuff) and replace it with a new plug. Notice that the plug is inserted _before_ the Router plug, but uses a `register_before_send` call to run the log statement just before the response is sent to the client.
+In `lib/my_app_web/endpoint.ex`, add a new plug below `plug Plug.Telemetry`:
 
-```ruby
+```rb
   # Custom one-line request logging
   # Must come before the session & router plugs.
   plug MyAppWeb.RequestLogger
@@ -98,7 +99,7 @@ In `lib/my_app_web/endpoint.ex`, remove `plug(Plug.Logger)` (more redundant stuf
 
 Finally create `lib/my_app_web/plugs/request_logger.ex` with the following content:
 
-```ruby
+```rb
 # One-line full request logging inspired by Plug.Logger.
 # See https://github.com/elixir-plug/plug/blob/v1.8.0/lib/plug/logger.ex
 # Need to restart the server after updating this file.
@@ -162,7 +163,7 @@ One-line SQL logging is easy to set up, but the steps change depending on whethe
 
 In `config.exs`, configure MyApp.Repo to use a new custom logger function:
 
-```ruby
+```rb
 config :my_app, MyApp.Repo,
   # ...
   loggers: [{MyApp.Repo, :log_query, []}]
@@ -170,7 +171,7 @@ config :my_app, MyApp.Repo,
 
 In `lib/my_app/repo.ex`, define the `log_query` function: (note: in my case I've hard-coded the `:debug` log level.)
 
-```
+```rb
   ...
   require Logger
 
@@ -195,7 +196,7 @@ In `lib/my_app/repo.ex`, define the `log_query` function: (note: in my case I've
 
 In `lib/my_app/application.ex` `MyApp.Application.start/2`, you need to set up the telemetry event. Add this snippet just before the `Supervisor.start_link/2` call:
 
-```ruby
+```rb
     # Subscribe to Ecto queries for logging
     # See https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events
     # and https://github.com/beam-telemetry/telemetry
@@ -205,7 +206,7 @@ In `lib/my_app/application.ex` `MyApp.Application.start/2`, you need to set up t
 
 Then define your Telemetry module which for now will only have this one event handler. I saved mine in `lib/my_app/telemetry.ex`:
 
-```
+```rb
 defmodule MyApp.Telemetry do
   require Logger
 
@@ -227,7 +228,7 @@ end
 
 In `config/config.exs`, configure MyApp.Repo to disable the standard Ecto logging:
 
-```ruby
+```rb
 config :my_app, MyApp.Repo,
   # ...
   log: false
@@ -235,16 +236,20 @@ config :my_app, MyApp.Repo,
 
 Finally, in `config/dev.exs`, optionally set log_level to `:debug` to include these logs:
 
-```ruby
+```rb
 config :logger, level: :debug
 ```
 
 
 ## Assets & layout
 
+Reference:
+
+  * [Webpack primer](https://what-problem-does-it-solve.com/webpack/intro.html)
+
 In `dev.exs`, configure the `node` watcher so errors are easier to diagnose:
 
-```
+```rb
   ...
   "--watch-stdin",
   "--color",                 # <<< ADD THIS
@@ -255,7 +260,7 @@ In `dev.exs`, configure the `node` watcher so errors are easier to diagnose:
 
 Make sure `webpack.config.js` knows where to look for modules referenced by JS that you include from hex deps:
 
-```
+```js
   // ... after the plugins setting ...
   // Make sure webpack checks here when looking for modules required by another module
   // (react-phoenix was giving errors until I added this)
@@ -267,16 +272,13 @@ Make sure `webpack.config.js` knows where to look for modules referenced by JS t
 Install Jquery and Bootstrap:
 
   * `cd assets`
-  * `yarn add jquery`
-  * `yarn add popper.js`
-  * `yarn add bootstrap`
-  * In `app.js`, add: `import "bootstrap"` (for basic JS features like dropdowns)
-  * When you want Jquery: `import $ from "jquery"` then use $ as normal
+  * `npm i --save jquery`
+  * `npm i --save popper.js`
+  * `npm i --save bootstrap`
+  * If you want Bootstrap JS: in `app.js`, add: `import "bootstrap"`
+  * Whenever you want Jquery: `import $ from "jquery"` then use `$` as normal
   * In `app.css`, add `@import "../node_modules/bootstrap/dist/css/bootstrap.min.css";`
-    (TODO: is there no more convenient way to link it?)
-    (See https://getbootstrap.com/docs/4.0/getting-started/webpack/ to customize)
-
-(Webpack primer: https://what-problem-does-it-solve.com/webpack/intro.html)
+    (See https://getbootstrap.com/docs/4.0/getting-started/webpack/ to customize Bootstrap)
 
 Install SCSS support:
 (based on install steps at https://github.com/webpack-contrib/sass-loader)
@@ -284,7 +286,7 @@ Install SCSS support:
   * `npm i --save sass-loader node-sass`
   * Add a .scss rule to `webpack.config.js`:
 
-    ```
+    ```js
     {
       test: /\.scss$/,
       use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
@@ -296,7 +298,7 @@ Install SCSS support:
 
 Replace `lib/my_app_web/templates/layout/app.html.eex` with a simple Bootstrap template:
 
-```html
+```xml
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -382,7 +384,7 @@ $(function(){
 
 To test that it's all wired up properly, replace `index.html.eex` and load the page:
 
-```
+```xml
 <h1>Title</h1>
 
 <div class="alert alert-success">An alert</div>

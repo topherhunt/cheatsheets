@@ -81,6 +81,10 @@
     mix test path/to/folder/or/file.exs:31
 
 
+`mix test --trace` is useful for debugging. It a) prints each test case that it runs,
+b) prints time taken so you can identify slow tests, and c) runs test synchronously so you can identify tests that are flapping due to race conditions.
+
+
 ## Phoenix app: Common setup workflow
 (TODO: This probably belongs in a "How to spin up a new Phx app" guide)
 

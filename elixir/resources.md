@@ -9,7 +9,7 @@
 
 ## Tutorials
 
-  * ElixirLang intro to Elixir: http://elixir-lang.org/getting-started/introduction.html
+  * ElixirLang intro to Elixir: http://elixir-lang.org/getting-started/introduction.html. I strongly recommend that you go all the way through this tutorial including the chapters on OTP and metaprogramming, so you have a solid handle on the language.
   * (Once you've mastered the basic syntax, complete a few basic Exercism challenges to get comfortable solving problems in Elixir.)
   * Phoenix intro guide: https://hexdocs.pm/phoenix/overview.html
   * ElixirLang Mix & OTP tutorial: https://elixir-lang.org/getting-started/mix-otp/introduction-to-mix.html
