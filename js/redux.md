@@ -4,11 +4,14 @@ References:
 
   * https://redux.js.org/introduction/getting-started#just-the-basics
   * https://redux.js.org/basics/usage-with-react
+  * https://redux.js.org/advanced/async-actions
+  * A demo of my latest Redux pattern: https://github.com/topherhunt/redux-pattern-reddit
 
 
 ## Basic concepts
 
 Concepts: actions, reducers, store, data flow.
+
 
 ### Actions
 
@@ -19,9 +22,11 @@ Concepts: actions, reducers, store, data flow.
   * Your reducers MUST be pure & deterministic, but your action creators MAY pull in non-deterministic inputs. (e.g. current time, random uuid...)
   * Try to frame action types in the past tense. It's a thing that happened in the world, that Redux needs to handle. e.g. "NEW_TODO_SUBMITTED".
 
+
 ### State
 
   * The entire app state is stored in a single state object. Think carefully about its shape; try to keep UI state and server-side state clearly separated, and minimize nesting. In particular, consider a tool like Normalizr to flatten JSON API responses into a normalized list of records.
+
 
 ### Reducers
 
@@ -33,10 +38,12 @@ Concepts: actions, reducers, store, data flow.
   * Once your reducers list gets long, break it out into subreducers so it's easier to read and reason about. Each subreducer must know how to handle an empty initial state.
   * I'll name subreducers very explicitly (e.g. `selectedSubredditReducer`).
 
+
 ### Store
 
   * The Store is what pulls actions, reducers, and state together and connects them to the outside world: that manages the app state, allows getting state, dispatching actions, and registering & unregistering listeners. Your app will only have one Store, which you create on page init and pass in your main reducer function.
   * Make your store available to the global JS context so that you can run debug commands on it, inspect it etc.
+
 
 ### Data flow
 
