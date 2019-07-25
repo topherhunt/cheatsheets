@@ -19,7 +19,6 @@ Create it:
 
     mix phx.new my_app # DO fetch and install dependencies.
     cd my_app
-    cd assets && npm i && cd ..
     subl .
     git init .
     git add .
@@ -269,7 +268,7 @@ Make sure `webpack.config.js` knows where to look for modules referenced by JS t
   }
 ```
 
-Install Jquery and Bootstrap:
+How to install Jquery and Bootstrap:
 
   * `cd assets`
   * `npm i --save jquery`

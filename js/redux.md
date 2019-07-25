@@ -5,7 +5,17 @@ References:
   * https://redux.js.org/introduction/getting-started#just-the-basics
   * https://redux.js.org/basics/usage-with-react
   * https://redux.js.org/advanced/async-actions
-  * A demo of my latest Redux pattern: https://github.com/topherhunt/redux-pattern-reddit
+  * Example Redux pattern #1: https://github.com/topherhunt/redux-pattern-reddit
+  * Example Redux pattern #2 (SPA with register/login/logout/profile/reddit browser): [TODO - ref JWT, redux branch]
+
+
+## Don't use Redux!
+
+Avoid Redux for as long as possible. And if you do adopt it, be very parsimonious with your actions and reducers. Anything that can be kept in local component state / props, should be kept in local component state / props. Redux "flattens out" your app state, imposing a heavy cost in terms of additional layers (and files) you need to traverse in order to reason about a single change.
+
+Consider using [React Context](https://reactjs.org/docs/context.html) before Redux.
+
+Redux is useful if you have a large-scale app and need advanced tools like middleware, time-travel debugging (see React Dev Tools), and logging state progression in production.
 
 
 ## Basic concepts
@@ -25,7 +35,13 @@ Concepts: actions, reducers, store, data flow.
 
 ### State
 
-  * The entire app state is stored in a single state object. Think carefully about its shape; try to keep UI state and server-side state clearly separated, and minimize nesting. In particular, consider a tool like Normalizr to flatten JSON API responses into a normalized list of records.
+Think carefully about your state schema. Principles to consider:
+
+  * Have separate top-level keys for :ui (UI-related state), :requests (the status of in-progress or completed api requests), and :data (managed data e.g. records returned from the api).
+
+  * Represent each request's state as an object with a :status string (started, success, failure) plus optional other keys.
+
+  * For data records, consider a tool like Normalizr to flatten JSON API responses into a normalized list of records.
 
 
 ### Reducers
@@ -90,4 +106,21 @@ Define a container component by calling `connect()` and passing it two functions
 
   * A given api request will normally involve dispatching at least 3 actions: 1) an action stating that the request began, 2) an action stating that the request completed, and 3) an action stating that the request failed. A common pattern is to use the same `type` for these 3 actions, and a `status` field to indicate the status of that request.
 
-  * Your action creators will be converted into **thunks**: they'll return a function instead of returning the action object directly. This function may have side effects, including making api calls and dispatching other actions.
+  * You'll convert some action creators into **thunks**: they'll return a function instead of returning the action object directly. This function may have side effects, including making api calls and dispatching other actions.
+
+
+## Installing Redux & Thunk
+
+Steps to set up a Phoenix app for Redux state mgmt, with Redux-Thunk for api data syncing.
+
+Given a standard React setup, here's the brief steps for installing Redux.
+
+  * `npm i --save redux redux-thunk redux-logger react-redux`
+
+  * Define the store in `assets/js/redux/store.js`, with middlewares for logger and thunk.
+
+  * Define your action creator functions in `assets/js/redux/action_creators.js`.
+
+  * Define your reducers in `assets/js/redux/reducers.js`.
+
+  * Wrap the React root component in a Redux Provider.
