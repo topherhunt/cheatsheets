@@ -11,10 +11,7 @@ defmodule MyApp.Factory do
     })
   end
 
-  def random_uuid do
-    pool = String.codepoints("ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789")
-    Enum.map(1..6, fn _ -> Enum.random(pool) end) |> Enum.join()
-  end
+  def random_uuid, do: Nanoid.generate(8)
 
   #
   # Internal
@@ -22,11 +19,7 @@ defmodule MyApp.Factory do
 
   defp assert_no_keys_except(params, allowed_keys) do
     keys = Enum.into(params, %{}) |> Map.keys()
-
-    Enum.each(keys, fn key ->
-      unless key in allowed_keys do
-        raise "Unexpected key #{inspect(key)}."
-      end
-    end)
+    unexpected_key = Enum.find(keys, & &1 not in allowed_keys)
+    if unexpected_key, do: raise "Unexpected key: #{inspect(unexpected_key)}."
   end
 end

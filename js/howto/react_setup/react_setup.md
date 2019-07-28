@@ -89,7 +89,7 @@ Install Babel plugins for better ES6 support:
 
 Installing ESLint can help protect me from some of JS' footguns.
 
-  * `npm i --save-dev eslint babel-eslint eslint-loader eslint-plugin-react`
+  * `npm i --save-dev eslint babel-eslint eslint-loader eslint-plugin-react`.
     - `babel-eslint` uses the Babel config to teach eslint how to parse our files
     - `eslint-loader` lets you set up Webpack to run eslint and print any errors
     - `eslint-plugin-react` helps eslint make sense of jsx markup
@@ -108,6 +108,16 @@ Installing ESLint can help protect me from some of JS' footguns.
     ```
 
   * Start your server. Confirm that Webpack compiles and correctly warns you of linter errors both in .js and .jsx files. Fix the warnings.
+
+
+## Jest
+
+TODO: Add steps for installing Jest for react component unit tests.
+
+See also:
+
+  * https://jestjs.io/docs/en/getting-started.html
+  * `jest.md`
 
 
 ## Client-side token auth support
@@ -134,7 +144,7 @@ Conceptually, token auth in React is very simple. My general approach:
 
 You do NOT need Redux and Thunk to build a non-trivial token-authed SPA. If your component tree is getting too large to simply pass down props, consider setting up a React Context which is much lower-maintenance and easier to reason about than Redux actions & reducers.
 
-See [my JWT app repo](TODO) for an example implementation. (relevant code is under `assets/js/react/`)
+See [my `phoenix-react-token-auth` repo](https://github.com/topherhunt/phoenix-react-token-auth) for an example implementation. (relevant code is under `assets/js/react/`)
 
 Testing requests with curl: `curl -D - /api/users/me -H "Authorization: Bearer <valid_jwt_token>"`
 

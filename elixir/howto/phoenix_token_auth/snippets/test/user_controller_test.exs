@@ -1,6 +1,6 @@
-defmodule JwtWeb.Api.UserControllerTest do
-  use JwtWeb.ConnCase
-  alias Jwt.Accounts
+defmodule MyAppWeb.Api.UserControllerTest do
+  use MyAppWeb.ConnCase
+  alias MyApp.Accounts
 
   describe "#me" do
     test "displays the authed user's details", %{conn: conn} do
@@ -21,7 +21,7 @@ defmodule JwtWeb.Api.UserControllerTest do
       conn = put_req_header(conn, "authorization", "Bearer "<>token<>"z")
       conn = get(conn, Routes.api_user_path(conn, :me))
 
-      assert json_response(conn, 401) == %{"error" => "invalid_token"}
+      assert json_response(conn, 401) == %{"ok" => false, "reason" => "invalid_token"}
     end
 
     test "returns 401 if no user is authed", %{conn: conn} do
@@ -29,7 +29,7 @@ defmodule JwtWeb.Api.UserControllerTest do
 
       conn = get(conn, Routes.api_user_path(conn, :me))
 
-      assert json_response(conn, 401) == %{"error" => "user_required"}
+      assert json_response(conn, 401) == %{"ok" => false, "reason" => "user_required"}
     end
   end
 end

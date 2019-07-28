@@ -14,7 +14,8 @@
   * Phoenix intro guide: https://hexdocs.pm/phoenix/overview.html
   * ElixirLang Mix & OTP tutorial: https://elixir-lang.org/getting-started/mix-otp/introduction-to-mix.html
   * ElixirLang metaprogramming tutorial: https://elixir-lang.org/getting-started/meta/quote-and-unquote.html
-  * Minimum Viable Phoenix: http://www.petecorey.com/blog/2019/05/20/minimum-viable-phoenix/ - helps conceptually bridge between a single-file Elixir script, a Mix project, and a full-blown Phoenix app.
+  * Minimum Viable Phoenix: http://www.petecorey.com/blog/2019/05/20/minimum-viable-phoenix/
+    - helps conceptually bridge between a single-file Elixir script, a Mix project, and a full-blown Phoenix app.
 
 
 ## Useful tools

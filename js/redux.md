@@ -47,17 +47,22 @@ Think carefully about your state schema. Principles to consider:
 ### Reducers
 
   * Reducers define how your app state will change in response to a given action.
+
+  * Reducers MUST be pure and deterministic. They cannot mutate arguments or perform side effects or use non-deterministic inputs (such as Date.now() or Math.random()). In particular, reducers must not mutate the original state. One common pattern to prevent this: `return {...state, newKey: "newValue"}`
+
   * For any unknown actions, **the reducer must return the original state**.
-  * Reducers MUST be pure and deterministic. They cannot mutate arguments or perform side effects or use non-deterministic inputs (such as Date.now() or Math.random()).
-  * In particular, reducers must not mutate the original state. One common pattern to prevent this: `return {...state, newKey: "newValue"}`
-  * Consider either using immutable.js, declaring the state as a `const`, or `Object.freeze(state)` to ensure I can't accidentally mutate it.
+
   * Once your reducers list gets long, break it out into subreducers so it's easier to read and reason about. Each subreducer must know how to handle an empty initial state.
-  * I'll name subreducers very explicitly (e.g. `selectedSubredditReducer`).
+
+  * See [my sample Redux token auth setup](https://github.com/topherhunt/phoenix-react-token-auth/blob/redux/assets/js/redux/reducers.js) for an example of how to structure subreducers.
+
+  * When defining subreducers, avoid spread operators and instead define "whole" objects where possible. (It's easier to read & understand the state tree when the code defines whole objects as much as possible.)
 
 
 ### Store
 
   * The Store is what pulls actions, reducers, and state together and connects them to the outside world: that manages the app state, allows getting state, dispatching actions, and registering & unregistering listeners. Your app will only have one Store, which you create on page init and pass in your main reducer function.
+
   * Make your store available to the global JS context so that you can run debug commands on it, inspect it etc.
 
 
@@ -107,6 +112,13 @@ Define a container component by calling `connect()` and passing it two functions
   * A given api request will normally involve dispatching at least 3 actions: 1) an action stating that the request began, 2) an action stating that the request completed, and 3) an action stating that the request failed. A common pattern is to use the same `type` for these 3 actions, and a `status` field to indicate the status of that request.
 
   * You'll convert some action creators into **thunks**: they'll return a function instead of returning the action object directly. This function may have side effects, including making api calls and dispatching other actions.
+
+
+## React/Redux development workflow
+
+  - Always start with the desired UI. Then build out the needed React components.
+  - Figure out what state they need to reference and what state callbacks they need to call.
+  - That will tell you what state Redux needs to store and what actions you'll need to dispatch and what the reducers will do.
 
 
 ## Installing Redux & Thunk

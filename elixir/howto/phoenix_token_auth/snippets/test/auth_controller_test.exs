@@ -1,6 +1,6 @@
-defmodule JwtWeb.Api.AuthControllerTest do
-  use JwtWeb.ConnCase
-  alias Jwt.Accounts
+defmodule MyAppWeb.Api.AuthControllerTest do
+  use MyAppWeb.ConnCase
+  alias MyApp.Accounts
 
   describe "#login" do
     test "returns an auth token when your credentials are valid", %{conn: conn} do
@@ -20,7 +20,9 @@ defmodule JwtWeb.Api.AuthControllerTest do
       params = %{"email" => user.email, "password" => user.password <> "x"}
       conn = post(conn, Routes.api_auth_path(conn, :login), params)
 
-      %{"error" => "invalid_credentials"} = json_response(conn, 401)
+      json = json_response(conn, 401)
+      assert json["ok"] == false
+      assert json["reason"] =~ "email or password is incorrect"
     end
 
     # This is a separate code pathway, so we cover it separately
@@ -30,7 +32,8 @@ defmodule JwtWeb.Api.AuthControllerTest do
       params = %{"email" => user.email <> "x", "password" => user.password}
       conn = post(conn, Routes.api_auth_path(conn, :login), params)
 
-      %{"error" => "invalid_credentials"} = json_response(conn, 401)
+      json = json_response(conn, 401)
+      assert json["reason"] =~ "email or password is incorrect"
     end
   end
 
@@ -54,7 +57,9 @@ defmodule JwtWeb.Api.AuthControllerTest do
       conn = post(conn, Routes.api_auth_path(conn, :register), params)
 
       assert Accounts.count_users() == pre_count
-      assert json_response(conn, 422) == %{"errors" => ["email can't be blank"]}
+      json = json_response(conn, 422)
+      assert json["ok"] == false
+      assert json["reason"] =~ "email can't be blank"
     end
   end
 end

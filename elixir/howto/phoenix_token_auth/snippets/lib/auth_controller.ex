@@ -1,6 +1,6 @@
 defmodule MyAppWeb.Api.AuthController do
   use MyAppWeb, :controller
-  alias Jwt.Accounts
+  alias MyApp.Accounts
 
   def login(conn, %{"email" => email, "password" => password}) do
     case Accounts.authenticate_user(email, password) do

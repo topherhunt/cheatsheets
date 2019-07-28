@@ -28,8 +28,10 @@ Review `mix.exs`:
 
   * Set the Elixir version
   * Ensure Phoenix is <= 1.4.6 to avoid the Phoenix.Controller log config bug
-  * Add any deps you need
-  * Review / compare to my other apps
+  * Install Hound (optional): `{:hound, "~> 1.0", only: :test}`
+  * Install Rollbax (optional): `{:rollbax, "~> 0.10"}`
+
+Fetch dependencies: `mix deps.get`
 
 Update `.formatter.exs`, if you care to
 
@@ -44,26 +46,98 @@ config/secrets.exs
 *.log
 ```
 
-Set up the `config/` files to use env vars: (see RTL for reference)
-(Note: Env var usage isn't compatible with Distillery releases.)
-Files and topics to consider:
+Set up your `config/` files as needed. Here's the full setup, which might not be relevant to quick prototype apps:
 
-  * config.exs:
-    - define H.env!
-    - load secrets.exs
-    - use H.env! everywhere
-    - Repo
-    - oauth & ueberauth
-    - review config
-  * dev.exs: review config, live_reload liveviews path, rollbax
-  * test.exs: review config, Repo, Mailer, LoggerFileBackend
-  * prod.exs: update prod config as relevant; remove mention of `prod.secrets.exs`
-  * secrets.exs: copy this file and set up all dev secrets
-  * copy secrets.exs to secrets.exs.template, sanitize it
+  * Update `config.exs` with my standard setup:
 
-Then commit all these changes to git. Ensure `config.secrets.exs` is ignored!
+    - Add `H.env` helper:
+      (Remember that my H.env! strategy is incompatible with Elixir releases.)
 
-Fetch dependencies: `mix deps.get`
+      ```rb
+      defmodule H do
+        def env!(key), do: System.get_env(key) || raise("Env var '#{key}' is missing!")
+      end
+      ```
+
+    - Load `secrets.exs` if available:
+
+      ```rb
+      # Automatically load sensitive environment variables for dev and test
+      if File.exists?("config/secrets.exs"), do: import_config("secrets.exs")
+      ```
+
+    - Configure the database connection globally:
+
+      ```rb
+      config :my_app, MyApp.Repo,
+        url: H.env!("DATABASE_URL"),
+        # Heroku PG hobby-dev allows max 20 db connections
+        pool_size: 10,
+        log: false
+      ```
+
+    - Replace the hard-coded `secret_key_base` string with `H.env!("SECRET_KEY_BASE")`.
+
+    - Disable Rollbax: `config :rollbax, enabled: false`
+
+  * Update `dev.exs`:
+
+    - Remove the redundant MyApp.Repo config keys (only keep `show_sensitive_data...`)
+
+    - Disable Rollbax: `config :rollbax, enabled: false`
+
+  * Update `test.exs`:
+
+    - Update the Repo config:
+
+      ```rb
+      config :my_app, MyApp.Repo,
+        pool: Ecto.Adapters.SQL.Sandbox,
+        # long timeout to allow debugging in tests
+        ownership_timeout: 20 * 60 * 1000
+      ```
+
+    - Update `MyAppWeb.Endpoint` to `server: true` and port `4001` for Hound:
+
+      ```rb
+      config :my_app, MyAppWeb.Endpoint,
+        http: [port: 4001],
+        server: true
+      ```
+
+    - Configure Hound: `config :hound, driver: "chrome_driver", browser: "chrome_headless"`
+
+    - Disable Rollbax: `config :rollbax, enabled: false`
+
+  * Update `prod.exs`:
+
+    - Update the Endpoint config to require https:
+
+      ```rb
+      config :my_app, MyAppWeb.Endpoint,
+        http: [:inet6, port: System.get_env("PORT") || 4000],
+        url: [scheme: "https", host: H.env!("HOST_NAME"), port: 443],
+        force_ssl: [rewrite_on: [:x_forwarded_proto]],
+        cache_static_manifest: "priv/static/cache_manifest.json"
+      ```
+
+    - Configure Rollbax:
+
+      ```rb
+      config :rollbax,
+        access_token: H.env!("ROLLBAR_ACCESS_TOKEN"),
+        environment: "prod"
+      ```
+
+    - Remove the unneeded `import_config "prod.secret.exs"` line.
+
+  * Write `config/secrets.exs.template`, updating the list of sample env vars to match your needs. (See snippet)
+
+  * Then COPY `secrets.exs.template` to `secrets.exs` and fill in any local (dev) values.
+
+  * Delete `prod.secret.exs`.
+
+Then commit all these changes to git. Ensure `config/secrets.exs` is ignored!
 
 Create the db: `mix ecto.create`
 
@@ -251,8 +325,7 @@ In `dev.exs`, configure the `node` watcher so errors are easier to diagnose:
 ```rb
   ...
   "--watch-stdin",
-  "--color",                 # <<< ADD THIS
-  "--display-error-details", # <<< ADD THIS
+  "--color", "--display-error-details", # <<< ADD THESE TWO FLAGS
   cd: Path.expand("../assets", __DIR__)
   ...
 ```
@@ -295,64 +368,7 @@ Install SCSS support:
   * Rename `app.css` to `app.scss`. This lets you `@import` either css or scss into app.scss. Remember to also update this file's reference in `app.js`. (If `app.scss` is your only css entrypoint, this makes the .css rule in webpack.config.js obsolete, but there's no harm in leaving it there.)
   * In `dev.exs`, configure `live_reload` to also watch for `scss` extension.
 
-Replace `lib/my_app_web/templates/layout/app.html.eex` with a simple Bootstrap template:
-
-```xml
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <title>Grassflog</title>
-    <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>">
-  </head>
-
-  <body>
-    <nav class="navbar navbar-expand-sm navbar-light bg-light">
-      <%= link "My Site", to: "#", class: "navbar-brand" %>
-      <button class="navbar-toggler" data-toggle="collapse" data-target="#navbar-content">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div id="navbar-content" class="collapse navbar-collapse">
-        <ul class="navbar-nav mr-auto"></ul>
-        <ul class="navbar-nav">
-          <li class="nav-item"><%= link "Log in", to: "#", class: "nav-link" %></li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
-              <i class="icon">settings</i> <span class="caret"></span>
-            </a>
-            <div class="dropdown-menu dropdown-menu-right">
-              <div class="dropdown-item em small">Dropdown text</div>
-              <%= link "A link", to: "#", class: "dropdown-item text-danger" %>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </nav>
-
-    <main class="container-fluid">
-      <%= if get_flash(@conn, :info) do %>
-        <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-      <% end %>
-
-      <%= if get_flash(@conn, :error) do %>
-        <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
-      <% end %>
-
-      <%= render @view_module, @view_template, assigns %>
-    </main>
-
-    <footer class="text-center small">
-      Built by <%= link "Topher Hunt", to: "http://topherhunt.com", target: "_blank" %>
-    </footer>
-
-    <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
-  </body>
-</html>
-```
+Replace `lib/my_app_web/templates/layout/app.html.eex` with a simple Bootstrap template. (See snippet)
 
 Copy my custom css from RTL, as relevant:
 
@@ -364,7 +380,7 @@ Copy my custom css from RTL, as relevant:
 Install the Google Material iconset: https://material.io/tools/icons/?style=baseline
 
   * Copy `icons.css` from RTL (and declare it in `app.css`)
-  * Download or copy the .woff2 font to `assets/static/fonts/`
+  * Download or copy `MaterialIcons-Regular.woff2` to `assets/static/fonts/`
 
 To test Jquery, add `assets/js/utilities.js` and declare it in `app.js`:
 
@@ -400,8 +416,61 @@ To test that it's all wired up properly, replace `index.html.eex` and load the p
 
 ## Misc.
 
-  * Copy query helpers from RTL.Repo.
-  * Copy helpers module from RTL.Helpers.
-  * Rename PageController to HomeController. (controller, route, view, template, test)
-  * Copy RTL.Factory. (maybe leave one insert_* func commented out for later)
-  * Copy **Grassflog's** ErrorHelpers.error_tag/2 for easier controller test assertions
+  * In `repo.ex`, add my standard helpers:
+
+    ```rb
+    import Ecto.Query
+
+    def count(query), do: query |> select([t], count(t.id)) |> one()
+    def any?(query), do: count(query) >= 1
+    def first(query), do: query |> limit(1) |> one()
+    def first!(query), do: query |> limit(1) |> one!()
+
+    def ensure_success(result) do
+      case result do
+        {:ok, object} -> object
+        {:error, changeset} -> raise Ecto.InvalidChangesetError, changeset: changeset
+      end
+    end
+    ```
+
+  * Write `lib/my_app/helpers.ex` with some common helpers:
+
+    ```rb
+    defmodule MyApp.Helpers do
+      def env!(key), do: System.get_env(key) || raise("Env var '#{key}' is missing!")
+      def blank?(value), do: value == nil || (is_binary(value) && String.trim(value) == "")
+      def present?(value), do: !blank?(value)
+    end
+    ```
+
+  * Write `lib/my_app/factory.ex`: (commented out until you've built your schemas)
+
+    ```rb
+    defmodule Calories.Factory do
+      # alias Calories.Accounts
+
+      # def insert_user(params \\ %{}) do
+      #   assert_no_keys_except(params, [:name, :email, :password])
+      #   uuid = random_uuid()
+
+      #   Accounts.insert_user!(%{
+      #     name: params[:name] || "User #{uuid}",
+      #     email: params[:email] || "user_#{uuid}@example.com",
+      #     password: params[:password] || uuid
+      #   })
+      # end
+
+      def random_uuid, do: Nanoid.generate(8)
+
+      #
+      # Internal
+      #
+
+      defp assert_no_keys_except(params, allowed_keys) do
+        keys = Enum.into(params, %{}) |> Map.keys()
+        unexpected_key = Enum.find(keys, & &1 not in allowed_keys)
+        if unexpected_key, do: raise "Unexpected key: #{inspect(unexpected_key)}."
+      end
+    end
+    ```

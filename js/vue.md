@@ -1,6 +1,6 @@
 # Vue.js
 
-Reasons to prefer Vue.js over React:
+Reasons to prefer Vue over React:
 
   * Simpler codebase
   * Easier learning curve

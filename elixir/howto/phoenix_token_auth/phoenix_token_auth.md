@@ -14,7 +14,7 @@ See also:
   * Add bcrypt to `mix.exs` for password hashing:
 
     ```rb
-    {:bcrypt_elixir, "~> 2.0"},
+    {:bcrypt_elixir, "~> 2.0"}
     ```
 
   * `mix deps.get`
@@ -26,7 +26,7 @@ Create the Accounts context and User schema (or if you've already created them, 
 
   * Ensure `repo.ex` has the standard helpers (see snippet).
 
-  * Write the Accounts context, `lib/my_app_web/accounts/accounts.ex` (see snippet).
+  * Write the Accounts context, `lib/my_app/accounts/accounts.ex` (see snippet).
     This contains the generic helpers for working with User records, plus logic for authenticating a user from email + password and for signing and parsing auth tokens.
 
   * Write the User schema, `lib/my_app_web/accounts/user.ex` (see snippet).
@@ -69,12 +69,11 @@ Create the Accounts context and User schema (or if you've already created them, 
 
     # ...
 
-    scope "/api", JwtWeb, as: :api do
+    scope "/api", MyAppWeb, as: :api do
       pipe_through :api
 
       post "/login", Api.AuthController, :login
       post "/register", Api.AuthController, :register
-
       get "/users/me", Api.UserController, :me
     end
     ```
@@ -82,14 +81,14 @@ Create the Accounts context and User schema (or if you've already created them, 
   * In `my_app_web.ex`, in the controller quote, import the require_user plug:
 
     ```rb
-    import JwtWeb.AuthPlugs, only: [require_user: 2]
+    import MyAppWeb.AuthPlugs, only: [require_user: 2]
     ```
 
   * Write `lib/my_app_web/controllers/api/auth_controller.ex` (see snippet). This has actions for login (ie. getting an auth token) and registration.
 
   * Write `lib/my_app_web/controllers/api/user_controller.ex` (see snippet). This has one protected endpoint `/api/users/me` which lets us test out login-restricted endpoints.
 
-Useful pattern: each api endpoint's response json should include an :ok bool flag indicating whether this request was a success. If ok == false, include a standard "reason" field explaining the problem. This gives the consumer a consistent api to verify success against.
+Useful pattern: each api request's response json should include `ok: true` if this request was a success, `ok: false` otherwise. If false, also include a "reason" field explaining why. This gives the consumer a consistent api to verify success against.
 
 
 ## Tests
@@ -101,7 +100,7 @@ Useful pattern: each api endpoint's response json should include an :ok bool fla
     config :bcrypt_elixir, log_rounds: 4
     ```
 
-  * In `test/support/conn_case.ex`, in the quote block, add: `alias Jwt.Factory`
+  * In `test/support/conn_case.ex`, in the quote block, add: `alias MyApp.Factory`
 
   * Write `lib/my_app/factory.ex` or add an `insert_user` helper to it (see snippet)
 

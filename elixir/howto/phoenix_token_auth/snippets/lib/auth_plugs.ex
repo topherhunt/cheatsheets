@@ -24,7 +24,7 @@ defmodule MyAppWeb.AuthPlugs do
     else
       conn
       |> put_status(401)
-      |> json(%{"error" => "user_required"})
+      |> json(%{ok: false, reason: "user_required"})
       |> halt()
     end
   end
@@ -72,7 +72,7 @@ defmodule MyAppWeb.AuthPlugs do
   defp halt_with_invalid_token_error(conn) do
     conn
     |> put_status(401)
-    |> json(%{"error" => "invalid_token"})
+    |> json(%{ok: false, reason: "invalid_token"})
     |> halt()
   end
 

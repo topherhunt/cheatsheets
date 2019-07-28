@@ -5,12 +5,18 @@ Prevent Mac from sleeping:
     pmset noidle
 
 
-# Video / image / audio processing
+## Video / image / audio processing
 
 Download a list of songs from Youtube for post-processing:
-- Create a file `urls.txt` with one video URL on each line
-- irb: `File.open("urls.txt").read.each_line { |l| `youtube-dl -f140 #{l}`; sleep 10 }`
-- In another tab: `watch -n5 "ls | grep .m4a | wc -l"`
+
+  - Create a file `urls.txt` with one video URL on each line
+
+  - irb:
+    ```rb
+    File.open("urls.txt").read.each_line { |l| puts "Downloading #{l}..."; `youtube-dl -f140 #{l}`; sleep 10 }
+    ```
+
+  - In another tab: `watch -n5 "ls | grep .m4a | wc -l"`
 
 Convert .png to .jpg, compress size of all .jpgs, and remove the originals:
 (1200 is a better standard than 1024.)
@@ -36,7 +42,7 @@ Join each mp3 in a folder into one long mp3 (each must have same codec):
     ffmpeg -f concat -safe 0 -i filesToConcatenate.txt -c copy concatenated.mp3
 
 
-# Searching & listing files
+## Searching & listing files
 
 List most recently modified files / folders
 
@@ -55,14 +61,14 @@ Recursively search for text in this dir:
     grep -rnw . -e 'test-manage-custom-fields'
 
 
-# Resources
+## Resources
 
 Show disk space used in this dir and 1 level of subfolders
 
     du -d1 -h .
 
 
-# Text parsing
+## Text parsing
 
 Get output from a column, ignoring varying whitespace:
 
@@ -73,14 +79,14 @@ Count LOC in all source code files. For reference: BusBK is 40K loc; GrayOwl is 
     git ls-files | egrep "\.(txt|md|sh|rb|erb|html|haml|ex|exs|eex|js|jsx|json|css|scss|lock|yml)$" | egrep -v "/vendor/|package-lock\.json|schema\.json|yarn\.lock|Gemfile\.lock|cdn_backup|third_party" | sed 's/.*/"&"/' | xargs wc -l
 
 
-# Background processes
+## Background processes
 
 - `w` - list all current sessions to this machine, and what they're running
 - `last` - list all *recent* sessions on this machine
 - `ps aux` - list all running processes
 - `nohup [bash command]` # ensure the command doesn't die when your SSH connection ends
 
-# Looping
+## Looping
 
 Infitine loop:
 
@@ -90,6 +96,6 @@ Run a command for each line in a file:
 
     cat lines.txt | while read line; do echo "This line is: $line"; done
 
-# Downloads
+## Downloads
 
 - `wget -c <url>` - download a resource, resuming from partial progress if interrupted

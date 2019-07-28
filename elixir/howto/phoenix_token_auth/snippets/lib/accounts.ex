@@ -1,7 +1,7 @@
-defmodule Jwt.Accounts do
+defmodule MyApp.Accounts do
   import Ecto.Query, warn: false
-  alias Jwt.Repo
-  alias Jwt.Accounts.User
+  alias MyApp.Repo
+  alias MyApp.Accounts.User
 
   #
   # Users
@@ -47,10 +47,6 @@ defmodule Jwt.Accounts do
     User.changeset(user, %{})
   end
 
-  #
-  # Authentication & token helpers
-  #
-
   # Given login credentials, returns the matching user if the creds are correct.
   def authenticate_user(email, password) do
     user = get_user_by(email: email)
@@ -62,11 +58,16 @@ defmodule Jwt.Accounts do
         {:error, :invalid_credentials}
       end
     else
-      Comeonin.Bcrypt.dummy_checkpw()
+      Bcrypt.no_user_verify()
       {:error, :invalid_credentials}
     end
   end
 
+  #
+  # Auth tokens
+  #
+
+  @endpoint MyAppWeb.Endpoint
   @token_salt "hard-coded salt for user auth tokens"
 
   def new_token_for_user(user) do
@@ -75,13 +76,13 @@ defmodule Jwt.Accounts do
     # encoding signed_at will give us a pathway for detecting old tokens so we can issue
     # a new one as relevant.
     data = %{user_id: user.id, signed_at: signed_at}
-    Phoenix.Token.sign(JwtWeb.Endpoint, @token_salt, data, signed_at: signed_at)
+    Phoenix.Token.sign(@endpoint, @token_salt, data, signed_at: signed_at)
   end
 
   def verify_token_and_get_user_id(token) do
     # TODO: Currently tokens have infinite lifetime. For safety we should expire them
     # after a day or so, and implement a way for the consumer to exchange for a fresh one.
-    case Phoenix.Token.verify(JwtWeb.Endpoint, @token_salt, token, max_age: :infinity) do
+    case Phoenix.Token.verify(@endpoint, @token_salt, token, max_age: :infinity) do
       {:ok, %{user_id: user_id}} -> {:ok, user_id}
       {:error, reason} -> {:error, reason}
     end
