@@ -7,20 +7,15 @@ See also: https://hexdocs.pm/phoenix/heroku.html#content
 
 ## The steps
 
-  * Create the Heroku app:
+  * Create the Heroku app and add the standard buildpacks:
 
     ```
     heroku create myapp
-    ```
-
-  * Add the Elixir & Phoenix buildpacks:
-
-    ```
     heroku buildpacks:add https://github.com/HashNuke/heroku-buildpack-elixir.git
     heroku buildpacks:add https://github.com/gjaldon/heroku-buildpack-phoenix-static.git
     ```
 
-  * Configure the buildpacks by adding and committing these 3 files in your project root.
+  * Configure the buildpacks by adding and committing these 3 files in your project root:
 
     - `elixir_buildpack.config`:
 

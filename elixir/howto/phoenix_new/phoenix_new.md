@@ -80,11 +80,15 @@ Set up your `config/` files as needed. Here's the full setup, which might not be
 
     - Disable Rollbax: `config :rollbax, enabled: false`
 
+    - Disable the logger `request_id` data by commenting `metadata: [:request_id]`
+
   * Update `dev.exs`:
 
     - Remove the redundant MyApp.Repo config keys (only keep `show_sensitive_data...`)
 
     - Disable Rollbax: `config :rollbax, enabled: false`
+
+    - Remove `config :logger, :console, format...` so dev logs look the same as prod logs
 
   * Update `test.exs`:
 
@@ -320,121 +324,107 @@ Reference:
 
   * [Webpack primer](https://what-problem-does-it-solve.com/webpack/intro.html)
 
-In `dev.exs`, configure the `node` watcher so errors are easier to diagnose:
+Steps:
 
-```rb
-  ...
-  "--watch-stdin",
-  "--color", "--display-error-details", # <<< ADD THESE TWO FLAGS
-  cd: Path.expand("../assets", __DIR__)
-  ...
-```
+  * In `dev.exs`, configure the `node` watcher so errors are easier to diagnose:
 
-Make sure `webpack.config.js` knows where to look for modules referenced by JS that you include from hex deps:
-
-```js
-  // ... after the plugins setting ...
-  // Make sure webpack checks here when looking for modules required by another module
-  // (react-phoenix was giving errors until I added this)
-  resolve: {
-    modules: [path.join(__dirname, "node_modules")]
-  }
-```
-
-How to install Jquery and Bootstrap:
-
-  * `cd assets`
-  * `npm i --save jquery`
-  * `npm i --save popper.js`
-  * `npm i --save bootstrap`
-  * If you want Bootstrap JS: in `app.js`, add: `import "bootstrap"`
-  * Whenever you want Jquery: `import $ from "jquery"` then use `$` as normal
-  * In `app.css`, add `@import "../node_modules/bootstrap/dist/css/bootstrap.min.css";`
-    (See https://getbootstrap.com/docs/4.0/getting-started/webpack/ to customize Bootstrap)
-
-Install SCSS support:
-(based on install steps at https://github.com/webpack-contrib/sass-loader)
-
-  * `npm i --save sass-loader node-sass`
-  * Add a .scss rule to `webpack.config.js`:
-
-    ```js
-    {
-      test: /\.scss$/,
-      use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
-    }
+    ```rb
+      ...
+      "--watch-stdin",
+      "--color", "--display-error-details", # <<< ADD THESE TWO FLAGS
+      cd: Path.expand("../assets", __DIR__)
+      ...
     ```
 
-  * Rename `app.css` to `app.scss`. This lets you `@import` either css or scss into app.scss. Remember to also update this file's reference in `app.js`. (If `app.scss` is your only css entrypoint, this makes the .css rule in webpack.config.js obsolete, but there's no harm in leaving it there.)
-  * In `dev.exs`, configure `live_reload` to also watch for `scss` extension.
+  * Make sure `webpack.config.js` knows where to look for modules referenced by JS that you include from hex deps:
 
-Replace `lib/my_app_web/templates/layout/app.html.eex` with a simple Bootstrap template. (See snippet)
+    ```js
+      // ... after the plugins setting ...
+      // Make sure webpack checks here when looking for modules required by another module
+      // (react-phoenix was giving errors until I added this)
+      resolve: {
+        modules: [path.join(__dirname, "node_modules")]
+      }
+    ```
 
-Copy my custom css from RTL, as relevant:
+  * Install Bootstrap and Jquery if desired:
 
-  * layout.scss (contains styles for the sticky footer)
-  * overrides.scss
-  * utilities.css
-  * (ensure each one is declared in app.css)
+    - `cd assets`
+    - `npm i --save jquery`
+    - `npm i --save popper.js`
+    - `npm i --save bootstrap`
+    - If you want Bootstrap JS: in `app.js`, add: `import "bootstrap"`
+    - Whenever you want Jquery: `import $ from "jquery"` then use `$` as normal
+    - In `app.css`, add `@import "../node_modules/bootstrap/dist/css/bootstrap.min.css";`
+      (See https://getbootstrap.com/docs/4.0/getting-started/webpack/ to customize Bootstrap.)
 
-Install the Google Material iconset: https://material.io/tools/icons/?style=baseline
+  * Install SCSS support:
+    (based on install steps at https://github.com/webpack-contrib/sass-loader)
 
-  * Copy `icons.css` from RTL (and declare it in `app.css`)
-  * Download or copy `MaterialIcons-Regular.woff2` to `assets/static/fonts/`
+    - `npm i --save sass-loader node-sass`
+    - Add a .scss rule to `webpack.config.js`:
 
-To test Jquery, add `assets/js/utilities.js` and declare it in `app.js`:
+      ```js
+      {
+        test: /\.scss$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
+      }
+      ```
 
-```js
-import $ from "jquery"
+    - Rename `app.css` to `app.scss`. This lets you `@import` either css or scss into app.scss. Remember to also update this file's reference in `app.js`. (If `app.scss` is your only css entrypoint, this makes the .css rule in webpack.config.js obsolete, but there's no harm in leaving it there.)
+    - In `dev.exs`, configure `live_reload` to also watch for `scss` extension.
 
-$(function(){
+  * Replace `lib/my_app_web/templates/layout/app.html.eex` with a simple Bootstrap template. (See snippet)
 
-  $(".js-fade-on-click").click(function(e) {
-    e.preventDefault()
-    $(this).fadeToggle(500)
-  })
+  * Copy my custom css from RTL, as relevant:
 
-})
-```
+    - layout.scss (contains styles for the sticky footer)
+    - overrides.scss
+    - utilities.css
+    - (ensure each one is declared in app.css)
 
-To test that it's all wired up properly, replace `index.html.eex` and load the page:
+  * Install the Google Material iconset: https://material.io/tools/icons/?style=baseline
 
-```xml
-<h1>Title</h1>
+    - Copy `icons.css` from RTL (and declare it in `app.css`)
+    - Download or copy `MaterialIcons-Regular.woff2` to `assets/static/fonts/`
 
-<div class="alert alert-success">An alert</div>
+  * To test Jquery, add `assets/js/utilities.js` and declare it in `app.js`:
 
-<div class="u-card">
-  A div with the "u-card" class
-</div>
+    ```js
+    import $ from "jquery"
 
-<div class="u-card js-fade-on-click">Jquery test: click me to fade</div>
+    $(function(){
 
-<h3>An icon: <i class="icon">face</i></h3>
-```
+      $(".js-fade-on-click").click(function(e) {
+        e.preventDefault()
+        $(this).fadeToggle(500)
+      })
+
+    })
+    ```
+
+  * To test that it's all wired up properly, replace `index.html.eex` and load the page:
+
+    ```xml
+    <h1>Title</h1>
+
+    <div class="alert alert-success">An alert</div>
+
+    <div class="u-card">
+      A div with the "u-card" class
+    </div>
+
+    <div class="u-card js-fade-on-click">Jquery test: click me to fade</div>
+
+    <h3>An icon: <i class="icon">face</i></h3>
+    ```
 
 
 ## Misc.
 
-  * In `repo.ex`, add my standard helpers:
+  * Add my standard querying and changeset validation helpers to `repo.ex`. (see snippet)
 
-    ```rb
-    import Ecto.Query
-
-    def count(query), do: query |> select([t], count(t.id)) |> one()
-    def any?(query), do: count(query) >= 1
-    def first(query), do: query |> limit(1) |> one()
-    def first!(query), do: query |> limit(1) |> one!()
-
-    def ensure_success(result) do
-      case result do
-        {:ok, object} -> object
-        {:error, changeset} -> raise Ecto.InvalidChangesetError, changeset: changeset
-      end
-    end
-    ```
-
-  * Write `lib/my_app/helpers.ex` with some common helpers:
+  * Add `lib/my_app/helpers.ex` with some common helpers:
 
     ```rb
     defmodule MyApp.Helpers do
@@ -444,11 +434,11 @@ To test that it's all wired up properly, replace `index.html.eex` and load the p
     end
     ```
 
-  * Write `lib/my_app/factory.ex`: (commented out until you've built your schemas)
+  * Add `lib/my_app/factory.ex`: (commented out until you've built your schemas)
 
     ```rb
-    defmodule Calories.Factory do
-      # alias Calories.Accounts
+    defmodule MyApp.Factory do
+      # alias MyApp.Accounts
 
       # def insert_user(params \\ %{}) do
       #   assert_no_keys_except(params, [:name, :email, :password])

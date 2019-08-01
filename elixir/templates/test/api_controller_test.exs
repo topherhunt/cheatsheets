@@ -1,4 +1,4 @@
-# Here's a sample UserControllerTest for an api.
+# Here's a generic UserControllerTest for an api.
 # I use some custom helpers to make things more compact & readable:
 # - set_auth_token
 # - assert_record_fields

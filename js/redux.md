@@ -136,3 +136,40 @@ Given a standard React setup, here's the brief steps for installing Redux.
   * Define your reducers in `assets/js/redux/reducers.js`.
 
   * Wrap the React root component in a Redux Provider.
+
+
+
+## Possible patterns for Redux state structure
+
+  * The store state has one branch where normalized records are stored: `state.data.records = {users: [incomplete list of records], meals: [...]}`. `records` is an object where each key is the schema/table name and the value is a list of known records of this type. This is an INCOMPLETE list. Any api requests that create, update, or delete record(s) should ensure that all impacted records are added/removed from the records dict. (ie. if a record was deleted, its correspnoding store.data.records entry should be removed.)
+
+  * There's a standard RECORDS_RECEIVED action which you can dispatch and provide the records in the payload. Records can be of any type and can be mixed together; the api must include a "type" field (matching the table name) in each record's json representation so this action's reducer can infer which collection to add/update it to.
+
+  * TODO - whatever I was thinking
+
+  *
+
+  * How to handle paginated collections? I can think of at least 2 approaches:
+
+    - 1: collections aren't stored in Redux. When you page through a collection, you're making a fresh request each time whose response is stored in the local component state. Any records contained in the response are updated in the
+
+    - 2: store partial data on available collections in the store: `state.data.collections` = an object where each key is a collection name (e.g. path without params) and the value is an object {pages: {[pageNum]: [list of ids on this page]}}. This approach lets you cached pages so you can flip back and forth without needing to re-fetch all records on each page flip. But on any record deletion or addition, you need to manually bust the cache for some or all pages.
+
+    ```
+    # Example of how this state might be structured
+    state: {
+      data: {
+        records: {...},
+        collections: {
+          "/users": {
+            pages: {
+              0: [list of record ids on this page],
+              4: [...]
+            },
+            totalRecords: 193
+        }
+      }
+    }
+    ```
+
+  *

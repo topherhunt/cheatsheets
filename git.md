@@ -1,6 +1,28 @@
 # Git
 
 
+## The basics
+
+These commands should be all you need to capture all  simple version control
+
+  * `git init .` - create a new Git repository in this folder
+
+  * `git status` - list any changes since the last commit
+
+  * `git add --all` - add ("stage") all file changes for committing. (You can also add files one-by-one if you want finer-grained control.)
+
+  * `git commit -m "Some commit message"` - commit all staged changes
+
+  * `git log` - List all your commits
+
+  * `git remote add origin https://your-github-repository-url` - add your Github (or Gitlab or Bitbucket) repository so you can push your changes there
+
+  * `git push origin master` - push your latest commits to the `origin` (a remote repository on Github or similar)
+
+  * `git checkout SOME_COMMIT_ID` - restore the code to an older commit (you can find the commit id in `git log`). Be sure to `git checkout master` to return to the "tip" of the `master` branch, before you make any code changes or commits!
+
+
+
 ## Log
 
 Roman's git log output format with the graph on left side:

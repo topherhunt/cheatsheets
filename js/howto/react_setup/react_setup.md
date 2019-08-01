@@ -146,7 +146,11 @@ You do NOT need Redux and Thunk to build a non-trivial token-authed SPA. If your
 
 See [my `phoenix-react-token-auth` repo](https://github.com/topherhunt/phoenix-react-token-auth) for an example implementation. (relevant code is under `assets/js/react/`)
 
-Testing requests with curl: `curl -D - /api/users/me -H "Authorization: Bearer <valid_jwt_token>"`
+Testing requests with curl:
+
+```sh
+curl -D - /api/users/me -H "Authorization: Bearer <valid_jwt_token>"
+```
 
 
 ## Next?

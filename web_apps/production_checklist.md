@@ -21,23 +21,33 @@ Security:
 
   * All file upload vectors are validated for attachment size, or post-processed to protect against huge images, as relevant
 
+  * Changesets have validations for all conceivable string & numeric field exploits (e.g. registering a 2000-char username or setting your age to 9999999999999999 should not result in a database error!)
+
 Database:
 
   * DB is auto backed up regularly
 
   * DB migrations are small, focused, and safe against table locking risks (see https://github.com/LendingHome/zero_downtime_migrations) unless downtime is expected
 
-Testing:
+Test coverage:
 
-  * Test suite covers all business-critical behavior.
+  * Controllers: tests for all endpoints, & all possible logic pathways for each
 
-  * All tests are passing with network access disabled.
+  * Integration: judicious test coverage for all important happy paths
+
+  * Contexts: tests for all schema inserts, covering all conceiveable field edge cases & ensuring that the error messages look sane (e.g. what if they register with a 2k-char username? what if they set their age to 99999999999?)
+
+  * Custom logic modules: all complex logic has judicious unit test coverage
+
+  * All tests pass reliably with network access disabled
 
 Performance:
 
+  * Any api endpoints that return collections are paginated (unless there's a good reason why they won't need pagination).
+
   * Page loads reviewed. (target under 100KB for most pages)
 
-  * Load-testing harness that makes it easy to assess how the current deployment will stand up to various amounts of traffic
+  * Load-testing script set up. (K6?) The site can comfortably handle 10x projected traffic.
 
 Logging:
 
