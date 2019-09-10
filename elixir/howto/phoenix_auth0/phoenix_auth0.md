@@ -1,6 +1,7 @@
 # How to set up Auth0 integration in Elixir/Phoenix
 
-See also `howto_auth0_rails.md` which this guide is based on.
+  * Consider using the Coherence dep (Devise clone) instead.
+  * See also `howto_auth0_rails.md` which this guide is based on.
 
 
 ## Configuring the Auth0 account

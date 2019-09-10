@@ -3,22 +3,32 @@
 
 ## Files (reading & writing)
 
-Read each line of a local file: (IO.foreach is surprisingly performant)
+Read a file:
 
-```ruby
+```rb
+# Load the whole file into a string
+IO.read(filename)
+
+# Loop over each line (performant; doesn't load entire file into memory)
 IO.foreach(filename) { |line| puts "The line is: #{line}" }
 ```
 
 Write to a file (overwrite current contents):
 
-```ruby
+```rb
 IO.write("filename.txt", "Contents")
 ```
 
 Write to file (append to current contents):
 
-```ruby
+```rb
 File.open(filename, 'a') { |f| f.write "Some appended text\n" }
+```
+
+List all files in a directory:
+
+```rb
+Dir.glob("#{Rails.root}/app/views/manuals/*.html").map { |str| File.basename(str) }
 ```
 
 

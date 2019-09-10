@@ -4,18 +4,7 @@
 
 * (if Rails) Bullet gem is configured to raise in dev & test if lazy-loaded N+1 queries are detected (forcing us to preload associated data up-front)
 
-* The readme contains:
-  - Overview of the purpose & main components of the app
-  - Overview of code style guidelines (test suite principles etc.)
-  - How to set up for local development & testing
-  - How to do load testing
-  - How to safely deploy changes
-  - Notes on our production environment:
-    * where to find stuff
-    * how to deploy changes
-    * how to scale up & down to accommodate traffic, etc.
-  - How to deploy to a new prod environment
-  - A link to this production-readiness checklist
+* The readme contains everything in my `readme_template.md`
 
 Security:
 

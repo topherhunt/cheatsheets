@@ -10,12 +10,12 @@ Here's my standard setup for a small to medium-size React app. Includes token au
   * Install `react_phoenix`:
     (see also original steps: https://hexdocs.pm/react_phoenix/readme.html)
 
-    - Add the mix dep: `{:react_phoenix, "~> 1.0.0"}`
+    - Add the mix dep: `{:react_phoenix, "~> 1.0"}`
     - `mix deps.get`
     - `cd assets`
     - `npm i --save react react-dom`
     - `npm i --save-dev @babel/preset-react`
-    - Add react_phoenix to package.json depedencies list:
+    - Add react_phoenix to package.json dependencies list:
       `"react-phoenix": "file:../deps/react_phoenix"`
     - `npm i`
     - In `.babelrc`, add `"@babel/preset-react"` to the **presets** list

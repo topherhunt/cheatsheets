@@ -1,0 +1,48 @@
+//
+// Layout
+//
+
+.u-centered-1000 { max-width: 1000px; margin-left: auto; margin-right: auto; }
+.u-centered-800  { max-width:  800px; margin-left: auto; margin-right: auto; }
+.u-centered-600  { max-width:  600px; margin-left: auto; margin-right: auto; }
+
+// Inserts 1 text-line's worth of spacing between each child element.
+.u-stack > * + * { margin-top: 1.5rem; }
+
+.u-gap-10 { width: 100%; height: 10px; }
+.u-gap-20 { width: 100%; height: 20px; }
+
+// Position action buttons etc. in top-right corner of a div
+.u-relative { position: relative; }
+.u-abs-top-right { position: absolute; top: 7px; right: 10px; }
+
+//
+// Blocks
+//
+
+.u-card {
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+}
+
+.u-box-shadow { box-shadow: 1px 3px 5px 1px #ccc; border-radius: 5px; }
+
+.u-rounded-tag {
+  background-color: #fff;
+  border-radius: 15px;
+  padding: 3px 5px 3px 5px;
+}
+
+.u-hidden { display: none; }
+
+.u-form-error { color: #a00; background-color: #fee; padding: 5px; }
+
+//
+// Text
+//
+
+.u-nowrap { white-space: nowrap; }
+.u-ellipsis { overflow: hidden; text-overflow: ellipsis; }

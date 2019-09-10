@@ -6,6 +6,7 @@ Notes:
 
 - This approach only works on Chrome & FF (as of Mar 2019).
 - See RTL for the latest version of this code.
+- This guide doesn't cover doing uploads from the browser. It just covers capturing the blob which you can then upload somewhere somehow.
 
 
 ## Steps

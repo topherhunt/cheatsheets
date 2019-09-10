@@ -141,25 +141,32 @@ Given a standard React setup, here's the brief steps for installing Redux.
 
 ## Possible patterns for Redux state structure
 
-  * The store state has one branch where normalized records are stored: `state.data.records = {users: [incomplete list of records], meals: [...]}`. `records` is an object where each key is the schema/table name and the value is a list of known records of this type. This is an INCOMPLETE list. Any api requests that create, update, or delete record(s) should ensure that all impacted records are added/removed from the records dict. (ie. if a record was deleted, its correspnoding store.data.records entry should be removed.)
+  * The store state has one branch where normalized records are stored: `state.data.records = {users: [incomplete list of records], meals: [...]}`. `records` is an object where each key is the schema/table name and the value is a list of known records of this type. This is an INCOMPLETE list, meaning we can never treat it as a complete list of available records of a given type. Any api requests that create, update, or delete record(s) should ensure that all impacted records are added/removed from the records dict.
 
-  * There's a standard RECORDS_RECEIVED action which you can dispatch and provide the records in the payload. Records can be of any type and can be mixed together; the api must include a "type" field (matching the table name) in each record's json representation so this action's reducer can infer which collection to add/update it to.
+  * There's a standard RECORDS_RECEIVED action which you can dispatch on record creation/update. Provide the added/updated record(s) in the payload. Records can be of any type and can be mixed together; the api must include a "type" field (matching the table name) in each record's json representation so this action's reducer can infer which collection to add/update it to.
 
-  * TODO - whatever I was thinking
-
-  *
+  * There's also a RECORDS_REMOVED action. You pass a list of {id:, type:} objects and it ensures each is removed from the `state.data.records` store. Nonexistent records shouldn't be left in the store.
 
   * How to handle paginated collections? I can think of at least 2 approaches:
 
-    - 1: collections aren't stored in Redux. When you page through a collection, you're making a fresh request each time whose response is stored in the local component state. Any records contained in the response are updated in the
+    - 1: (simpler approach) Collections aren't stored in Redux. When you page through a collection, you're making a fresh request for each page switch, whose response is stored in the local component state. Any records contained in the response are updated in Redux (`state.data.records`, as above), but the list of what ids should be displayed on this page, is only kept in local state. Pro: this is way easier to reason about that caching collection results in the Redux store. Con: if you lose your network connection, you can't switch back to pages you've already visited, even if those records are still cached in the store.
 
-    - 2: store partial data on available collections in the store: `state.data.collections` = an object where each key is a collection name (e.g. path without params) and the value is an object {pages: {[pageNum]: [list of ids on this page]}}. This approach lets you cached pages so you can flip back and forth without needing to re-fetch all records on each page flip. But on any record deletion or addition, you need to manually bust the cache for some or all pages.
+    - 2: (I don't like this approach) Store partial data on available collections in the store: `state.data.collections` = an object where each key is a collection name (e.g. path without params) and the value is an object {pages: {[pageNum]: [list of ids on this page]}}. This approach lets you cached pages so you can flip back and forth without needing to re-fetch all records on each page flip. But on any record deletion or addition, you need to manually bust the cache for some or all pages.
 
     ```
-    # Example of how this state might be structured
+    # Example of how this state might be structured:
     state: {
       data: {
-        records: {...},
+        records: {
+          users: [
+            {id: 1, username: "larry"},
+            {id: 2, username: "admin"}
+          ],
+          meals: [
+            {id: 5, user_id: 1, description: "turkey sandwich"}
+            {id: 6, user_id: 1, description: "grapes"}
+          ]
+        },
         collections: {
           "/users": {
             pages: {

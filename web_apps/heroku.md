@@ -3,31 +3,45 @@
 
 ## Basics
 
-- `heroku create`
-- `git push heroku master`
-- `heroku restart`
-- `heroku run rake db:migrate` # arbitrary bash commands can be run this way
+  - `heroku create my-app-name --region eu`
+  - `git push heroku master`
+  - `heroku restart`
+  - `heroku run rake db:migrate` # arbitrary bash commands can be run this way
 
 
 ## Sync database from Heroku to local
 
-- `heroku pg:backups:capture`
-- `heroku pg:backups:download`
-- `pg_restore --verbose --clean --no-acl --no-owner -h localhost -U topher -d mydb latest.dump`
+  - `heroku pg:backups:capture -a my_app`
+  - `heroku pg:backups:download -a my_app`
+  - `pg_restore --verbose --clean --no-acl --no-owner -d my_local_db latest.dump`
+  - `rm latest.dump`
 
-Or try the one-liner: `heroku pg:pull DATABASE_URL tealdog_dev`
+There's also a shortcut: `heroku pg:pull -a my_app DATABASE_URL my_local_db`
+
+
+## Sync database from local to Heroku
+
+  - `heroku pg:backups:capture -a my_app`
+  - `heroku pg:reset -a my_app --confirm=my_app`
+  - `heroku pg:push -a my_app my_local_db DATABASE_URL` (DATABASE_URL is a literal)
 
 
 ## Working with multiple environments
 
-- `heroku create --remote staging` # create a new environment
-- `heroku rake db:migrate --app citm-staging`
-  # run a Heroku command on a specific environment
-  # (required if this app has multiple Heroku environments)
+```
+# create a new environment:
+heroku create --remote staging
+
+run a Heroku command on a specific environment:
+heroku rake db:migrate -a mapp-staging
+```
 
 
 ## Troubleshooting
 
 - `heroku ps` - list all running processes on this app
+
 - `heroku ps:stop <process id>` - kill a frozen process
-- If you run into tmpfile permission errors during deploy, consider clearing the Heroku build cache: https://help.heroku.com/18PI5RSY/how-do-i-clear-the-build-cache
+
+- `heroku repo:purge_cache -a appname` - clear the build cache.
+  Useful if deploy fails due to tmpfile permission errors. More info: https://help.heroku.com/18PI5RSY/how-do-i-clear-the-build-cache

@@ -27,4 +27,11 @@ Example LiveView apps:
 
   * Don't do LiveView partials on static pages. If I need LV on a page, make the whole page the LV.
 
-  * If you're rendering a video inside a LV, watch out for CPU spikes, especially if the LV will rerender frequently. Chrome doesn't seem to like this.
+  * Don't put nested data (eg. Ecto records) into the LV session. Keep in mind the session data is sent across the wire when the websocket inits! Keep your session data to scalars as much as possible.
+
+  * If you're rendering a video inside a LV, watch out for crazy high CPU usage, especially if the LV will rerender frequently. Chrome doesn't seem to like this. Move the video to outside the LV boundary and the issue should resolve.
+
+
+## Testing LVs
+
+The api for unit testing LVs isn't super stable. Latest version of Phoenix.LiveViewTest recommend using ConnTests that load the associated route rather than manually mounting the LV as an isolated process. I'm unclear how this would work in case of LVs that are rendered as a partial in a static html template.

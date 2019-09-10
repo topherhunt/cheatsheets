@@ -1,125 +1,73 @@
-# Useful commands for Elixir / Phoenix / Mix
+# Useful commands for Elixir / Mix
 
 
-## Run a console, script, or function
+## Running code
 
-    # start a bare iex console (not within the project context)
-    iex
+  * `iex` - start a bare iex console (not within the project context)
 
-    # start an iex console in this project (w all dependencies loaded)
-    iex -S mix
+  * `iex -S mix` - start a console within this project
+    - all dependencies will be loaded, all modules will be available
 
-    # run a specific script
-    # (args can be accessed via `System.argv()`)
-    mix run priv/repo/seeds.exs
+  * `mix run priv/repo/do_a_thing.exs` - run a script within this project context
+    - The script will have access to all dependencies, modules, etc.
+    - Access script args via `System.argv()`
 
-    # run a specific function
-    mix run -e MyApp.Module.execute_some_function("one")
+  * `mix run -e MyApp.Module.some_function("one")` - run a specific function in your code
 
 
 ## Dependencies
 
-    # installs all deps and lists current version of each
-    mix deps.get
+  * `mix deps.get` - install all deps and list installed version of each
 
-    # updates all deps to latest version (within constraints)
-    mix deps.update --all
+  * `mix deps.update --all` - update all deps to the latest version (within constraints)
 
-    # recompile deps if you've manually modified their code
-    mix deps.compile
+  * `mix deps.compile` - recompile all deps
+    - Useful if you've modified a dep's source code for debugging purposes.
 
-    # recompile a dependency (useful if you're hacking the dep code to troubleshoot)
-    mix deps.compile ueberauth_auth0
-
-    # Force-recompile all deps (can fix some weird undefined func errors)
-    mix deps.compile --force
+  * `mix deps.compile --force` - force-recompile all deps
+    - Useful if you're seeing nonsensical "undefined function" errors. (corrupt state?)
 
 
-## Code formatting
+## Formatting
 
-    mix format # be careful what you wish for
-
-
-## Phoenix
-
-    mix phx new app_name (syntax?)
-
-    # Generate a context, schema, and scaffold controller / templates
-    mix phx.gen.html Accounts User users name:string email:string password_hash:string last_signed_in_at:utc_datetime
-
-    mix phx.server
+  * `mix format` - format all your code. Be careful what you wish for!
 
 
 ## Ecto
 
-    mix ecto.create
+  * `mix ecto.create`
 
-    mix ecto.migrate
+  * `mix ecto.migrate`
 
-    mix ecto.rollback
+  * `mix ecto.rollback`
 
-    mix ecto.drop
+  * `mix ecto.drop`
 
-    mix ecto.gen.migration create_user
+  * `mix ecto.gen.migration create_user`
 
-    MIX_ENV=test mix ecto.reset
+  * `MIX_ENV=test mix ecto.reset`
 
 
 ## Tests
 
-    # run test suite (auto migrates db first)
-    mix test
+  * `mix test` - run the whole test suite
 
-    # run test suite with pry debugging enabled
-    # (add `IEx.pry` to your code to open a debugger there)
-    iex -S mix test --trace
+  * `mix test path/to/folder/or/file.exs:31` - run just a single test
 
-    # run just a single test file
-    mix test path/to/folder/or/file.exs
+  * `mix test --trace` - runs tests in "trace" mode (verbose, all tests synchronous)
+    - Can help detect whether a flap is due to a race condition since async is disabled.
 
-    # run just a single test
-    mix test path/to/folder/or/file.exs:31
-
-
-`mix test --trace` is useful for debugging. It a) prints each test case that it runs,
-b) prints time taken so you can identify slow tests, and c) runs test synchronously so you can identify tests that are flapping due to race conditions.
-
-
-## Phoenix app: Common setup workflow
-(TODO: This probably belongs in a "How to spin up a new Phx app" guide)
-
-    mix phx new app_name # (syntax?)
-
-    # Update dependencies as needed
-
-    mix deps.get
-
-    # Update JS config & dependencies as needed
-
-    cd assets/ && npm install
-
-    mix ecto.create
-
-    mix ecto.gen.migration create_user
-
-    # Fill in the migrations & schemas for any new models
-
-    mix ecto.migrate
-
-    mix test
-
-    mix phx.server
+  * Add a debugger to your test:
+    - Add `IEx.pry()` to your code
+    - Ensure that module has `require IEx`
+    - Run tests in interactive mode: `iex -S mix test --trace`
 
 
 ## Help & docs
 
-    # list ALL mix tasks & generators
-    mix help
+  * `mix help` - list all available mix tasks
 
-    # show docs for a particular task
-    mix help phx.gen.schema
+  * `mix help phx.gen.schema` - show docs for a task
 
-    # open docs on a package (e.g. elixir, mix, phoenix, ecto)
-    # (alias of `mix hex.docs open --offline PACKAGE_NAME`)
-    hexdocs PACKAGE_NAME
-
+  * `mix hex.docs open --offline ecto_sql` - open the docs for a package (and cache them)
+    - (I have it aliased to `hexdocs ecto_sql`)

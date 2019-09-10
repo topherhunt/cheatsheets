@@ -16,6 +16,11 @@ defmodule MyApp.Repo do
     end
   end
 
+  #
+  # Describing changeset errors
+  # (arguably doesn't belong in Repo)
+  #
+
   # Assemble all this changeset's errors into a comma-separated summary.
   # e.g. "username can't be blank, password must be at most 20 characters"
   def describe_errors(changeset) do
@@ -27,7 +32,6 @@ defmodule MyApp.Repo do
     |> Enum.join(", ")
     |> String.replace("(s)", "s")
   end
-
 
   defp inject_vars_into_error_messages(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn({msg, opts}) ->

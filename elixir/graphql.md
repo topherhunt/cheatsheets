@@ -24,6 +24,15 @@ Authentication & Contexts:
   * https://hexdocs.pm/absinthe/plug-phoenix.html#absinthe-context
 
 
+## GraphQL / Absinthe
+
+Best practices:
+
+  * Every resolver must verify authorization unless it's a getter with a parent association and no arguments (in which case a parent resolver has already run auth).
+
+  * If a resolver can't find the resource or if permission auth fails, it should not raise an exception but rather should return an {:error, message} tuple, which gives the api consumer a more helpful error message. When a resolver needs multiple conditional steps (auth check, resource not found check, etc.), use a `with` statement to chain them.
+
+
 ## Apollo
 
 Best practices:

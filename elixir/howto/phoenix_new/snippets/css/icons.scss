@@ -1,0 +1,44 @@
+/*
+  Google Material Design iconset
+  Thanks to https://google.github.io/material-design-icons/#icon-font-for-the-web
+
+  Installation:
+    1. Include this stylesheet.
+    2. Download the woff2 from: https://github.com/google/material-design-icons/
+       and save it in assets/static/fonts/ (see Plug.Static config for allowed paths).
+
+  Usage:
+    * Find an icon in the library: https://material.io/tools/icons/?style=baseline
+    * <i class="icon">face</i>
+    * Or use a helper: <%= icon("face", " HTML to append") %>
+*/
+
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Material Icons'),
+    local('MaterialIcons-Regular'),
+    url(/fonts/MaterialIcons-Regular.woff2) format('woff2');
+}
+
+.icon {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1.2em; /* scale to the surrounding text */
+  width: 1em;
+  display: inline-block;
+  line-height: 1;
+  vertical-align: text-bottom; /* (original positioning was too high) */
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+
+  -webkit-font-smoothing: antialiased; /* for all WebKit browsers */
+  text-rendering: optimizeLegibility; /* for Safari and Chrome */
+  -moz-osx-font-smoothing: grayscale; /* for Firefox */
+  font-feature-settings: 'liga'; /* for IE, may it rest in peace */
+}

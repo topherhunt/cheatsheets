@@ -78,8 +78,6 @@ Set up your `config/` files as needed. Here's the full setup, which might not be
 
     - Replace the hard-coded `secret_key_base` string with `H.env!("SECRET_KEY_BASE")`.
 
-    - Disable Rollbax: `config :rollbax, enabled: false`
-
     - Disable the logger `request_id` data by commenting `metadata: [:request_id]`
 
   * Update `dev.exs`:
@@ -376,34 +374,17 @@ Steps:
 
   * Replace `lib/my_app_web/templates/layout/app.html.eex` with a simple Bootstrap template. (See snippet)
 
-  * Copy my custom css from RTL, as relevant:
-
-    - layout.scss (contains styles for the sticky footer)
-    - overrides.scss
-    - utilities.css
-    - (ensure each one is declared in app.css)
+  * Copy in my standard css overrides & utils, as relevant:
+    - `layout.scss` (see snippet)
+    - `utilities.scss` (see snippet)
 
   * Install the Google Material iconset: https://material.io/tools/icons/?style=baseline
 
-    - Copy `icons.css` from RTL (and declare it in `app.css`)
-    - Download or copy `MaterialIcons-Regular.woff2` to `assets/static/fonts/`
+    - Add `icons.scss` (see snippet) and declare it in app.scss.
 
-  * To test Jquery, add `assets/js/utilities.js` and declare it in `app.js`:
+    - Download `MaterialIcons-Regular.woff2` from https://github.com/google/material-design-icons/tree/master/iconfont. Save it to `assets/static/fonts/`.
 
-    ```js
-    import $ from "jquery"
-
-    $(function(){
-
-      $(".js-fade-on-click").click(function(e) {
-        e.preventDefault()
-        $(this).fadeToggle(500)
-      })
-
-    })
-    ```
-
-  * To test that it's all wired up properly, replace `index.html.eex` and load the page:
+  * To test the CSS, replace `index.html.eex` and load the page:
 
     ```xml
     <h1>Title</h1>
@@ -414,9 +395,20 @@ Steps:
       A div with the "u-card" class
     </div>
 
-    <div class="u-card js-fade-on-click">Jquery test: click me to fade</div>
-
     <h3>An icon: <i class="icon">face</i></h3>
+
+    <script type="text/javascript">$(".js-fade-on-click").click(function(e){  });</script>
+    ```
+
+  * To test Jquery, add `assets/js/utilities.js`, declare it in `app.js`, and reload the page to confirm that the body background is red:
+
+    ```js
+    import $ from "jquery"
+
+    $(function(){
+      // Smoke-test Jquery integration
+      $("body").css("background-color", "red");
+    })
     ```
 
 
@@ -464,3 +456,9 @@ Steps:
       end
     end
     ```
+
+  * For the next Phx app I set up, do email-only authentication. Considerations:
+    - Each time you log in, we send you a one-time token.
+    - The login link should expire after 30 **mins**.
+    - Login session expires after 30 days of inactivity.
+    - You must be able to explicitly log out which busts all of your active sessions. This means we need to store some hashed tokenoid in the db, but I'm not yet sure exactly what. How to support ending all active login sessions, but allow you to login from multiple devices?
