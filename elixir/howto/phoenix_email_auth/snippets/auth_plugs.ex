@@ -1,5 +1,4 @@
-# Plugs & helpers for loading the logged-in user and logging you in / out.
-defmodule MyAppWeb.SessionPlugs do
+defmodule WorldviewsWeb.AuthPlugs do
   import Plug.Conn,
     only: [
       assign: 3,
@@ -32,13 +31,14 @@ defmodule MyAppWeb.SessionPlugs do
   # External helpers
   #
 
-  # Start a logged-in session for an (already authenticated) user
+  # Start a login session for an (already authenticated) user
   def login!(conn, user) do
-    MyApp.SomeContext.User.update!(user, %{last_signed_in_at: Timex.now()})
+    Worldviews.Data.update_user!(user, %{last_logged_in_at: Timex.now()})
 
     conn
     |> assign(:current_user, user)
     |> put_session(:user_id, user.id)
+    |> put_session(:login_token, user.login_token)
     |> put_session(:expires_at, new_expiration_string())
     |> configure_session(renew: true)
   end
@@ -64,6 +64,22 @@ defmodule MyAppWeb.SessionPlugs do
     get_session(conn, :user_id) == nil
   end
 
+  defp load_user_from_session(conn) do
+    id = get_session(conn, :user_id)
+    session_token = get_session(conn, :session_token)
+    Worldviews.Data.get_user_by(id: id, session_token: session_token)
+  end
+
+  defp set_assigned_user(conn, user) do
+    conn
+    |> put_session(:expires_at, new_expiration_string()) # Renew the session lifetime
+    |> assign(:current_user, user)
+  end
+
+  #
+  # Expiry helpers
+  #
+
   defp session_expired?(conn) do
     expires_at = get_session(conn, :expires_at)
     expires_at == nil || is_past?(parse_time(expires_at))
@@ -72,16 +88,6 @@ defmodule MyAppWeb.SessionPlugs do
   defp is_past?(time), do: Timex.before?(time, Timex.now())
 
   defp parse_time(string), do: Timex.parse!(string, "{ISO:Extended}")
-
-  defp load_user_from_session(conn) do
-    MyApp.SomeContext.User.get_by(id: get_session(conn, :user_id))
-  end
-
-  defp set_assigned_user(conn, user) do
-    conn
-    |> put_session(:expires_at, new_expiration_string()) # Renew the session's lifetime
-    |> assign(:current_user, user)
-  end
 
   defp new_expiration_string do
     Timex.now() |> Timex.shift(days: +30) |> Timex.format!("{ISO:Extended}")

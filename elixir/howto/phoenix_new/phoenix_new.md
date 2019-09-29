@@ -46,7 +46,7 @@ config/secrets.exs
 *.log
 ```
 
-Set up your `config/` files as needed. Here's the full setup, which might not be relevant to quick prototype apps:
+Set up your `config/` files as needed. Here's my standard setup:
 
   * Update `config.exs` with my standard setup:
 
@@ -269,7 +269,7 @@ In `lib/my_app/repo.ex`, define the `log_query` function: (note: in my case I've
 
 ### For Ecto v3
 
-In `lib/my_app/application.ex` `MyApp.Application.start/2`, you need to set up the telemetry event. Add this snippet just before the `Supervisor.start_link/2` call:
+In `lib/my_app/application.ex` `.start/2`, you need to set up the telemetry event. Add this snippet just before the `Supervisor.start_link/2` call:
 
 ```rb
     # Subscribe to Ecto queries for logging
@@ -359,24 +359,26 @@ Steps:
   * Install SCSS support:
     (based on install steps at https://github.com/webpack-contrib/sass-loader)
 
-    - `npm i --save sass-loader node-sass`
-    - Add a .scss rule to `webpack.config.js`:
+    - `npm i --save sass-loader@7.1.0 node-sass`
+      (sass-loader version is locked because v8 requires a different setup)
+    - Replace the .css rule to `webpack.config.js` to also support scss:
 
       ```js
       {
-        test: /\.scss$/,
+        test: /\.s?css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
       }
       ```
 
-    - Rename `app.css` to `app.scss`. This lets you `@import` either css or scss into app.scss. Remember to also update this file's reference in `app.js`. (If `app.scss` is your only css entrypoint, this makes the .css rule in webpack.config.js obsolete, but there's no harm in leaving it there.)
+    - (No need to rename `app.css`, any contained scss will be compiled by the new rule.)
     - In `dev.exs`, configure `live_reload` to also watch for `scss` extension.
 
   * Replace `lib/my_app_web/templates/layout/app.html.eex` with a simple Bootstrap template. (See snippet)
 
-  * Copy in my standard css overrides & utils, as relevant:
+  * Copy my standard css styles, as relevant:
     - `layout.scss` (see snippet)
     - `utilities.scss` (see snippet)
+    - Remember to declare these in `app.scss`
 
   * Install the Google Material iconset: https://material.io/tools/icons/?style=baseline
 
@@ -395,9 +397,9 @@ Steps:
       A div with the "u-card" class
     </div>
 
-    <h3>An icon: <i class="icon">face</i></h3>
+    <p>Some text with <strong class="u-tooltip-target">a tooltipped section <span class="u-tooltip">The tooltip content!</span></strong></p>
 
-    <script type="text/javascript">$(".js-fade-on-click").click(function(e){  });</script>
+    <h3>An icon: <i class="icon">face</i></h3>
     ```
 
   * To test Jquery, add `assets/js/utilities.js`, declare it in `app.js`, and reload the page to confirm that the body background is red:
@@ -449,16 +451,13 @@ Steps:
       # Internal
       #
 
-      defp assert_no_keys_except(params, allowed_keys) do
-        keys = Enum.into(params, %{}) |> Map.keys()
-        unexpected_key = Enum.find(keys, & &1 not in allowed_keys)
+      defp cast_params(params, allowed_keys) do
+        params = Enum.into(params, %{})
+        unexpected_key = Map.keys(params) |> Enum.find(& &1 not in allowed_keys)
         if unexpected_key, do: raise "Unexpected key: #{inspect(unexpected_key)}."
+        params
       end
     end
     ```
 
-  * For the next Phx app I set up, do email-only authentication. Considerations:
-    - Each time you log in, we send you a one-time token.
-    - The login link should expire after 30 **mins**.
-    - Login session expires after 30 days of inactivity.
-    - You must be able to explicitly log out which busts all of your active sessions. This means we need to store some hashed tokenoid in the db, but I'm not yet sure exactly what. How to support ending all active login sessions, but allow you to login from multiple devices?
+  * Set up user accounts with email-only login. See `email_only_auth.md`.

@@ -32,3 +32,12 @@ Repo.insert!(%Artist{
     }
   ]
 })
+
+# Run a query in batches of 1000 ids
+max_id = from(u in MyApp.User, select: max(u.id)) |> Repo.one()
+(1..max_id)
+|> Enum.chunk_every(10_000)
+|> Enum.each(fn ids ->
+  batch = Repo.all(from u in MyAppUser, join: something_expensive(), where: u.id in ^ids)
+  # ...
+end)

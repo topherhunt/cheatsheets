@@ -4,8 +4,8 @@ def change do
     add :org_id, references(:orgs, on_delete: :delete_all)
     add :name, :string
     add :age_years, :integer, null: false
-    add :retirement_date, :date
-    add :last_yawned_at, :utc_datetime
+    add :birth_date, :date
+    add :last_logged_in_at, :utc_datetime
     add :height_inches, :decimal, precision: 4, scale: 1 # e.g. 100.3
     add :project_ids, {:array, :integer}, null: false # array of integers (int[])
     timestamps()

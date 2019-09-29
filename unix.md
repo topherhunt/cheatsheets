@@ -86,6 +86,7 @@ Count LOC in all source code files. For reference: BusBK is 40K loc; GrayOwl is 
 - `ps aux` - list all running processes
 - `nohup [bash command]` # ensure the command doesn't die when your SSH connection ends
 
+
 ## Looping
 
 Infitine loop:
@@ -96,6 +97,18 @@ Run a command for each line in a file:
 
     cat lines.txt | while read line; do echo "This line is: $line"; done
 
+
 ## Downloads
 
 - `wget -c <url>` - download a resource, resuming from partial progress if interrupted
+
+
+## Command-line CSV viewer
+
+I haven't tested these, but some ideas are:
+
+- https://www.stefaanlippens.net/pretty-csv.html
+- `sc` tool: https://superuser.com/a/308586/233455
+- `tabview`: https://superuser.com/a/1381292/233455
+- Vim CSV plugin: https://superuser.com/a/913186/233455
+

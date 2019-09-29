@@ -12,8 +12,32 @@
 
 ## Managing databases, users, roles
 
-- `createdb $(whoami)` - create a default database for this user
-- `CREATE ROLE postgres SUPERUSER CREATEDB LOGIN PASSWORD 'postgres';`
+Create a default database for this user:
+
+    createdb $(whoami)
+
+Create a superadmin role:
+
+    CREATE ROLE postgres SUPERUSER CREATEDB LOGIN PASSWORD 'postgres';
+
+Rename a database:
+
+    ALTER DATABASE db RENAME TO newdb;
+
+
+## Importing & exporting database structure & content
+
+Export the db schema to a file:
+
+    pg_dump -c -s delphi_development > delphi-structure.sql
+
+Export the content of selected tables:
+
+    pg_dump delphi_development -c -t organizations -t users -t organizations_users -t schema_migrations > delphi-selected-tables.sql
+
+Execute a .sql script:
+
+    psql -d delphi_development -f delphi-structure.sql
 
 
 ## Connecting to a remote database
@@ -74,4 +98,18 @@ FROM (
     WHERE relkind = 'r'
   ) a
 ) a;
+```
+
+
+## Install Postgres 9.5 on Ubuntu 16.04
+
+(useful on DO & AWS instances which have the older version)
+
+```
+sudo apt-get update
+sudo apt-get install postgresql postgresql-contrib
+sudo -u postgres psql -d postgres -c "CREATE ROLE ubuntu SUPERUSER CREATEDB LOGIN;"
+createdb
+
+# Now you can run `psql` to connect to your local db as superuser.
 ```

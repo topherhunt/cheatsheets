@@ -46,3 +46,46 @@
 
 .u-nowrap { white-space: nowrap; }
 .u-ellipsis { overflow: hidden; text-overflow: ellipsis; }
+
+//
+// CSS-only tooltips compatible with LiveView.
+//
+// Example:
+// <span class="u-tooltip-target">
+//   Hover on me
+//   <div class="u-tooltip">This tooltip will display when hovered</div>
+// </span>
+//
+.u-tooltip-target {
+  position: relative;
+  cursor: help;
+
+  .u-tooltip {
+    position: absolute;
+    top: -1.75rem;
+    left: 0px;
+    text-align: center;
+    background-color: #000;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    font-weight: normal;
+    color: #fff;
+    padding: 0.1rem 0.3rem;
+    white-space: nowrap;
+  }
+
+  .u-tooltip::after {
+    content: " ";
+    position: absolute;
+    top: 100%; /* At the bottom of the tooltip */
+    left: 0.75em;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+  }
+
+  // The opacity change is for the transition
+  .u-tooltip { visibility: hidden; opacity: 0; transition: all 0.3s ease; }
+  &:hover .u-tooltip { visibility: visible; opacity: 1; }
+}
