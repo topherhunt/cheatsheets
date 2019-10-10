@@ -22,10 +22,11 @@ For more asdf commands, see: https://asdf-vm.com/#/core-commands
 
 ## Misc.
 
-- Use function `i/1` to get details about any value.
-- Use `&&` and `||`, not `and` and `or`.
-- `^` is the pin operator. It forces matching against the current value rather than re-binding the variable. Often used in Ecto queries.
-- `|>` is the pipe operator, my favorite thing ever.
+  - Use function `i/1` to get details about any value.
+
+  - `and` and `or` require both values to be strict booleans. `&&` and `||` can take any truthy / falsey values.
+
+  - How to reverse a map: `Map.new(map, fn {k, v} -> {v, k} end)`
 
 
 ## Reading & writing files
@@ -109,6 +110,10 @@ ETS table options include:
 
 
 ## Performance & benchmarking
+
+Check total memory in use by the Erlang VM:
+
+    memory_used_mb = :erlang.memory(:total) / 1_000_000
 
 Here's an example of using Benchee to test whether duplicate Ecto preloads "share" the same in-memory object or not. If preloads are shared, I'd expect the `plus_athlete` case to have substantially higher memory usage than the `plus_event` case.
 

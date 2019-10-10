@@ -16,6 +16,22 @@ defmodule MyApp.Repo do
     end
   end
 
+  # Given a schema & batch size, returns a list of {min, max} windows for batching queries
+  # Example:
+  #   Repo.batch_ids(Athlete, 10_000)
+  #   |> Enum.map(fn {min, max} -> run_batched_query(min, max) end)
+  #   |> List.flatten()
+  def batch_ids(schema_module, window_size) do
+    max_id = from(t in schema_module, select: max(t.id)) |> one!()
+    num_windows = trunc(max_id || 0 / window_size) + 1
+
+    Enum.map(1..num_windows, fn n ->
+      min = (n - 1) * window_size + 1
+      max = n * window_size
+      {min, max}
+    end)
+  end
+
   #
   # Describing changeset errors
   # (arguably doesn't belong in Repo)

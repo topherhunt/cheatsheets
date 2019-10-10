@@ -33,11 +33,43 @@ Repo.insert!(%Artist{
   ]
 })
 
-# Run a query in batches of 1000 ids
-max_id = from(u in MyApp.User, select: max(u.id)) |> Repo.one()
-(1..max_id)
-|> Enum.chunk_every(10_000)
-|> Enum.each(fn ids ->
-  batch = Repo.all(from u in MyAppUser, join: something_expensive(), where: u.id in ^ids)
+#
+# Run a query in batches of 1000 ids:
+#
+
+# In Repo, define a batch_ids function to generate id windows:
+defmodule MyApp.Repo do
   # ...
-end)
+
+  # Given a schema & batch size, returns a list of {min, max} windows for batching queries
+  def batch_ids(schema_module, window_size) do
+    max_id = from(t in schema_module, select: max(t.id)) |> one!()
+    num_windows = trunc(max_id / window_size) + 1
+
+    Enum.map(1..num_windows, fn n ->
+      min = (n - 1) * window_size + 1
+      max = n * window_size
+      {min, max}
+    end)
+  end
+end
+
+# Now your target code should map over those windows and run the relevant query once
+# for each batch. Make sure that the queries are in fact isolated so batching won't
+# impact your results!
+def all_results do
+  Repo.batch_ids(User, 10_000)
+  |> Enum.map(fn {min, max} -> results_for_ids(min, max) end)
+  |> List.flatten()
+end
+
+def results_for_ids(min_id, max_id) do
+  from(u in User, where: u.id >= ^min_id and u.id <= ^max_id) |> Repo.all()
+end
+
+# Poor-man's batching also works if you have a specific list of ids:
+# (Careful - at 100K+ ids this will allocate huge amounts of memory! Use Benchee to test.)
+specific_user_ids
+|> Enum.chunk_every(100)
+|> Enum.map(fn ids -> {Enum.min(ids), Enum.max(ids)} end)
+|> Enum.map(fn {min, max} -> results_for_ids(min, max) end)

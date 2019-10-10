@@ -1,4 +1,6 @@
+# Generic context for this tiny schema
 defmodule Worldviews.Data do
+  alias Worldviews.Repo
   alias Worldviews.Data.User
 
   #
@@ -21,18 +23,23 @@ defmodule Worldviews.Data do
   def new_user_changeset(params \\ %{}), do: User.changeset(%User{}, params)
   def user_changeset(user, params \\ %{}), do: User.changeset(user, params)
 
+  # Resetting the session_token voids all currently-active login sessions, so the user
+  # can be sure that they aren't still logged in on some forgotten device.
+  def reset_user_sessions(user), do: update_user!(user, %{session_token: ""})
+
   #
   # Login tokens
   #
 
+  @endpoint WorldviewsWeb.Endpoint
+
   def get_login_token(email) do
-    # Instead of doing custom hash stuff, we use Phoenix.Token which gives us signed,
-    # reversible, expirable tokens for free.
-    Phoenix.Token.sign(WorldviewsWeb.Endpoint, "login token salt", email)
+    # Phoenix.Token gives us signed, salted, reversible, expirable tokens for free.
+    Phoenix.Token.sign(@endpoint, "login token salt", email)
   end
 
   def verify_login_token(token) do
-    Phoenix.Token.verify(WorldviewsWeb.Endpoint, "login token salt", token, max_age: 3600)
+    Phoenix.Token.verify(@endpoint, "login token salt", token, max_age: 3600)
     # Will return {:ok, email} or {:error, _}
   end
 end

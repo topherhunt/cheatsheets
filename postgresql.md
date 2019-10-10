@@ -25,6 +25,11 @@ Rename a database:
     ALTER DATABASE db RENAME TO newdb;
 
 
+## Performance & scaling
+
+  * Rule of thumb: Every FK should be indexed. This is important not only to keep join queries fast, but also to prevent gridlock when deleting rows in the associated table. If you try to delete rows in the FK target table, for each row it needs to scan the first table to ensure deleting the row won't violate any FKs. If this scan is unindexed, query time gets exponential fast. Fortunately, adding FKs after-the-fact isn't too painful (but test first!)
+
+
 ## Importing & exporting database structure & content
 
 Export the db schema to a file:
@@ -40,16 +45,18 @@ Execute a .sql script:
     psql -d delphi_development -f delphi-structure.sql
 
 
+## Importing & exporting SQL dumps
+
+  - `pg_dump -h hostname -U username -d database_name --password > 2016-09-27-dumpfile.psql` (dump the entire database to a PSQL file that can be executed against another database to recreate the same state. Connection settings take same format as psql.)
+
+  - You can also *export a SQL dump through SSH*, which eliminates the SCP step and is handy if the server has no free disk space: `ssh grayowl "pg_dump -h hostname -U username -d database_name --password" > 2016-09-27-dumpfile.psql` (will prompt for password as normal)
+
+  - `psql -h localhost -U grayowlmaster --password grayowl_development < 2016-06-01_grayowl_staging.psql` (imports / executes a sql dump against a specified environment)
+
+
 ## Connecting to a remote database
 
-- `psql -h grayowlnetwork.czo1pb6i4lc0.us-east-1.rds.amazonaws.com -U grayowlmaster -d grayowl_staging --password` (specifies host, user, database, and password (supplied in a subsequent prompt))
-
-
-## Exporting & importing SQL dumps
-
-- `pg_dump -h hostname -U username -d database_name --password > 2016-09-27-dumpfile.psql` (dump the entire database to a PSQL file that can be executed against another database to recreate the same state. Connection settings take same format as psql.)
-- You can also *export a SQL dump through SSH*, which eliminates the SCP step and is handy if the server has no free disk space: `ssh grayowl "pg_dump -h hostname -U username -d database_name --password" > 2016-09-27-dumpfile.psql` (will prompt for password as normal)
-- `psql -h localhost -U grayowlmaster --password grayowl_development < 2016-06-01_grayowl_staging.psql` (imports / executes a sql dump against a specified environment)
+  - `psql -h grayowlnetwork.czo1pb6i4lc0.us-east-1.rds.amazonaws.com -U grayowlmaster -d grayowl_staging --password` (specifies host, user, database, and password (supplied in a subsequent prompt))
 
 
 ## Full-text search
@@ -97,7 +104,8 @@ FROM (
     LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
     WHERE relkind = 'r'
   ) a
-) a;
+) a
+ORDER BY table_schema, table_name;
 ```
 
 

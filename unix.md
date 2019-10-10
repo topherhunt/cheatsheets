@@ -108,7 +108,6 @@ Run a command for each line in a file:
 I haven't tested these, but some ideas are:
 
 - https://www.stefaanlippens.net/pretty-csv.html
-- `sc` tool: https://superuser.com/a/308586/233455
-- `tabview`: https://superuser.com/a/1381292/233455
+- `tabview`: https://superuser.com/a/1381292/233455 (works great)
 - Vim CSV plugin: https://superuser.com/a/913186/233455
 

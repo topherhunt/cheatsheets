@@ -15,38 +15,55 @@ See also:
 
 ## Create the app
 
-Create it:
+  * Create it:
 
+    ```
     mix phx.new my_app # DO fetch and install dependencies.
     cd my_app
     subl .
     git init .
     git add .
     git commit -m "Initial commit"
+    ```
 
-Review `mix.exs`:
+  * Update `mix.exs`:
 
-  * Set the Elixir version
-  * Ensure Phoenix is <= 1.4.6 to avoid the Phoenix.Controller log config bug
-  * Install Hound (optional): `{:hound, "~> 1.0", only: :test}`
-  * Install Rollbax (optional): `{:rollbax, "~> 0.10"}`
+    - Set the desired Elixir version
+    - Set Phoenix version to "1.4.6" to avoid the Phoenix.Controller log config bug
+    - Install Hound (optional): `{:hound, "~> 1.0", only: :test}`
+    - Install Rollbax (optional): `{:rollbax, "~> 0.10"}`
 
-Fetch dependencies: `mix deps.get`
+  * Fetch dependencies: `mix deps.get`
 
-Update `.formatter.exs`, if you care to
+  * Update `.formatter.exs` config, if you care to
 
-Ensure the following are in .gitignore:
+  * Add `.tool_versions` to configure asdf:
 
-```
-# Sensitive env vars
-config/secrets.exs
+    ```
+    # asdf tool version specification
+    # To use it:
+    # 1. Install asdf: https://asdf-vm.com/#/core-manage-asdf-vm
+    # 2. Run `asdf install`
+    # 3. Run your normal `mix` and `iex` commands as you normally would
 
-# Temp files
-.DS_Store
-*.log
-```
+    elixir 1.8.1-otp-21
+    erlang 21.0.6
+    ```
 
-Set up your `config/` files as needed. Here's my standard setup:
+  * Run `asdf install` to make sure those versions are installed
+
+  * Ensure the following are in .gitignore:
+
+    ```
+    # Sensitive env vars
+    config/secrets.exs
+
+    # Temp files
+    .DS_Store
+    *.log
+    ```
+
+Next, set up your `config/` files as needed. Here's my standard setup:
 
   * Update `config.exs` with my standard setup:
 
@@ -54,6 +71,7 @@ Set up your `config/` files as needed. Here's my standard setup:
       (Remember that my H.env! strategy is incompatible with Elixir releases.)
 
       ```rb
+      # Helper for fetching env variables (incompatible with best-practice Elixir releases)
       defmodule H do
         def env!(key), do: System.get_env(key) || raise("Env var '#{key}' is missing!")
       end
@@ -154,120 +172,36 @@ Useful references for logging in Elixir & Phoenix:
 
 Follow these steps to set up one-line logging for a Phoenix app.
 
-In `lib/my_app_web.ex`, in the `controller` quote block, disable Phoenix.Controller logging:
+  * In `lib/my_app_web.ex`, in the `controller` quote block, disable Phoenix.Controller logging:
 
-```rb
-def controller do
-  quote do
-    # NOTE: This doesn't work in phoenix 1.4.7+. Stick with v1.4.6 for now.
-    use Phoenix.Controller, namespace: MyAppWeb, log: false
-    ...
-```
+    ```rb
+    def controller do
+      quote do
+        # NOTE: This doesn't work in phoenix 1.4.7+. Stick with v1.4.6 for now.
+        use Phoenix.Controller, namespace: MyAppWeb, log: false
+        # ... other stuff
+    ```
 
-In `lib/my_app_web/endpoint.ex`, add a new plug below `plug Plug.Telemetry`:
+  * In `lib/my_app_web/endpoint.ex`, add a new plug below `plug Plug.Telemetry`:
 
-```rb
-  # Custom one-line request logging
-  # Must come before the session & router plugs.
-  plug MyAppWeb.RequestLogger
-```
+    ```rb
+      # Custom one-line request logging
+      # Must come before the session & router plugs.
+      plug MyAppWeb.RequestLogger
+    ```
 
-Finally create `lib/my_app_web/plugs/request_logger.ex` with the following content:
+  * Finally, add `lib/my_app_web/plugs/request_logger.ex` (see snippet).
 
-```rb
-# One-line full request logging inspired by Plug.Logger.
-# See https://github.com/elixir-plug/plug/blob/v1.8.0/lib/plug/logger.ex
-# Need to restart the server after updating this file.
-defmodule MyAppWeb.RequestLogger do
-  require Logger
+  * Restart your server and you should see just one log line per request:
 
-  @behaviour Plug
-
-  def init(opts), do: opts
-
-  def call(conn, _opts) do
-    start_time = System.monotonic_time()
-
-    Plug.Conn.register_before_send(conn, fn(conn) ->
-      Logger.log(:info, fn ->
-        # We don't want passwords etc. being logged
-        params = inspect(Phoenix.Logger.filter_values(conn.params))
-        # Clean up GraphQL query params for easier readability
-        params = Regex.replace(~r/\\n/, params, " ")
-        params = Regex.replace(~r/ +/, params, " ")
-
-        ip = conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
-
-        # Log any important session data eg. logged-in user
-        user = conn.assigns[:current_user]
-        user_string = if user, do: "#{user.id} (#{user.name})", else: "(none)"
-
-        # Note redirect, if any
-        redirect = Plug.Conn.get_resp_header(conn, "location")
-        redirect_string = if redirect != [], do: " redirected_to=#{redirect}", else: ""
-
-        # Calculate time taken (always in ms for consistency
-        stop_time = System.monotonic_time()
-        time_us = System.convert_time_unit(stop_time - start_time, :native, :microsecond)
-        time_ms = div(time_us, 100) / 10
-
-        "■ method=#{conn.method} path=#{conn.request_path} params=#{params} "<>
-        "ip=#{ip} user=#{user_string} "<>
-        "status=#{conn.status}#{redirect_string} duration=#{time_ms}ms"
-      end)
-
-      conn
-    end)
-  end
-end
-```
-
-Now restart your server and you should see each request generate one log entry (and only one), with all the basic info present:
-
-```
-2019-06-09 18:18:51.410 [info] ■ [PUT /manage/projects/7qDjSk/prompts/3tUrF9] params=%{"_csrf_token" => "dDVjGiIiHWUWADphMS48EXAZP34VAAAADFRcXaw/ZTx8kKPFCHr2PQ==", "_method" => "put", "_utf8" => "✓", "project_uuid" => "7qDjSk", "prompt" => %{"html" => "<div>Test question 3</div>"}, "prompt_uuid" => "3tUrF9"} user=1 (Topher Hunt) status=302 redirected_to=/manage/projects/7qDjSk duration=21ms
-```
+    ```
+    2019-06-09 18:18:51.410 [info] ■ [PUT /manage/projects/7qDjSk/prompts/3tUrF9] params=%{"_csrf_token" => "dDVjGiIiHWUWADphMS48EXAZP34VAAAADFRcXaw/ZTx8kKPFCHr2PQ==", "_method" => "put", "_utf8" => "✓", "project_uuid" => "7qDjSk", "prompt" => %{"html" => "<div>Test question 3</div>"}, "prompt_uuid" => "3tUrF9"} user=1 (Topher Hunt) status=302 redirected_to=/manage/projects/7qDjSk duration=21ms
+    ```
 
 
 ## One-line SQL logging
 
-One-line SQL logging is easy to set up, but the steps change depending on whether you're on Ecto v2 or v3.
-
-
-### For Ecto v2
-
-In `config.exs`, configure MyApp.Repo to use a new custom logger function:
-
-```rb
-config :my_app, MyApp.Repo,
-  # ...
-  loggers: [{MyApp.Repo, :log_query, []}]
-```
-
-In `lib/my_app/repo.ex`, define the `log_query` function: (note: in my case I've hard-coded the `:debug` log level.)
-
-```rb
-  ...
-  require Logger
-
-  # Inspired by https://github.com/elixir-ecto/ecto/blob/v2.2.11/lib/ecto/log_entry.ex
-  def log_query(entry) do
-    Logger.log(:debug, fn ->
-      {ok, _} = entry.result
-      source = inspect(entry.source)
-      time_us = System.convert_time_unit(entry.query_time, :native, :microsecond)
-      time_ms = div(time_us, 100) / 10
-      # Strip out unnecessary quotes from the query for readability
-      query = Regex.replace(~r/(\d\.)"([^"]+)"/, entry.query, "\\1\\2")
-      params = inspect(entry.params, charlists: false)
-
-      "SQL query: #{ok} source=#{source} db=#{time_ms}ms   #{query}   params=#{params}"
-    end)
-  end
-```
-
-
-### For Ecto v3
+_These steps only work for Ecto v3._
 
 In `lib/my_app/application.ex` `.start/2`, you need to set up the telemetry event. Add this snippet just before the `Supervisor.start_link/2` call:
 
@@ -314,6 +248,27 @@ Finally, in `config/dev.exs`, optionally set log_level to `:debug` to include th
 ```rb
 config :logger, level: :debug
 ```
+
+
+## Rollbar error reporting
+
+Above we added the :rollbax depoendency but we didn't wire up any error reporting.
+
+  * In `router.ex`, add:
+
+    ```rb
+    # NEAR THE TOP:
+    use Plug.ErrorHandler # for Rollbax
+
+    # ... all your routes ...
+
+    # NEAR THE BOTTOM:
+    defp handle_errors(conn, data), do: WorldviewsWeb.ErrorPlugs.handle_errors(conn, data)
+    ```
+
+  * Add `lib/my_app_web/plugs/error_plugs.ex` (see snippet).
+
+  * Celebrate.
 
 
 ## Assets & layout

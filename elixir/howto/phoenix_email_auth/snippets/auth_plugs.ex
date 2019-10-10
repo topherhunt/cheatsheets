@@ -33,12 +33,10 @@ defmodule WorldviewsWeb.AuthPlugs do
 
   # Start a login session for an (already authenticated) user
   def login!(conn, user) do
-    Worldviews.Data.update_user!(user, %{last_logged_in_at: Timex.now()})
-
     conn
     |> assign(:current_user, user)
     |> put_session(:user_id, user.id)
-    |> put_session(:login_token, user.login_token)
+    |> put_session(:session_token, user.session_token)
     |> put_session(:expires_at, new_expiration_string())
     |> configure_session(renew: true)
   end
@@ -48,6 +46,7 @@ defmodule WorldviewsWeb.AuthPlugs do
     conn
     |> assign(:current_user, nil)
     |> put_session(:user_id, nil)
+    |> put_session(:session_token, nil)
     |> configure_session(drop: true)
     # But we don't halt the conn. Later plugs can decide what response to give.
   end
@@ -65,12 +64,18 @@ defmodule WorldviewsWeb.AuthPlugs do
   end
 
   defp load_user_from_session(conn) do
+    # User session must match on both id and session_token. This allows the user to log
+    # out of all logged-in devices; we just change the session_token.
     id = get_session(conn, :user_id)
     session_token = get_session(conn, :session_token)
     Worldviews.Data.get_user_by(id: id, session_token: session_token)
   end
 
   defp set_assigned_user(conn, user) do
+    if user.last_visit_date != Date.utc_today() do
+      Worldviews.Data.update_user!(user, %{last_visit_date: Date.utc_today()})
+    end
+
     conn
     |> put_session(:expires_at, new_expiration_string()) # Renew the session lifetime
     |> assign(:current_user, user)

@@ -20,7 +20,7 @@ See also: https://hexdocs.pm/phoenix/heroku.html#content
     - `elixir_buildpack.config`:
 
       ```
-      # See also: https://github.com/HashNuke/heroku-buildpack-elixir
+      # See https://github.com/HashNuke/heroku-buildpack-elixir
 
       erlang_version=20.1
       elixir_version=1.8.1
@@ -29,7 +29,7 @@ See also: https://hexdocs.pm/phoenix/heroku.html#content
     - `phoenix_static_buildpack.config`:
 
       ```
-      # See also: https://github.com/gjaldon/heroku-buildpack-phoenix-static#configuration
+      # See https://github.com/gjaldon/heroku-buildpack-phoenix-static#configuration
 
       clean_cache=false
       compile="buildpack_compile_script"
@@ -55,7 +55,7 @@ See also: https://hexdocs.pm/phoenix/heroku.html#content
   * Add my commonly-needed addons:
 
     ```
-    heroku addons:create heroku-postgresql:hobby-dev
+    heroku addons:create heroku-postgresql:hobby-dev # (or hobby-basic for $9/mo)
     heroku addons:create papertrail:choklad
     heroku addons:create rollbar:free
     ```
@@ -67,8 +67,6 @@ See also: https://hexdocs.pm/phoenix/heroku.html#content
     ```
     heroku config:set KEY=value KEY2=value2
     ```
-
-  * Configure Auth0 to allow callbacks on the Heroku domain (eg. myapp.herokuapp.com) rather than just localhost.
 
   * Deploy the app:
     (the first deploy will take several mins)
@@ -83,4 +81,8 @@ See also: https://hexdocs.pm/phoenix/heroku.html#content
     heroku run mix ecto.migrate
     ```
 
-  * Test it out!
+  * Smoke test it (as relevant):
+
+    - Request errors should be reported to Rollbar
+    - Logs show up in Papertrail
+    - Emails are sent as expected
