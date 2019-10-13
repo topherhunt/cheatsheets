@@ -62,30 +62,51 @@
 
   .u-tooltip {
     position: absolute;
-    top: -1.75rem;
-    left: 0px;
-    text-align: center;
-    background-color: #000;
+    bottom: 100%;
+    left: -25px;
+    margin-bottom: 15px;
+    width: 200px;
+    display: block;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 0.4rem 0.5rem;
     border-radius: 3px;
+    text-align: left;
     font-size: 0.8rem;
     font-weight: normal;
+    background-color: #000;
     color: #fff;
-    padding: 0.1rem 0.3rem;
-    white-space: nowrap;
+    box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.6);
   }
 
-  .u-tooltip::after {
+  // This bridges the gap so you can mouse into the tooltip without it disappearing
+  .u-tooltip::before {
+    bottom: -20px;
     content: " ";
+    display: block;
+    height: 20px;
+    left: 0;
     position: absolute;
-    top: 100%; /* At the bottom of the tooltip */
-    left: 0.75em;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: black transparent transparent transparent;
+    width: 100%;
   }
 
-  // The opacity change is for the transition
-  .u-tooltip { visibility: hidden; opacity: 0; transition: all 0.3s ease; }
-  &:hover .u-tooltip { visibility: visible; opacity: 1; }
+  // CSS Triangles
+  .u-tooltip::after {
+    position: absolute;
+    left: 40px;
+    bottom: -10px;
+    margin-left: -13px;
+    height: 0;
+    width: 0;
+    content: " ";
+    border-left: solid transparent 10px;
+    border-right: solid transparent 10px;
+    border-top: solid #000 10px;
+  }
+
+  &:hover .u-tooltip {
+    visibility: visible;
+    opacity: 1;
+  }
 }

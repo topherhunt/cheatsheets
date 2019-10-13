@@ -5,6 +5,8 @@
 
 Checklist for troubleshooting integration test errors:
 
+  * "Invalid session id" error may mean that your Chromedriver version doesn't match your Chrome major version. Double-check `chromedriver --version` versus Chrome's installed version.
+
   * Can you repro the failure in a live Chrome browser? If so, troubleshoot it there.
 
   * Changed any JS lately? Make sure the server is running so Webpack can rebuild!
