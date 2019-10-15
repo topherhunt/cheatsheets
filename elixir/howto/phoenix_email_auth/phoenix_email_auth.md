@@ -39,6 +39,8 @@ The broad approach is described well here: https://lukeplant.me.uk/blog/posts/a-
 
   * Define `lib/my_app/factory.ex` with a User factory. (see snippet)
 
+  * Add the Nanoid dep to `mix.exs`: `{:nanoid, "~> 2.0"},`
+
 
 ## Pages / endpoints / controllers / routes
 
@@ -91,8 +93,8 @@ The broad approach is described well here: https://lukeplant.me.uk/blog/posts/a-
       scope "/", WorldviewsWeb do
         # ...
         # ADD THESE:
-        get "/auth/new", AuthController, :new
-        post "/auth/create", AuthController, :create
+        get "/auth/login", AuthController, :login
+        post "/auth/login_submit", AuthController, :login_submit
         get "/auth/confirm", AuthController, :confirm
         get "/auth/log_out", AuthController, :log_out
       end
@@ -121,6 +123,8 @@ The broad approach is described well here: https://lukeplant.me.uk/blog/posts/a-
       </ul>
     </div>
     ```
+
+  * To allow "force login" as another user, add `lib/my_app/tasks/login.ex` (see snippet).
 
 
 ## Set up email system (Bamboo)
@@ -225,7 +229,7 @@ The broad approach is described well here: https://lukeplant.me.uk/blog/posts/a-
     $> Bamboo.SentEmail.all()
     ```
 
-In tests, you can make assertions about what emails were or weren't sent. See snippet `auth_controller_test.exs` (added later) as an example.
+  * In tests, asserting against what emails were sent is straightforward. See snippet `auth_controller_test.exs` (used below).
 
 
 ## Tests

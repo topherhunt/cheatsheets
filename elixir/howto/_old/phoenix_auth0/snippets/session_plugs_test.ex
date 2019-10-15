@@ -32,7 +32,7 @@ defmodule MyAppWeb.SessionPlugsTest do
       conn = SessionPlugs.load_current_user(conn, nil)
       assert get_session(conn, :user_id) == nil
       assert conn.assigns.current_user == nil
-      assert !conn.halted
+      refute conn.halted
     end
 
     test "ends the session if expired", %{conn: conn} do

@@ -14,9 +14,21 @@ defmodule Worldviews.Data.User do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:email, :session_token, :last_visit_date])
+    |> downcase_email()
     |> set_session_token()
     |> validate_required([:email, :session_token])
     |> unique_constraint(:email)
+  end
+
+  defp downcase_email(changeset) do
+    email = get_field(changeset, :email) || ""
+    downcased = String.downcase(email)
+
+    if email != downcased do
+      put_change(changeset, :email, downcased)
+    else
+      changeset
+    end
   end
 
   defp set_session_token(changeset) do
@@ -36,6 +48,6 @@ defmodule Worldviews.Data.User do
   end
 
   def filter(query, :id, id), do: where(query, [t], t.id == ^id)
-  def filter(query, :email, email), do: where(query, [t], t.email == ^email)
+  def filter(query, :email, e), do: where(query, [u], u.email == ^String.downcase(e))
   def filter(query, :session_token, st), do: where(query, [t], t.session_token == ^st)
 end

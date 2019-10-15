@@ -1,4 +1,4 @@
-defmodule WorldviewsWeb.AuthPlugs do
+defmodule MyAppWeb.AuthPlugs do
   import Plug.Conn,
     only: [
       assign: 3,
@@ -68,12 +68,13 @@ defmodule WorldviewsWeb.AuthPlugs do
     # out of all logged-in devices; we just change the session_token.
     id = get_session(conn, :user_id)
     session_token = get_session(conn, :session_token)
-    Worldviews.Data.get_user_by(id: id, session_token: session_token)
+    MyApp.Data.get_user_by(id: id, session_token: session_token)
   end
 
   defp set_assigned_user(conn, user) do
     if user.last_visit_date != Date.utc_today() do
-      Worldviews.Data.update_user!(user, %{last_visit_date: Date.utc_today()})
+      IO.puts "Updating last_visit_date."
+      MyApp.Data.update_user!(user, %{last_visit_date: Date.utc_today()})
     end
 
     conn

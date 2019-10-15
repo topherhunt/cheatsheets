@@ -22,7 +22,7 @@ defmodule MyAppWeb.SampleControllerTest do
       assert conn.resp_body =~ "test-page-sample-index"
       assert conn.resp_body =~ sample1.name
       assert conn.resp_body =~ sample2.name
-      assert !(conn.resp_body =~ sample3.name)
+      refute conn.resp_body =~ sample3.name
     end
   end
 

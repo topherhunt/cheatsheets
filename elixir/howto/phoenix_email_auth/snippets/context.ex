@@ -1,18 +1,19 @@
 # Generic context for this tiny schema
-defmodule Worldviews.Data do
-  alias Worldviews.Repo
-  alias Worldviews.Data.User
+defmodule MyApp.Data do
+  alias MyApp.Repo
+  alias MyApp.Data.User
 
   #
   # Users
   #
 
-  def get_user(id, filt \\ []), do: get_user_by(Keyword.merge([id: id], filt))
-  def get_user!(id, filt \\ []), do: get_user_by!(Keyword.merge([id: id], filt))
-  def get_user_by(filt), do: User |> User.apply_filters(filt) |> Repo.first()
-  def get_user_by!(filt), do: User |> User.apply_filters(filt) |> Repo.first!()
-  def get_users(filt \\ []), do: User |> User.apply_filters(filt) |> Repo.all()
-  def count_users(filt \\ []), do: User |> User.apply_filters(filt) |> Repo.count()
+  def get_user(id, filt \\ []), do: query_users([{:id, id} | filt]) |> Repo.one()
+  def get_user!(id, filt \\ []), do: query_users([{:id, id} | filt]) |> Repo.one!()
+  def get_user_by(filt), do: query_users(filt) |> Repo.first()
+  def get_user_by!(filt), do: query_users(filt) |> Repo.first!()
+  def get_users(filt \\ []), do: query_users(filt) |> Repo.all()
+  def count_users(filt \\ []), do: query_users(filt) |> Repo.count()
+  def query_users(filt), do: User |> User.filter(filt)
 
   def insert_user(params), do: new_user_changeset(params) |> Repo.insert()
   def insert_user!(params), do: new_user_changeset(params) |> Repo.insert!()
@@ -31,15 +32,13 @@ defmodule Worldviews.Data do
   # Login tokens
   #
 
-  @endpoint WorldviewsWeb.Endpoint
-
   def get_login_token(email) do
     # Phoenix.Token gives us signed, salted, reversible, expirable tokens for free.
-    Phoenix.Token.sign(@endpoint, "login token salt", email)
+    Phoenix.Token.sign(MyAppWeb.Endpoint, "login token salt", email)
   end
 
   def verify_login_token(token) do
-    Phoenix.Token.verify(@endpoint, "login token salt", token, max_age: 3600)
+    Phoenix.Token.verify(MyAppWeb.Endpoint, "login token salt", token, max_age: 3600)
     # Will return {:ok, email} or {:error, _}
   end
 end

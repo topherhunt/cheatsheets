@@ -1,18 +1,16 @@
-defmodule WorldviewsWeb.AuthController do
+defmodule MyAppWeb.AuthController do
   require Logger
-  use WorldviewsWeb, :controller
-  alias Worldviews.Data
+  use MyAppWeb, :controller
+  alias MyApp.Data
 
-  # Login form
-  def new(conn, _params) do
-    render conn, "new.html"
+  def login(conn, _params) do
+    render conn, "login.html"
   end
 
-  # Login form submission
-  def create(conn, %{"user" => %{"email" => email}}) do
+  def login_submit(conn, %{"user" => %{"email" => email}}) do
     # We don't look up the user, we simply send a confirmation link to that address.
     # We'll find or create them after we confirm that they control this address.
-    Worldviews.Emails.confirm_address(email) |> Worldviews.Mailer.deliver_now()
+    MyApp.Emails.confirm_address(email) |> MyApp.Mailer.deliver_now()
     msg = "Thanks! We just emailed you a login link. Please check your inbox (#{email})."
 
     conn
@@ -20,17 +18,26 @@ defmodule WorldviewsWeb.AuthController do
     |> redirect(to: Routes.auth_path(conn, :new))
   end
 
-  # The emailed login link directs here
+  # The emailed login link directs here.
+  # NOTE: This endpoint must only redirect, never render html, for security reasons.
   def confirm(conn, %{"token" => token}) do
-    # This page must only redirect, not render an html response, for security reasons.
     case Data.verify_login_token(token) do
       {:ok, email} ->
-        email = String.downcase(email)
         user = find_user(email) || register_user(email)
-        conn
-        |> WorldviewsWeb.AuthPlugs.login!(user)
-        |> put_flash(:info, "Welcome back!")
-        |> redirect(to: Routes.group_path(conn, :index))
+        conn = MyAppWeb.AuthPlugs.login!(conn, user)
+
+        # --- OPTIONAL: After registration, direct to account settings page ---
+        # --- (See RTL UserController) ---
+        # Newly registered users must fill in more info before their account is complete.
+        if user.name do
+          conn
+          |> put_flash(:info, "Welcome back!")
+          |> redirect(to: Routes.home_path(conn, :index))
+        else
+          conn
+          |> put_flash(:info, "Please enter your name to complete registration.")
+          |> redirect(to: Routes.user_path(conn, :edit))
+        end
 
       _ ->
         conn
@@ -45,7 +52,7 @@ defmodule WorldviewsWeb.AuthController do
     end
 
     conn
-    |> WorldviewsWeb.AuthPlugs.logout!()
+    |> MyAppWeb.AuthPlugs.logout!()
     |> redirect(to: Routes.page_path(conn, :index))
   end
 

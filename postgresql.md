@@ -10,6 +10,24 @@
 - `\connect [database name]` - connect to a database
 
 
+## Install & set up a specific version of Postgres (Ubuntu)
+
+Generally, the _client_ version (eg. psql) needs to be >= the _server_ version.
+Note that only certain versions are provided: -9.5, -9.6, -10, -11. See the link.
+
+Steps:
+
+  * Follow steps at: https://www.postgresql.org/download/linux/ubuntu/
+  * `sudo apt-get install postgresql-9.6`
+  * `sudo -u postgres psql -d postgres -c "CREATE ROLE ubuntu SUPERUSER CREATEDB LOGIN;"`
+  * `createdb $(whoami)` (create a "home" db so you can use psql locally)
+  * Now `psql` and `pg_dump` etc. should work as expected.
+
+You can also remove most Postgres related packages like this:
+
+    sudo apt-get remove postgresql-client-common
+
+
 ## Managing databases, users, roles
 
 Create a default database for this user:
@@ -18,7 +36,7 @@ Create a default database for this user:
 
 Create a superadmin role:
 
-    CREATE ROLE postgres SUPERUSER CREATEDB LOGIN PASSWORD 'postgres';
+    CREATE ROLE ubuntu SUPERUSER CREATEDB LOGIN;
 
 Rename a database:
 
@@ -31,6 +49,8 @@ Rename a database:
 
 
 ## Importing & exporting database structure & content
+
+See also `ubuntu.md` which has some psql setup & remote connection tips.
 
 Export the db schema to a file:
 
@@ -56,7 +76,11 @@ Execute a .sql script:
 
 ## Connecting to a remote database
 
-  - `psql -h grayowlnetwork.czo1pb6i4lc0.us-east-1.rds.amazonaws.com -U grayowlmaster -d grayowl_staging --password` (specifies host, user, database, and password (supplied in a subsequent prompt))
+URL connection format:
+
+    psql username:password@hostname.us-east-1.rds.amazonaws.com:5432/database_name
+
+NOTE: If your client is on postgres v9.6+, you MUST specify the port in the url when making remote connections. It may default to port 5434.
 
 
 ## Full-text search

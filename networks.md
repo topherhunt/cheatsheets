@@ -51,7 +51,7 @@ TODO:
 * Q: Are all the above setting changes required to enable traffic forwarding and reverse forwarding?
 
 
-## Forward HTTP requests to a local server:
+## Forward others' HTTP requests to a local server:
 
 Use https://ngrok.com/ where possible, this is a super nice tool for forwarding to local.
 `ngrok http 3000` will start a proxy server, listen for any requests, and forward them to `localhost:3000` over its tunnel.
@@ -88,3 +88,16 @@ This tool is the easiest way to throttle your network on OSX: https://www.sitesp
 - `throttle` - start with default profile
 - `throttle --stop` - disable
 - `throttle --up 330 --down 780 --rtt 1` - enable and specify speeds
+
+
+## SSH tunnel for a specific port
+
+Start an SSH tunnel so that all traffic sent to a specific port on `localhost`, will be forwarded to your ssh server and sent to a specific host and port.
+
+For example, let's say that my VPS server `vpn1` is on the ip whitelist to access a Postgres server `postgres-server-hostname`, but my local machine (having a dynamic ip) is not. I can run this command locally to open a tunnel to that VPS:
+
+    ssh -NT -L 55555:postgres-server-hostname:5432 vpn1
+
+Then locally I can run the following command to connect to the Postgres server:
+
+    psql -h localhost -p 55555 -d my-database

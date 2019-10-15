@@ -34,7 +34,7 @@ defmodule RTLWeb.SessionPlugsTest do
 
       assert get_session(conn, :user_id) == nil
       assert conn.assigns.current_user == nil
-      assert !conn.halted
+      refute conn.halted
     end
 
     test "ends the session if expired", %{conn: conn} do

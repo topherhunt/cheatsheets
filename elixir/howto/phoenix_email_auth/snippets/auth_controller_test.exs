@@ -1,6 +1,6 @@
-defmodule WorldviewsWeb.AuthControllerTest do
-  use WorldviewsWeb.ConnCase
-  alias Worldviews.Data
+defmodule MyAppWeb.AuthControllerTest do
+  use MyAppWeb.ConnCase
+  alias MyApp.Data
 
   setup do
     # Clear all emails sent by previous tests.
@@ -8,9 +8,9 @@ defmodule WorldviewsWeb.AuthControllerTest do
     Bamboo.SentEmail.reset()
   end
 
-  @ts_now System.system_time(:second)
-  @ts_nearly_1h_ago System.system_time(:second) - 3598
-  @ts_over_1h_ago System.system_time(:second) - 3602
+  def ts_now, do: System.system_time(:second)
+  def ts_nearly_1h_ago, do: ts_now() - 3595
+  def ts_over_1h_ago, do: ts_now() - 3605
 
   describe "#new" do
     test "renders the login form", %{conn: conn} do
@@ -42,7 +42,7 @@ defmodule WorldviewsWeb.AuthControllerTest do
       user = Factory.insert_user(email: "daffy@example.com")
 
       # User visits the confirm page with a nearly-expired link.
-      token = stub_token("Daffy@EXAMPLE.com", @ts_nearly_1h_ago)
+      token = stub_token("Daffy@EXAMPLE.com", ts_nearly_1h_ago())
       conn = get(conn, Routes.auth_path(conn, :confirm, token: token))
 
       assert redirected_to(conn) == Routes.group_path(conn, :index)
@@ -51,7 +51,7 @@ defmodule WorldviewsWeb.AuthControllerTest do
 
     test "when valid and user does not exist: registers & logs you in", %{conn: conn} do
       # Token contains a capitalized email, but is registered as lower-cased
-      token = stub_token("Daisy@EXAMPLE.com", @ts_now)
+      token = stub_token("Daisy@EXAMPLE.com", ts_now())
       conn = get(conn, Routes.auth_path(conn, :confirm, token: token))
 
       assert user = Data.get_user_by!(email: "daisy@example.com")
@@ -60,7 +60,7 @@ defmodule WorldviewsWeb.AuthControllerTest do
     end
 
     test "when link is expired: rejects and redirects", %{conn: conn} do
-      token = stub_token("Daisy@EXAMPLE.com", @ts_over_1h_ago)
+      token = stub_token("Daisy@EXAMPLE.com", ts_over_1h_ago())
       conn = get(conn, Routes.auth_path(conn, :confirm, token: token))
 
       assert redirected_to(conn) == Routes.auth_path(conn, :new)
@@ -68,7 +68,7 @@ defmodule WorldviewsWeb.AuthControllerTest do
     end
 
     test "when link is invalid: rejects and redirects", %{conn: conn} do
-      token = stub_token("Daisy@EXAMPLE.com", @ts_now)
+      token = stub_token("Daisy@EXAMPLE.com", ts_now())
       conn = get(conn, Routes.auth_path(conn, :confirm, token: token<>"z"))
 
       assert redirected_to(conn) == Routes.auth_path(conn, :new)
@@ -79,7 +79,7 @@ defmodule WorldviewsWeb.AuthControllerTest do
   describe "#logout" do
     test "logs you out of all your sessions", %{conn: conn} do
       user = Factory.insert_user()
-      token = stub_token(user.email, @ts_now)
+      token = stub_token(user.email, ts_now())
       conn = get(conn, Routes.auth_path(conn, :confirm, token: token))
       assert_logged_in(conn, user)
 
@@ -102,7 +102,7 @@ defmodule WorldviewsWeb.AuthControllerTest do
   #
 
   defp stub_token(email, signed_at) do
-    endpoint = WorldviewsWeb.Endpoint
+    endpoint = MyAppWeb.Endpoint
     Phoenix.Token.sign(endpoint, "login token salt", email, signed_at: signed_at)
   end
 
@@ -110,12 +110,12 @@ defmodule WorldviewsWeb.AuthControllerTest do
     conn = get(conn, Routes.page_path(conn, :index))
     assert conn.resp_body =~ "Log out"
     assert conn.resp_body =~ String.downcase(user.email)
-    assert !(conn.resp_body =~ "Log in")
+    refute conn.resp_body =~ "Log in"
   end
 
   defp assert_logged_out(conn) do
     conn = get(conn, Routes.page_path(conn, :index))
     assert conn.resp_body =~ "Log in"
-    assert !(conn.resp_body =~ "Log out")
+    refute conn.resp_body =~ "Log out"
   end
 end

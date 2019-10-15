@@ -1,0 +1,19 @@
+<%# A very simple edit form for a User resource. %>
+<div class="u-centered-600 u-card">
+  <h1>My profile</h1>
+
+  <%= form_for @changeset, Routes.user_path(@conn, :update, @user), [method: "patch"], fn f -> %>
+    <div class="form-group">
+      <%= label f, :email %>
+      <%= text_input f, :email, class: "form-control", disabled: true %>
+    </div>
+    <div class="form-group">
+      <%= label f, :full_name, "Your name" %>
+      <%= text_input f, :full_name, class: "form-control" %>
+      <%= error_tag f, :full_name %>
+    </div>
+    <div class="form-group">
+      <%= submit "Save", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>

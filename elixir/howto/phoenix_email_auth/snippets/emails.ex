@@ -1,11 +1,14 @@
 defmodule Worldviews.Emails do
-  import Bamboo.Email
   use Bamboo.Phoenix, view: WorldviewsWeb.EmailsView
+  import Bamboo.Email
   alias WorldviewsWeb.Router.Helpers, as: Routes
+  require Logger
 
   def confirm_address(email) do
     token = Worldviews.Data.get_login_token(email)
     url = Routes.auth_url(WorldviewsWeb.Endpoint, :confirm, token: token)
+
+    if Mix.env == :dev, do: Logger.info "Login link for #{email}: #{url}"
 
     new_email()
     |> to(email)
