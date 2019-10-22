@@ -1,6 +1,16 @@
 # Elixir: installing, syntax, tips, OTP
 
 
+## References
+
+  * [Elixir intro guide](https://elixir-lang.org/getting-started/introduction.html)
+    (Highly recommend the OTP & metaprogramming tutorials too)
+  * [Elixir official docs](https://hexdocs.pm/elixir/Kernel.html)
+  * [Talk: Intro to Phoenix](https://www.youtube.com/watch?v=OxhTQdcieQE)
+  * [Phoenix official docs](https://hexdocs.pm/phoenix/overview.html)
+  * [Fun tutorial on "minimum viable Phoenix"](http://www.petecorey.com/blog/2019/05/20/minimum-viable-phoenix/)
+
+
 ## Installing Elixir on OSX
 
 The best way to install Elixir/Erlang and manage versions is using `asdf`.
@@ -22,11 +32,9 @@ For more asdf commands, see: https://asdf-vm.com/#/core-commands
 
 ## Misc.
 
-  - Use function `i/1` to get details about any value.
+  * `and` and `or` require strict booleans. `&&` and `||` allow any truthy / falsey values.
 
-  - `and` and `or` require both values to be strict booleans. `&&` and `||` can take any truthy / falsey values.
-
-  - How to reverse a map: `Map.new(map, fn {k, v} -> {v, k} end)`
+  * Reverse a map: `Map.new(map, fn {k, v} -> {v, k} end)`
 
 
 ## Reading & writing files
@@ -35,6 +43,12 @@ Write a file:
 
 ```rb
 File.write!("tmp/filename.txt", contents)
+```
+
+Open a file, loading its full contents into a variable:
+
+```rb
+contents = File.read!("./input.txt")
 ```
 
 Open a file and process each line:
@@ -65,7 +79,16 @@ File.stream!(filename, encoding: :utf8)
 
 ## OTP
 
-  * Start the Erlang OTP observer UI: `:observer.start()`
+Start the Erlang OTP observer UI:
+
+    :observer.start()
+
+Run code in a linked background process (eg. to start a lightweight job from the controller):
+(If the job raises an exception, the parent process will crash.)
+
+    Task.start_link(fn ->
+      # run stuff here
+    end)
 
 
 ## ETS

@@ -47,6 +47,12 @@ Rename a database:
 
   * Rule of thumb: Every FK should be indexed. This is important not only to keep join queries fast, but also to prevent gridlock when deleting rows in the associated table. If you try to delete rows in the FK target table, for each row it needs to scan the first table to ensure deleting the row won't violate any FKs. If this scan is unindexed, query time gets exponential fast. Fortunately, adding FKs after-the-fact isn't too painful (but test first!)
 
+  * As table size grows beyond 1M records, `COUNT(*)` grows intolerably slow. If you need an exact count, there's no avoiding a full-table scan which is inefficient. But you can get an _estimated_ count quickly by querying the stats table. In my testing, this estimate is within ~ 0.1% of the precise row count:
+
+    ```sql
+    SELECT n_live_tup FROM pg_stat_all_tables WHERE relname = 'athletes';
+    ```
+
 
 ## Importing & exporting database structure & content
 

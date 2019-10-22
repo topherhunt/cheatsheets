@@ -32,4 +32,4 @@
 
 ## Handling data requests
 
-  * Start by confirming their identity. Ask for a scan of a photo id (eg. passport or drivers license). I should refuse any requesters who don't prove who they are.
+  * Start by confirming their identity. Ask for a scan of a photo id (eg. passport or drivers license). I should refuse any requesters who don't prove who they are. This of course means that user data requests can't safely be processed unless I retain enough data to determine whether the requester is in fact the owner of that data.

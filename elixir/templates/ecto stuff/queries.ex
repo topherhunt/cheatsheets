@@ -73,3 +73,21 @@ specific_user_ids
 |> Enum.chunk_every(100)
 |> Enum.map(fn ids -> {Enum.min(ids), Enum.max(ids)} end)
 |> Enum.map(fn {min, max} -> results_for_ids(min, max) end)
+
+#
+# Fully-manual query, with injections (unsafe):
+#
+
+"""
+SELECT entries.athlete_id, cevent_categories.name, count(*)
+  FROM entries INNER JOIN cevents
+                       ON cevents.id = entries.event_id
+               INNER JOIN cevent_categories
+                       ON cevent_categories.id = cevents.event_category_id
+ WHERE cevents.starts_at between $2 AND $3
+   AND (entries.completion_time = 0 OR entries.completion_time IS NULL)
+   AND entries.athlete_id in (SELECT athlete_id FROM athletes)
+ GROUP BY entries.athlete_id, cevent_categories.name
+ ORDER BY entries.athlete_id
+"""
+|> Repo.query!([event.id, sdate, edate])

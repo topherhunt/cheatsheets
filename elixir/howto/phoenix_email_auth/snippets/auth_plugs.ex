@@ -67,7 +67,7 @@ defmodule MyAppWeb.AuthPlugs do
     # User session must match on both id and session_token. This allows the user to log
     # out of all logged-in devices; we just change the session_token.
     id = get_session(conn, :user_id)
-    session_token = get_session(conn, :session_token)
+    session_token = get_session(conn, :session_token) || "UNKNOWN"
     MyApp.Data.get_user_by(id: id, session_token: session_token)
   end
 

@@ -1,7 +1,7 @@
 defmodule MyAppWeb.AuthController do
-  require Logger
   use MyAppWeb, :controller
   alias MyApp.Data
+  require Logger
 
   def login(conn, _params) do
     render conn, "login.html"
@@ -15,7 +15,7 @@ defmodule MyAppWeb.AuthController do
 
     conn
     |> put_flash(:info, msg)
-    |> redirect(to: Routes.auth_path(conn, :new))
+    |> redirect(to: Routes.auth_path(conn, :login))
   end
 
   # The emailed login link directs here.
@@ -42,7 +42,7 @@ defmodule MyAppWeb.AuthController do
       _ ->
         conn
         |> put_flash(:error, "Hmm, that login link is too old. Please try again.")
-        |> redirect(to: Routes.auth_path(conn, :new))
+        |> redirect(to: Routes.auth_path(conn, :login))
     end
   end
 
@@ -53,7 +53,7 @@ defmodule MyAppWeb.AuthController do
 
     conn
     |> MyAppWeb.AuthPlugs.logout!()
-    |> redirect(to: Routes.page_path(conn, :index))
+    |> redirect(to: Routes.home_path(conn, :index))
   end
 
   #

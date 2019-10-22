@@ -1,27 +1,21 @@
 # Phoenix: Structure, components, tips
 
 
-## Useful commands
-
-  * `mix phx.new app_name`
-
-  * `mix phx.server`
-
-  * `mix phx.gen.html Accounts User users name:string email:string password_hash:string last_signed_in_at:utc_datetime` - generate a context, schema, and scaffold controller & templates
-
-
 ## Env
 
   * Standard envs are `dev`, `test`, and `prod`.
-
   * Check the current env: `Mix.env()`
-
   * Set the env for a command: `MIX_ENV=test mix ecto.reset`
-
   * Your deps always run in `prod` regardless of your main app's environment.
 
 
-# Contexts
+## Routes: Best practices
+
+  * Err on the side of using the `resources` macro rather than manually defining each route.
+  * Err on the side of flat and familiar route structures rather than nested and specialized route structures.
+
+
+## Contexts
 
   * Rather than your controllers etc. having direct access to query & write persisted data using your schemas, Phoenix uses *context* modules as an internal boundary. All interactions between a schema and the outside world should happen only through its publicly-exposed context functions.
 
@@ -41,21 +35,6 @@ Changesets:
   *  Warning: If you misspell a field in a validation macro, *it will silently skip that field*. Ensure test coverage of all validations.
 
   * Warning: `*_constraint` functions simply catch db-layer constraint errors and convert them to friendly object validation error messages; if you haven't added the corresponding db-layer constraint, these functions will have no effect.
-
-Associations:
-
-  * You must explicitly preload associations. No lazy loading like in Rails.
-
-  * Preload an association at query time:
-    `Ecto.Query.preload(query, :videos)`
-
-  * Load an assoc (onto the parent struct) after query time:
-    `Repo.preload(user, :videos)`
-
-  * Load the associated data and return it as a list (not on the parent struct):
-    `Ecto.assoc(user, :videos)`
-
-  * Fetching nested associations is easy: `Ecto.assoc(post, [:comments, :author]`
 
 Migrations:
 
