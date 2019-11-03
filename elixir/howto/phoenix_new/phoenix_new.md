@@ -37,17 +37,20 @@ See also:
 
   * Update `.formatter.exs` config, if you care to
 
-  * Add `.tool_versions` to configure asdf:
+  * Add `.tool-versions` to configure asdf:
 
     ```
     # asdf tool version specification
     # To use it:
-    # 1. Install asdf: https://asdf-vm.com/#/core-manage-asdf-vm
-    # 2. Run `asdf install`
-    # 3. Run your normal `mix` and `iex` commands as you normally would
+    #   * Install asdf: https://asdf-vm.com/#/core-manage-asdf-vm
+    #   * `asdf plugin install erlang`
+    #   * `asdf plugin install elixir`
+    #   * Install Erlang deps: https://github.com/asdf-vm/asdf-erlang#before-asdf-install
+    #   * Run `asdf install` (watch for any errors during Erlang build!
+    #   * Run your normal `mix` and `iex` commands as you normally would
 
-    elixir 1.8.1-otp-21
     erlang 21.0.6
+    elixir 1.8.1-otp-21
     ```
 
   * Run `asdf install` to make sure those versions are installed
