@@ -32,9 +32,9 @@ For more asdf commands, see: https://asdf-vm.com/#/core-commands
 
 ## Misc.
 
-  * `and` and `or` require strict booleans. `&&` and `||` allow any truthy / falsey values.
+`and` and `or` require strict booleans. `&&` and `||` allow any truthy / falsey values.
 
-  * Reverse a map: `Map.new(map, fn {k, v} -> {v, k} end)`
+Reverse a map: `Map.new(map, fn {k, v} -> {v, k} end)`
 
 
 ## Reading & writing files
@@ -45,7 +45,7 @@ Write a file:
 File.write!("tmp/filename.txt", contents)
 ```
 
-Open a file, loading its full contents into a variable:
+Open a file, loading its full contents into a string:
 
 ```rb
 contents = File.read!("./input.txt")
@@ -74,6 +74,15 @@ File.stream!(filename, encoding: :utf8)
 |> Enum.to_list()
 # Calling Enum will eager-load the streamed data. All items that survived the Stream.filter
 # will be loaded into memory at once now.
+```
+
+Parse a csv string (using the :csv package):
+
+```rb
+"a,b,c\n1,2,3\n4,5,6"
+|> String.split("\n")
+|> CSV.decode!()
+|> Enum.to_list()
 ```
 
 

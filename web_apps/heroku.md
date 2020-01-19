@@ -37,6 +37,13 @@ heroku rake db:migrate -a mapp-staging
 ```
 
 
+## Parsing Papertrail logs
+
+- Download all logfiles as .tsv.gz into a folder
+- Run `sh ~/Sites/personal/utilities/combine_pt_logs.sh` to unpack all logs, combine them into one file, and clean up their format
+- `less cleaned.tsv`
+
+
 ## Troubleshooting
 
 - `heroku ps` - list all running processes on this app

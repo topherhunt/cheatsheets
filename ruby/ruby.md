@@ -1,33 +1,22 @@
 # Ruby tips
 
 
-## Files (reading & writing)
-
-Read a file:
+## Reading & writing files
 
 ```rb
-# Load the whole file into a string
+# Read a file into a string, all at once
 IO.read(filename)
 
-# Loop over each line (performant; doesn't load entire file into memory)
+# Read and process a file line by line (avoids loading the whole thing into memory)
 IO.foreach(filename) { |line| puts "The line is: #{line}" }
-```
 
-Write to a file (overwrite current contents):
-
-```rb
+# Write to a file (overwrite current contents):
 IO.write("filename.txt", "Contents")
-```
 
-Write to file (append to current contents):
-
-```rb
+# Write to file (append to current contents):
 File.open(filename, 'a') { |f| f.write "Some appended text\n" }
-```
 
-List all files in a directory:
-
-```rb
+# List all files in a directory:
 Dir.glob("#{Rails.root}/app/views/manuals/*.html").map { |str| File.basename(str) }
 ```
 
@@ -42,6 +31,7 @@ DO use:
 - `Time#to_date` - explicitly give date relative to the specified tz
 - `Time#utc` - explicitly give time expressed in UTC
 - `2.days.ago` / `3.minutes.from_now` etc. are always in local tz
+- `Time.now.utc.to_date`
 
 DO NOT use:
 
@@ -64,10 +54,18 @@ method(:where).source
 There's also `#instance_method` which lets you access instance variables of a given class.
 
 
-## Frozen string literals
+## Sorting
 
-You can freeze all strings _in this file_ using the magic comment:
+```rb
+# Simple sort by one value:
+array.sort_by(&:length)
 
-```ruby
-# frozen_string_literal: true
+# Sort by multiple values: (sort by the first, then by the second, etc.)
+array = [{x: nil, y: 2, z: 2}, {x: nil, y: 1, z: 1}]
+array.sort { |a, b| [a[:x], a[:y], a[:z]] <=> [b[:x], b[:y], b[:z]] }
+
+# NOTE: This does NOT work when present values are compared against nil. So make sure
+# that all compared values || to something non-nil! e.g. this will raise an exception:
+array = [{x: nil, y: 2, z: 2}, {x: 1, y: 1, z: 1}]
+array.sort { |a, b| [a[:x], a[:y], a[:z]] <=> [b[:x], b[:y], b[:z]] }
 ```

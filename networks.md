@@ -1,6 +1,10 @@
 ## Quick reference
 
-```
+```sh
+# Make a curl request, printing just the headers
+curl -I https://www.wvtest.com/
+
+# Open an SSH tunnel for poor man's VPN
 ssh -vND 1024 vpn1
 ```
 

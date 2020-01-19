@@ -12,32 +12,30 @@ defmodule MyAppWeb.RequestLogger do
     start_time = System.monotonic_time()
 
     Plug.Conn.register_before_send(conn, fn(conn) ->
-      Logger.log(:info, fn ->
-        # We don't want passwords etc. being logged
-        params = inspect(Phoenix.Logger.filter_values(conn.params))
-        # Clean up GraphQL query params for easier readability
-        params = Regex.replace(~r/\\n/, params, " ")
-        params = Regex.replace(~r/ +/, params, " ")
+      # We don't want passwords etc. being logged
+      params = inspect(Phoenix.Logger.filter_values(conn.params))
 
-        ip = conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
+      # Clean up GraphQL query params for easier readability (uncomment if relevant)
+      # params = Regex.replace(~r/\\n/, params, " ")
+      # params = Regex.replace(~r/ +/, params, " ")
 
-        # Log any important session data eg. logged-in user
-        user = conn.assigns[:current_user]
-        user_string = if user, do: "#{user.id} (#{user.name})", else: "(none)"
+      # Log any important session data eg. logged-in user
+      user = conn.assigns[:current_user]
+      user_string = if user, do: "#{user.id} (#{user.name})", else: "(none)"
 
-        # Note redirect, if any
-        redirect = Plug.Conn.get_resp_header(conn, "location")
-        redirect_string = if redirect != [], do: " redirected_to=#{redirect}", else: ""
+      # Note redirect, if any
+      redirect = Plug.Conn.get_resp_header(conn, "location")
+      redirect_string = if redirect != [], do: " redirected_to=#{redirect}", else: ""
 
-        # Calculate time taken (always in ms for consistency
-        stop_time = System.monotonic_time()
-        time_us = System.convert_time_unit(stop_time - start_time, :native, :microsecond)
-        time_ms = div(time_us, 100) / 10
+      # Calculate time taken (in ms for consistency)
+      stop_time = System.monotonic_time()
+      time_us = System.convert_time_unit(stop_time - start_time, :native, :microsecond)
+      time_ms = div(time_us, 100) / 10
 
+      Logger.log(:info,
         "■ method=#{conn.method} path=#{conn.request_path} params=#{params} "<>
-        "ip=#{ip} user=#{user_string} "<>
-        "status=#{conn.status}#{redirect_string} duration=#{time_ms}ms"
-      end)
+        "user=#{user_string} status=#{conn.status}#{redirect_string} duration=#{time_ms}ms"
+      )
 
       conn
     end)

@@ -10,7 +10,8 @@ defmodule MyAppWeb.AuthController do
   def login_submit(conn, %{"user" => %{"email" => email}}) do
     # We don't look up the user, we simply send a confirmation link to that address.
     # We'll find or create them after we confirm that they control this address.
-    MyApp.Emails.confirm_address(email) |> MyApp.Mailer.deliver_now()
+    # Silently ignores sending failures.
+    MyApp.Emails.confirm_address(email) |> MyApp.Mailer.send()
     msg = "Thanks! We just emailed you a login link. Please check your inbox (#{email})."
 
     conn
@@ -25,19 +26,7 @@ defmodule MyAppWeb.AuthController do
       {:ok, email} ->
         user = find_user(email) || register_user(email)
         conn = MyAppWeb.AuthPlugs.login!(conn, user)
-
-        # --- OPTIONAL: After registration, direct to account settings page ---
-        # --- (See RTL UserController) ---
-        # Newly registered users must fill in more info before their account is complete.
-        if user.name do
-          conn
-          |> put_flash(:info, "Welcome back!")
-          |> redirect(to: Routes.home_path(conn, :index))
-        else
-          conn
-          |> put_flash(:info, "Please enter your name to complete registration.")
-          |> redirect(to: Routes.user_path(conn, :edit))
-        end
+        redirect_after_confirm(conn, user)
 
       _ ->
         conn
@@ -53,7 +42,7 @@ defmodule MyAppWeb.AuthController do
 
     conn
     |> MyAppWeb.AuthPlugs.logout!()
-    |> redirect(to: Routes.home_path(conn, :index))
+    |> redirect(to: Routes.page_path(conn, :index))
   end
 
   #
@@ -71,5 +60,26 @@ defmodule MyAppWeb.AuthController do
     user = Data.insert_user!(%{email: email})
     Logger.info "Registered new user #{user.id} (#{user.email})"
     user
+  end
+
+  defp redirect_after_confirm(conn, user) do
+    cond do
+      # [[[OPTIONAL]]] Direct newly registered users to fill in their account info
+      user.full_name == nil ->
+        conn
+        |> put_flash(:info, "Please enter your name to complete registration.")
+        |> redirect(to: Routes.user_path(conn, :edit))
+
+      return_to = conn.req_cookies["return_to"] ->
+        conn
+        |> delete_resp_cookie("return_to")
+        |> put_flash(:info, "Welcome back!")
+        |> redirect(to: return_to)
+
+      true ->
+        conn
+        |> put_flash(:info, "Welcome back!")
+        |> redirect(to: Routes.page_path(conn, :index))
+    end
   end
 end

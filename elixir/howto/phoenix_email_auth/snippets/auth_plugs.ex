@@ -1,11 +1,6 @@
 defmodule MyAppWeb.AuthPlugs do
-  import Plug.Conn,
-    only: [
-      assign: 3,
-      get_session: 2,
-      put_session: 3,
-      configure_session: 2
-    ]
+  import Plug.Conn
+  import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
 
   #
   # Plugs
@@ -24,6 +19,20 @@ defmodule MyAppWeb.AuthPlugs do
       user = load_user_from_session(conn) -> set_assigned_user(conn, user)
       # If no user was found by that id, the session is invalid. Log me out.
       true -> logout!(conn)
+    end
+  end
+
+  def require_logged_in(conn, _opts) do
+    if conn.assigns.current_user do
+      conn
+    else
+      return_to = "#{conn.request_path}?#{conn.query_string}"
+
+      conn
+      |> put_resp_cookie("return_to", return_to)
+      |> put_flash(:error, "You must be logged in to access that page.")
+      |> redirect(to: Routes.page_path(conn, :index))
+      |> halt()
     end
   end
 

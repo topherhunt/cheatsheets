@@ -3,26 +3,12 @@
 
 ## General philosophy
 
-  * Don't aim for 100% coverage. Aim for a *consistent* high level of coverage and a *predictable*, easy-to-navigate test suite.
-  * The test suite should be structured intentionally, not grown organically. Maintain it at a consistent level.
-  * Use helper methods & helper modules liberally to keep the test examples concise, consistently structured, and easy to read.
+  * I don't do TDD. I only occasionally write my tests first, when the solution is clear and I just need a quick feedback loop. Mostly my tests are aimed at detecting breakage (regression).
 
+  * I focus on controller tests (request tests in Rails) as the main boundary of test coverage. Controller tests should cover every endpoint (action) and generally should have a separate example for each important outcome / logic branch in that action.
 
-## Controller tests
+  * Where controller tests aren't enough, I'll add judicious unit tests to cover any complex or high-stakes logic, as well as integration tests for any high-stakes JS workflows.
 
-  * Are the most consistent & thorough testing boundary
-  * Should cover every endpoint, every logic pathway, and every important outcome / side effect.
+  * Don't aim for 100% coverage. Aim for a *consistent* high level of coverage and an, easy-to-navigate test suite. The test suite should have a predictable, consistent structure to it. It should not feel "organic".
 
-
-## Unit tests
-
-  * (in Phoenix) Schema validations should be tested at the context layer, ie. by attempting an insert and asserting that it failed. Don't do tests that reach inside the schema, unless there's a specific bit of complex logic that I want extra coverage for.
-  * There should be tests covering any complex custom logic / code you're particularly worried about
-
-
-## Integration / feature tests
-
-  * Should cover each form, filling in then checking the result of *each field* (there's no other way to confirm that a form is wired up properly)
-  * Should exercise any critical-path JS logic
-  * Should always start from the homepage (so navigation is nominally exercised)
-  * Should otherwise be as brief, minimal, standard, and boring as possible
+  * Most test examples should be 4-12 lines long. Set up helper methods as necessary to allow the data state to be set up in a concise, highly readable way.

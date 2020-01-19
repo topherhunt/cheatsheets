@@ -10,7 +10,7 @@ See also:
 
   * Ensure Erlang & Elixir are installed
   * Ensure you have the latest phx_new archive:
-    `mix archive.install hex phx_new 1.4.9`
+    `mix archive.install hex phx_new 1.4.11`
 
 
 ## Create the app
@@ -29,13 +29,11 @@ See also:
   * Update `mix.exs`:
 
     - Set the desired Elixir version
-    - Set Phoenix version to "1.4.6" to avoid the Phoenix.Controller log config bug
-    - Install Hound (optional): `{:hound, "~> 1.0", only: :test}`
-    - Install Rollbax (optional): `{:rollbax, "~> 0.10"}`
+    - Install Timex if desired: `{:timex, "~> 3.6.1"}`
+    - Install Rollbax if desired: `{:rollbax, "~> 0.11"}`
+    - Install Hound if desired: `{:hound, "~> 1.0", only: :test}`
 
   * Fetch dependencies: `mix deps.get`
-
-  * Update `.formatter.exs` config, if you care to
 
   * Add `.tool-versions` to configure asdf:
 
@@ -50,7 +48,7 @@ See also:
     #   * Run your normal `mix` and `iex` commands as you normally would
 
     erlang 21.0.6
-    elixir 1.8.1-otp-21
+    elixir 1.8.2-otp-21
     ```
 
   * Run `asdf install` to make sure those versions are installed
@@ -99,7 +97,7 @@ Next, set up your `config/` files as needed. Here's my standard setup:
 
     - Replace the hard-coded `secret_key_base` string with `H.env!("SECRET_KEY_BASE")`.
 
-    - Disable the logger `request_id` data by commenting `metadata: [:request_id]`
+    - Comment out the logger setting `metadata: [:request_id]` (not useful to me lately)
 
   * Update `dev.exs`:
 
@@ -124,7 +122,7 @@ Next, set up your `config/` files as needed. Here's my standard setup:
 
       ```rb
       config :my_app, MyAppWeb.Endpoint,
-        http: [port: 4001],
+        http: [port: 4001], # Chromedriver acts weird if you use the wrong port
         server: true
       ```
 
@@ -160,6 +158,22 @@ Next, set up your `config/` files as needed. Here's my standard setup:
 
   * Delete `prod.secret.exs`.
 
+  * In `endpoint.ex`, update your Plug.Session config to use same-site cookies:
+
+    ```rb
+    plug Plug.Session,
+      store: :cookie,
+      # ...
+      extra: "SameSite=Lax"
+    ```
+
+  * In `application.ex` at the top of `start/2`, log the environment versions so you never have to wonder what Elixir/OTP versions are running:
+
+    ```rb
+    build_info = Map.take(System.build_info, [:build, :otp_release])
+    Logger.info "#{__MODULE__}: Starting. #{inspect(build_info)}"
+    ```
+
 Then commit all these changes to git. Ensure `config/secrets.exs` is ignored!
 
 Create the db: `mix ecto.create`
@@ -175,21 +189,27 @@ Useful references for logging in Elixir & Phoenix:
 
 Follow these steps to set up one-line logging for a Phoenix app.
 
-  * In `lib/my_app_web.ex`, in the `controller` quote block, disable Phoenix.Controller logging:
+  * In `application.ex`, just before the start_link call, detach the default telemetry handlers that Phoenix attached:
 
     ```rb
-    def controller do
-      quote do
-        # NOTE: This doesn't work in phoenix 1.4.7+. Stick with v1.4.6 for now.
-        use Phoenix.Controller, namespace: MyAppWeb, log: false
-        # ... other stuff
+    def start(_type, _args) do
+      # ...
+
+      # vvv ADD THESE vvv
+      :ok = :telemetry.detach({Phoenix.Logger, [:phoenix, :socket_connected]})
+      :ok = :telemetry.detach({Phoenix.Logger, [:phoenix, :channel_joined]})
+      :ok = :telemetry.detach({Phoenix.Logger, [:phoenix, :router_dispatch, :start]})
+
+      # ...
+      Supervisor.start_link(children, opts)
     ```
 
-  * In `lib/my_app_web/endpoint.ex`, add a new plug below `plug Plug.Telemetry`:
+  * In `lib/my_app_web/endpoint.ex`, comment out the `Plug.Telemetry` plug.
+
+  * In `lib/my_app_web/endpoint.ex`, add this custom plug just before Plug.Session:
 
     ```rb
-      # Custom one-line request logging
-      # Must come before the session & router plugs.
+      # One-line request logging. Must come before the session & router plugs.
       plug MyAppWeb.RequestLogger
     ```
 
@@ -201,15 +221,17 @@ Follow these steps to set up one-line logging for a Phoenix app.
     2019-06-09 18:18:51.410 [info] ■ [PUT /manage/projects/7qDjSk/prompts/3tUrF9] params=%{"_csrf_token" => "dDVjGiIiHWUWADphMS48EXAZP34VAAAADFRcXaw/ZTx8kKPFCHr2PQ==", "_method" => "put", "_utf8" => "✓", "project_uuid" => "7qDjSk", "prompt" => %{"html" => "<div>Test question 3</div>"}, "prompt_uuid" => "3tUrF9"} user=1 (Topher Hunt) status=302 redirected_to=/manage/projects/7qDjSk duration=21ms
     ```
 
+(Note: A new preferred way would be to `:telemetry.attach` to the `[:phoenix, :router_dispatch, :stop]` event that Phoenix is already emitting. This provides all the data we'd need; see https://hexdocs.pm/phoenix/Phoenix.Endpoint.html#module-instrumentation for more detail.)
+
 
 ## One-line SQL logging
 
 _These steps only work for Ecto v3._
 
-In `lib/my_app/application.ex` `.start/2`, you need to set up the telemetry event. Add this snippet just before the `Supervisor.start_link/2` call:
+In `lib/my_app/application.ex` `.start/2`, add this snippet just before the `Supervisor.start_link/2` call to set up the telemetry event:
 
 ```rb
-    # Subscribe to Ecto queries for logging
+    # Subscribe to Ecto queries for logging.
     # See https://hexdocs.pm/ecto/Ecto.Repo.html#module-telemetry-events
     # and https://github.com/beam-telemetry/telemetry
     handler = &MyApp.Telemetry.handle_event/4
@@ -260,12 +282,13 @@ Above we added the :rollbax depoendency but we didn't wire up any error reportin
   * In `router.ex`, add:
 
     ```rb
-    # NEAR THE TOP:
+    # (NEAR THE TOP:)
     use Plug.ErrorHandler # for Rollbax
 
     # ... all your routes ...
 
-    # NEAR THE BOTTOM:
+    # (NEAR THE BOTTOM:)
+    # # Callback for Plug.ErrorHandler
     defp handle_errors(conn, data), do: WorldviewsWeb.ErrorPlugs.handle_errors(conn, data)
     ```
 
@@ -374,6 +397,8 @@ Steps:
 
 ## Misc.
 
+  * Search for any forgotten mentions of `my_app` or `MyApp` in your project and replace it with your app name.
+
   * Add my standard querying and changeset validation helpers to `repo.ex`. (see snippet)
 
   * Add `lib/my_app/helpers.ex` with some common helpers:
@@ -390,13 +415,13 @@ Steps:
 
     ```rb
     defmodule MyApp.Factory do
-      # alias MyApp.Accounts
+      # alias MyApp.Data
 
       # def insert_user(params \\ %{}) do
       #   assert_no_keys_except(params, [:name, :email, :password])
       #   uuid = random_uuid()
 
-      #   Accounts.insert_user!(%{
+      #   Data.insert_user!(%{
       #     name: params[:name] || "User #{uuid}",
       #     email: params[:email] || "user_#{uuid}@example.com",
       #     password: params[:password] || uuid

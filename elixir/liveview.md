@@ -25,11 +25,13 @@ Example LiveView apps:
 
   * LiveView pubsub broadcasts should include the changed object so receivers don't each have to re-fetch the same record.
 
-  * Don't do LiveView partials on static pages. If I need LV on a page, make the whole page the LV.
-
   * Don't put nested data (eg. Ecto records) into the LV session. Keep in mind the session data is sent across the wire when the websocket inits! Keep your session data to scalars as much as possible.
 
   * If you're rendering a video inside a LV, watch out for crazy high CPU usage, especially if the LV will rerender frequently. Chrome doesn't seem to like this. Move the video to outside the LV boundary and the issue should resolve.
+
+  * JY worked out a nice system for adding contenteditable spans that autosave immediately using Liveview and JS hooks. (see Tealdog)
+
+  * When rendering partials inside a .leex template, pass all assigns via the `assigns` helper function, rather than passing the specific variables (`@current_user`, `@project` etc). When you pass the @- variables, Liveview sometimes doesn't diff values properly and you can end up with problems rerendering / updating the DOM.
 
 
 ## Testing LVs

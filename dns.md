@@ -10,3 +10,15 @@ TXT smtp._domainkey.mail => k=rsa; p=MIGf...
 MX @ => mxa.mailgun.org.
 MX @ => mxb.mailgun.org.
 ```
+
+
+## CNAME and ALIAS/ANAME
+
+  * A CNAME record cannot coexist with any other records (on the same subdomain). If a CNAME exists, that MUST be the only record on that subdomain.
+
+  * More detail: https://blog.dnsimple.com/2014/01/why-alias-record/
+
+
+## Heroku site DNS
+
+  * Use whatever domain registrar is cheapest (e.g. Godaddy) but point to Cloudflare nameservers. That way I can use Cloudflare's far better DNS config options.

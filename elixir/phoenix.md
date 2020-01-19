@@ -50,6 +50,18 @@ Floats & decimals in Ecto:
 
   * See also: https://hexdocs.pm/ecto/Ecto.Schema.html#module-primitive-types
 
+Run a raw query in your code, with sanitized values:
+
+```ruby
+Repo.query!("SELECT id FROM athletes WHERE id = $1", [athlete.id])
+```
+
+Run a raw query in your migration:
+
+```ruby
+execute "UPDATE users SET name = email WHERE name IS NULL;"
+```
+
 
 ## Assets & Brunch
 

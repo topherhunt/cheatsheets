@@ -13,7 +13,7 @@ defmodule MyApp.Data do
   def get_user_by!(filt), do: query_users(filt) |> Repo.first!()
   def get_users(filt \\ []), do: query_users(filt) |> Repo.all()
   def count_users(filt \\ []), do: query_users(filt) |> Repo.count()
-  def query_users(filt), do: User |> User.filter(filt)
+  def query_users(filt), do: User |> User.apply_filters(filt)
 
   def insert_user(params), do: new_user_changeset(params) |> Repo.insert()
   def insert_user!(params), do: new_user_changeset(params) |> Repo.insert!()
@@ -32,7 +32,7 @@ defmodule MyApp.Data do
   # Login tokens
   #
 
-  def get_login_token(email) do
+  def new_login_token(email) do
     # Phoenix.Token gives us signed, salted, reversible, expirable tokens for free.
     Phoenix.Token.sign(MyAppWeb.Endpoint, "login token salt", email)
   end

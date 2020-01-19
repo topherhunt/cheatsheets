@@ -1,5 +1,8 @@
 # I18n / translation of a Phoenix app using Gettext
 
+
+## Setup
+
 is pretty straightforward.
 
   * On each request you need to detect what locale to use. Add a plug to `router.ex`:
@@ -31,11 +34,15 @@ is pretty straightforward.
         else
           session_locale = get_session(conn, :locale)
           browser_locale = get_req_header(conn, "Accept-Language") |> List.first()
-          locale = session_locale || browser_locale || "en"
+          locale = whitelist(session_locale) || whitelist(browser_locale) || "en"
 
           Gettext.put_locale(WorldviewsWeb.Gettext, locale)
           conn
         end
+      end
+
+      defp whitelist(locale) do
+        if locale in Gettext.known_locales(WorldviewsWeb.Gettext), do: locale
       end
     end
     ```
@@ -58,6 +65,18 @@ is pretty straightforward.
     </li>
     ```
 
+  * In `gettext.ex`, add define the `flag_for_locale` helper used in the dropdown:
+
+    ```rb
+    def flag_for_locale(locale) do
+      %{
+        "en" => "🇺🇸",
+        "nl" => "🇳🇱",
+        "es" => "🇪🇸"
+      }[locale]
+    end
+    ```
+
   * Go through your templates etc. and update all user-facing text to use `gettext` calls.
     Try to keep gettext strings compile-time static if possible (not computed).
 
@@ -78,6 +97,46 @@ is pretty straightforward.
     <%= gettext("Houston, we have a problem", "Houston, we have multiple problems", 3)
     ```
 
+  * If your client-side JS needs to access some translation strings, define a `gettext(text)` function in the JS global namespace by including this script in your layout header:
+
+    ```
+    <%# I'm not sure what's the best-practice way to pass Gettext strings to JS code. %>
+    <%# For now we'll define all JS-relevant strings in the page header. %>
+    <%# Thanks to https://stackoverflow.com/a/48704265/1729692 %>
+    <script type="text/javascript">
+      var translations = <%= raw Jason.encode!(%{
+        "Please fill in your name." => gettext("Please fill in your name."),
+        "Loading..." => gettext("Loading..."),
+        "Error!" => gettext("Error!"),
+        "Video info" => gettext("Video info"),
+        "Speaker:" => gettext("Speaker:"),
+        "Question:" => gettext("Question:"),
+        "apply" => gettext("apply"),
+        "Really delete this tag?" => gettext("Really delete this tag?"),
+        "Make a selection in the timeline first." => gettext("Make a selection in the timeline first."),
+        "Add a new tag" => gettext("Add a new tag"),
+        "Really delete this tagging?" => gettext("Really delete this tagging?"),
+        "That's all the clips we have for your search. Adjust your filters to see more." => gettext("That's all the clips we have for your search. Adjust your filters to see more."),
+        "Clear all selected tags" => gettext("Clear all selected tags"),
+      }) %>;
+
+      // Now in any JS file, I can call `gettext("the string to translate")`.
+      // Any missing keys will raise an error (and in prod, will be reported to Rollbar).
+      gettext = function(key) {
+        if (translations[key]) {
+          return translations[key];
+        } else {
+          throw("Error: Missing gettext key \""+key+"\"");
+        }
+      };
+    </script>
+    ```
+
+
+## Syncing translations
+
+You'll repeat these steps (or a subset) whenever you change the source text.
+
   * Run `mix gettext.extract`. This detects all `gettext` strings in your code and adds them to a "master template" `.pot` file under `priv/gettext/`.
 
   * Run `mix gettext.merge priv/gettext/` to merge this `.pot` file into all defined locales' `.po` files, adding and removing entries from the .po as necessary.
@@ -93,4 +152,11 @@ is pretty straightforward.
 
     - Or if you're in a rush, use my [machine translation script](https://github.com/topherhunt/topher-utilities/blob/master/machine_translate.rb) which fills in all blank strings in a pofile with Google Cloud Translate translations. (Caveat: the output needs careful manual review & cleanup.)
 
+  * After each merge, manually review any translations marked "fuzzy". Update the wording as needed, then delete the ", fuzzy" tag.
+
   * Once you've filled in a page's worth of translations for each locale, start up the dev server and test it out. You should be able to use the navbar switcher to switch locales, and your locale setting should be remembered for as long as you're logged in.
+
+
+## Tips
+
+  * Don't include leading/trailing whitespace in gettext strings. Where possible, put the space outside of the string. It's easy to lose a leading space when translating.

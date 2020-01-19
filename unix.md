@@ -78,6 +78,15 @@ Count LOC in all source code files. For reference: BusBK is 40K loc; GrayOwl is 
 
     git ls-files | egrep "\.(txt|md|sh|rb|erb|html|haml|ex|exs|eex|js|jsx|json|css|scss|lock|yml)$" | egrep -v "/vendor/|package-lock\.json|schema\.json|yarn\.lock|Gemfile\.lock|cdn_backup|third_party" | sed 's/.*/"&"/' | xargs wc -l
 
+Using sed to replace a substring by regex:
+
+```sh
+# Note the leading $ - necessary for \t to be escaped properly
+# On Linux, use `sed -r` instead of `sed -E`
+cat combined.tsv \
+  | sed -E $'s#^[0-9]+\t([0-9\-]+ [0-9\:]+)\t[0-9\-]+ [0-9\:]+\t[0-9]+\t[A-z\-]+\t([0-9\.]+)\t[A-z0-9]+\t[A-z]+\t([A-z0-9\/\.]+)\t#\\3\t\\1\t#g'
+```
+
 
 ## Background processes
 

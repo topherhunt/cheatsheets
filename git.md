@@ -21,6 +21,8 @@ These commands should be all you need to track your code changes using Git:
 
   * `git checkout SOME_COMMIT_ID` - restore the code to an older commit (you can find the commit id in `git log`). Be sure to `git checkout master` to return to the "tip" of the `master` branch, before you make any code changes or commits!
 
+  * `git branch --merged` - list all local branches which have been merged into the current branch (HEAD)
+
 
 ## Basic workflow using SourceTree
 

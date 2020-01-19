@@ -45,13 +45,30 @@ Rename a database:
 
 ## Performance & scaling
 
-  * Rule of thumb: Every FK should be indexed. This is important not only to keep join queries fast, but also to prevent gridlock when deleting rows in the associated table. If you try to delete rows in the FK target table, for each row it needs to scan the first table to ensure deleting the row won't violate any FKs. If this scan is unindexed, query time gets exponential fast. Fortunately, adding FKs after-the-fact isn't too painful (but test first!)
+  * Rule of thumb: Every FK should be indexed. This is important not only to keep join queries fast, but also to prevent gridlock when deleting rows in the target table.
 
-  * As table size grows beyond 1M records, `COUNT(*)` grows intolerably slow. If you need an exact count, there's no avoiding a full-table scan which is inefficient. But you can get an _estimated_ count quickly by querying the stats table. In my testing, this estimate is within ~ 0.1% of the precise row count:
+  * As table size grows beyond 1M records, `COUNT(*)` grows intolerably slow. If you need an exact count, there's no avoiding a full-table scan which is inefficient. But you can get an _estimated_ (within 0.1%) count quickly by querying the stats table:
 
     ```sql
     SELECT n_live_tup FROM pg_stat_all_tables WHERE relname = 'athletes';
     ```
+
+  * Referential integrity (ie. FKs) means some amount of performance hit. But if you index properly, the hit will be small, and it's vastly preferable to risking total loss of data consistency.
+
+  * Once you get into the "10M+ rows per table" scale, you need to plan more carefully and a lot of tough judgment calls come up. At this scale, stored procedures become extremely valuable, they let you do updates / deletions in smaller, more manageable steps to reduce the risk of causing performance problems.
+
+  * A query / write taking 300ms is "a total disaster". A row deletion should take on the order of 1ms.
+
+  * Useful discussion of SQL performance: https://dba.stackexchange.com/a/44345/32795
+
+
+## Troubleshoot a slow query
+
+  * First try EXPLAIN <query>.
+
+  * That only gives cost estimates. See the actual costs by running EXPLAIN ANALYZE <query>.
+
+  * If that still doesn't give enough info to help you diagnose the problem, try `ANALYZE VERBOSE tablename` to check the ratio btw live and dead rows.
 
 
 ## Importing & exporting database structure & content
@@ -115,6 +132,13 @@ LIMIT 100;
 ```
 
 
+## Dates & times
+
+  * Display a timestamp as a date: `DATE(found_at)`
+  * Display a date's year as string: `DATE_PART('year', a.created_at)`
+  * Add 1 month to a timestamp: `NOW() + INTERVAL '1 month'`
+
+
 ## Disk space usage
 
 - `pg_size_pretty(value)` - formats a number as KB, MB, GB etc.
@@ -128,6 +152,7 @@ FROM (
     SELECT c.oid, nspname AS table_schema, relname AS TABLE_NAME,
       c.reltuples AS row_estimate,
       pg_total_relation_size(c.oid) AS total_bytes,
+      pg_total_relation_size(c.oid) / 1000000 AS total_mb,
       pg_indexes_size(c.oid) AS index_bytes,
       pg_total_relation_size(reltoastrelid) AS toast_bytes
     FROM pg_class c
@@ -150,4 +175,26 @@ sudo -u postgres psql -d postgres -c "CREATE ROLE ubuntu SUPERUSER CREATEDB LOGI
 createdb
 
 # Now you can run `psql` to connect to your local db as superuser.
+```
+
+
+## Update many rows with different values
+
+You can batch-update many rows in a table, each with its own value, in a single query, using this pattern. Useful when updating thousands of rows with different values:
+
+```sql
+UPDATE entries e
+SET rank = t.rank
+FROM (VALUES
+  (1234, 1), (1346, 2), (2863, 3), (5827, 4), (5132, 5), (1245, 6), ...
+) AS t(entry_id, rank)
+WHERE e.id = t.entry_id
+```
+
+
+## Viewing connected processes & running queries
+
+```sql
+-- Show details of each currently running query
+SELECT xact_start, query_start, query FROM pg_stat_activity WHERE state != 'idle';
 ```

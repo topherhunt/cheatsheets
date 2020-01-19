@@ -17,7 +17,7 @@ The broad approach is described well here: https://lukeplant.me.uk/blog/posts/a-
   * Create the users table:
 
     ```rb
-    defmodule Worldviews.Repo.Migrations.CreateUsers do
+    defmodule MyApp.Repo.Migrations.CreateUsers do
       use Ecto.Migration
 
       def change do
@@ -51,36 +51,38 @@ The broad approach is described well here: https://lukeplant.me.uk/blog/posts/a-
   * Add `lib/...web/views/auth_view.ex`:
 
     ```rb
-    defmodule WorldviewsWeb.AuthView do
-      use WorldviewsWeb, :view
+    defmodule MyAppWeb.AuthView do
+      use MyAppWeb, :view
     end
     ```
 
-  * Add `lib/...web/templates/auth/new.html.eex`:
+  * Add `lib/...web/templates/auth/login.html.eex`:
 
     ```
-    <h1>Log in / register</h1>
+    <div class="u-card u-centered-600">
+      <h2>Log in / register</h2>
 
-    <p>I'm so glad you're here! Enter your email address, then click the button. We'll email you a secure login link.</p>
+      <p>Enter your email address, then click the button. We'll email you a secure login link.</p>
 
-    <%= form_for @conn, Routes.auth_path(@conn, :create), [method: :post], fn _f -> %>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <%= text_input :user, :email, class: "form-control" %>
-      </div>
-      <div class="form-group">
-        <%= submit "Send me my login link", class: "btn btn-primary" %>
-      </div>
-    <% end %>
+      <%= form_for @conn, Routes.auth_path(@conn, :login_submit), [method: :post], fn _f -> %>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <%= text_input :user, :email, class: "form-control" %>
+        </div>
+        <div class="form-group">
+          <%= submit "Send me my login link", class: "btn btn-primary" %>
+        </div>
+      <% end %>
+    </div>
     ```
 
   * In `router.ex`, declare the auth-related routes and make sure current_user is loaded:
 
     ```rb
-    defmodule WorldviewsWeb.Router do
+    defmodule MyAppWeb.Router do
       # ...
       # ADD THIS:
-      import WorldviewsWeb.AuthPlugs, only: [load_current_user: 2]
+      import MyAppWeb.AuthPlugs, only: [load_current_user: 2]
 
       pipeline :browser do
         # ...
@@ -90,7 +92,7 @@ The broad approach is described well here: https://lukeplant.me.uk/blog/posts/a-
 
       # ...
 
-      scope "/", WorldviewsWeb do
+      scope "/", MyAppWeb do
         # ...
         # ADD THESE:
         get "/auth/login", AuthController, :login
@@ -118,13 +120,15 @@ The broad approach is described well here: https://lukeplant.me.uk/blog/posts/a-
             </div>
           </li>
         <% else %>
-          <li class="nav-item"><%= link "Log in / register", to: Routes.auth_path(@conn, :new), class: "nav-link" %></li>
+          <li class="nav-item"><%= link "Log in / register", to: Routes.auth_path(@conn, :login), class: "nav-link" %></li>
         <% end %>
       </ul>
     </div>
     ```
 
   * To allow "force login" as another user, add `lib/my_app/tasks/login.ex` (see snippet).
+
+  * To restrict certain controllers to logged-in users, add `plug :require_logged_in`. (may need to import AuthPlugs too)
 
 
 ## Set up email system (Bamboo)
@@ -136,19 +140,13 @@ The broad approach is described well here: https://lukeplant.me.uk/blog/posts/a-
     {:bamboo_smtp, "~> 2.0"}
     ```
 
-  * Configure Bamboo in `dev.exs`:
+  * Configure Bamboo in `config.exs`:
 
     ```rb
-    # Sent emails are captured in a local process for later inspection.
+    # By default, sent emails are captured in a local process for later inspection.
     # Example:
     #   MyApp.AdminEmails.unknown_heats() |> MyApp.Mailer.deliver_now()
     #   Bamboo.SentEmail.all() # => a list having one %Bamboo.Email{} struct
-    config :my_app, MyApp.Mailer, adapter: Bamboo.LocalAdapter
-    ```
-
-  * Configure Bamboo in `test.exs`:
-
-    ```rb
     config :my_app, MyApp.Mailer, adapter: Bamboo.LocalAdapter
     ```
 
@@ -173,11 +171,24 @@ The broad approach is described well here: https://lukeplant.me.uk/blog/posts/a-
     end
     ```
 
-  * Define a mailer module in `lib/my_app/mailer.ex`:
+  * Define a mailer module in `lib/my_app/mailer.ex`. Remember to always call `.send` rather than `.deliver_now` etc. so that low-level Erlang errors are handled:
 
     ```rb
     defmodule MyApp.Mailer do
       use Bamboo.Mailer, otp_app: :my_app
+      require Logger
+
+      # Use Mailer.send rather than Mailer.deliver_now etc. SMTP failures may raise low-level
+      # ErlangErrors which aren't handled well by default.
+      def send(email) do
+        try do
+          deliver_now(email)
+          {:ok}
+        catch e ->
+          Logger.warn "Error sending email #{inspect(email.subject)} to #{inspect(email.to)}: #{inspect(e)}"
+          {:error, e}
+        end
+      end
     end
     ```
 
@@ -186,14 +197,14 @@ The broad approach is described well here: https://lukeplant.me.uk/blog/posts/a-
   * Add the view that this mailer will use for rendering, at `lib/...web/views/emails_view.ex`:
 
     ```rb
-    defmodule WorldviewsWeb.EmailsView do
-      use WorldviewsWeb, :view
+    defmodule MyAppWeb.EmailsView do
+      use MyAppWeb, :view
     end
     ```
 
   * Add a template for this email at `lib/...web/templates/emails/confirm_address.html.eex`:
 
-    ```
+    ```xml
     <h1>Worldview Journeys: Your special login link</h1>
 
     <p>Please click the link below to log in.</p>
