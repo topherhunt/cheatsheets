@@ -204,6 +204,8 @@ Follow these steps to set up one-line logging for a Phoenix app.
       Supervisor.start_link(children, opts)
     ```
 
+    (Call `:telemetry.list_handlers([])` to list all telemetry listeners.)
+
   * In `lib/my_app_web/endpoint.ex`, comment out the `Plug.Telemetry` plug.
 
   * In `lib/my_app_web/endpoint.ex`, add this custom plug just before Plug.Session:
