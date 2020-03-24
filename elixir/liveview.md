@@ -33,6 +33,8 @@ Example LiveView apps:
 
   * When rendering partials inside a .leex template, pass all assigns via the `assigns` helper function, rather than passing the specific variables (`@current_user`, `@project` etc). When you pass the @- variables, Liveview sometimes doesn't diff values properly and you can end up with problems rerendering / updating the DOM.
 
+  * If you want to invoke a Liveview event from within JS, there's two options: 1) You can trigger a LV event (eg. a phx-click) from JS by selecting the link element and dispatching a manually-created "click" event to it. 2) using Liveview's JS hooks system, add a function on the global `window` context that will trigger the Liveview event when the function is called. (Tealdog has an example of the latter.)
+
 
 ## Testing LVs
 

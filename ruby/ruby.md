@@ -1,6 +1,23 @@
 # Ruby tips
 
 
+## Strings
+
+Some ways to create a string:
+
+```rb
+
+'single quotes'
+
+"double quotes"
+
+%q{'\"oeuoeu}
+
+""" blah """
+
+```
+
+
 ## Reading & writing files
 
 ```rb
@@ -56,9 +73,14 @@ There's also `#instance_method` which lets you access instance variables of a gi
 
 ## Sorting
 
+All the following formats return a NEW array and do not mutate the original array.
+
 ```rb
 # Simple sort by one value:
 array.sort_by(&:length)
+
+# Or in block format:
+array.sort_by { |item| item.foo.bar }
 
 # Sort by multiple values: (sort by the first, then by the second, etc.)
 array = [{x: nil, y: 2, z: 2}, {x: nil, y: 1, z: 1}]

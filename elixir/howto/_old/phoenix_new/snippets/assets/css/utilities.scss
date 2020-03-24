@@ -1,0 +1,112 @@
+//
+// Layout
+//
+
+.u-centered-1000 { max-width: 1000px; margin-left: auto; margin-right: auto; }
+.u-centered-800  { max-width:  800px; margin-left: auto; margin-right: auto; }
+.u-centered-600  { max-width:  600px; margin-left: auto; margin-right: auto; }
+
+// Inserts 1 text-line's worth of spacing between each child element.
+.u-stack > * + * { margin-top: 1.5rem; }
+
+.u-gap-10 { width: 100%; height: 10px; }
+.u-gap-20 { width: 100%; height: 20px; }
+
+// Position action buttons etc. in top-right corner of a div
+.u-relative { position: relative; }
+.u-abs-top-right { position: absolute; top: 7px; right: 10px; }
+
+//
+// Blocks
+//
+
+.u-card {
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+}
+
+.u-box-shadow { box-shadow: 1px 3px 5px 1px #ccc; border-radius: 5px; }
+
+.u-rounded-tag {
+  background-color: #fff;
+  border-radius: 15px;
+  padding: 3px 5px 3px 5px;
+}
+
+.u-hidden { display: none; }
+
+.u-form-error, .help-block { color: #a00; background-color: #fee; padding: 5px; }
+
+//
+// Text
+//
+
+.u-nowrap { white-space: nowrap; }
+.u-ellipsis { overflow: hidden; text-overflow: ellipsis; }
+
+//
+// CSS-only tooltips compatible with LiveView.
+//
+// Example:
+// <span class="u-tooltip-target">
+//   Hover on me
+//   <div class="u-tooltip">This tooltip will display when hovered</div>
+// </span>
+//
+.u-tooltip-target {
+  position: relative;
+  cursor: help;
+
+  .u-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: -25px;
+    margin-bottom: 15px;
+    width: 200px;
+    display: block;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 0.4rem 0.5rem;
+    border-radius: 3px;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: normal;
+    background-color: #000;
+    color: #fff;
+    box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.6);
+  }
+
+  // This bridges the gap so you can mouse into the tooltip without it disappearing
+  .u-tooltip::before {
+    bottom: -20px;
+    content: " ";
+    display: block;
+    height: 20px;
+    left: 0;
+    position: absolute;
+    width: 100%;
+  }
+
+  // CSS Triangles
+  .u-tooltip::after {
+    position: absolute;
+    left: 40px;
+    bottom: -10px;
+    margin-left: -13px;
+    height: 0;
+    width: 0;
+    content: " ";
+    border-left: solid transparent 10px;
+    border-right: solid transparent 10px;
+    border-top: solid #000 10px;
+  }
+
+  &:hover .u-tooltip {
+    visibility: visible;
+    opacity: 1;
+  }
+}

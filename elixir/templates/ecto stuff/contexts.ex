@@ -1,6 +1,6 @@
 # Generic context for this tiny schema
-defmodule Worldviews.Data do
-  alias Worldviews.Data.User
+defmodule MyApp.Data do
+  alias MyApp.Data.User
 
   #
   # Users

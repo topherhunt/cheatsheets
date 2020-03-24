@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Grassflog</title>
+    <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>">
+    <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-sm navbar-light bg-light">
+      <%= link "MyApp", to: "#", class: "navbar-brand" %>
+      <button class="navbar-toggler" data-toggle="collapse" data-target="#navbar-content">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div id="navbar-content" class="collapse navbar-collapse">
+        <ul class="navbar-nav mr-auto"></ul>
+        <ul class="navbar-nav">
+          <li class="nav-item"><%= link "Some page", to: "#", class: "nav-link" %></li>
+
+          <%= if @current_user do %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+                <i class="icon">account_circle</i> <span class="caret"></span>
+              </a>
+              <div class="dropdown-menu dropdown-menu-right">
+                <div class="dropdown-item em small"><%= gettext "Logged in as" %> <%= @current_user.email %></div>
+                <%= link "Account settings", to: Routes.user_path(@conn, :edit), class: "dropdown-item" %>
+                <%= link "Log out", to: Routes.auth_path(@conn, :logout), class: "dropdown-item text-danger" %>
+              </div>
+            </li>
+
+          <% else %>
+
+            <li class="nav-item"><%= link gettext("Sign up"), to: Routes.auth_path(@conn, :signup), class: "nav-link" %></li>
+            <li class="nav-item"><%= link gettext("Log in"), to: Routes.auth_path(@conn, :login), class: "nav-link" %></li>
+
+          <% end %>
+
+        </ul>
+      </div>
+    </nav>
+
+    <main class="container-fluid">
+      <%= if get_flash(@conn, :info) do %>
+        <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
+      <% end %>
+
+      <%= if get_flash(@conn, :error) do %>
+        <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
+      <% end %>
+
+      <%= render @view_module, @view_template, assigns %>
+    </main>
+
+    <footer class="text-center small">
+      Built by <%= link "Topher Hunt", to: "http://topherhunt.com", target: "_blank" %>
+    </footer>
+  </body>
+</html>

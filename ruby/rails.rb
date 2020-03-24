@@ -35,6 +35,10 @@ end
 #    something. Here's example contents for edit.html.erb:
 $('#show-details').html("<%= escape_javascript render(partial: 'edit_game_details', locals: {}) %>");
 
+# `Rails.ajax` is a wrapper for `Jquery.ajax` which handles csrf tokens and response JS execution (if request format is JS). See: https://www.rubyguides.com/2019/03/rails-ajax/
+
+
+
 #
 # ActiveRecord migrations
 #

@@ -1,0 +1,14 @@
+<h1>Title</h1>
+
+<div class="alert alert-success">A Bootstrap alert</div>
+
+<div class="u-card">A div with the "u-card" class</div>
+
+<div>An icon: <i class="icon">face</i></div>
+
+<p>A paragraph with <strong class="u-tooltip-target">a tooltip inside it<span class="u-tooltip">The tooltip content!</span></strong></p>
+
+<div>
+  <span class="js-toggle-target" data-target="#toggle-test">Click me to toggle a hidden section</span>
+  <h3 class="text-success">This is the hidden section!</h3>
+</div>

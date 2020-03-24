@@ -9,7 +9,7 @@ is pretty straightforward.
 
     ```rb
     # ADD THIS NEAR THE TOP:
-    import WorldviewsWeb.LocalePlugs, only: [detect_locale: 2]
+    import MyAppWeb.LocalePlugs, only: [detect_locale: 2]
 
     # ADD THIS PLUG IN THE END OF EACH RELEVANT PIPELINE:
     plug :detect_locale
@@ -18,7 +18,7 @@ is pretty straightforward.
   * Write `lib/my_app_web/plugs/locale_plugs.ex`:
 
     ```rb
-    defmodule WorldviewsWeb.LocalePlugs do
+    defmodule MyAppWeb.LocalePlugs do
       import Plug.Conn, only: [get_session: 2, get_req_header: 2, put_session: 3, halt: 1]
       import Phoenix.Controller, only: [redirect: 2]
 
@@ -36,13 +36,13 @@ is pretty straightforward.
           browser_locale = get_req_header(conn, "Accept-Language") |> List.first()
           locale = whitelist(session_locale) || whitelist(browser_locale) || "en"
 
-          Gettext.put_locale(WorldviewsWeb.Gettext, locale)
+          Gettext.put_locale(MyAppWeb.Gettext, locale)
           conn
         end
       end
 
       defp whitelist(locale) do
-        if locale in Gettext.known_locales(WorldviewsWeb.Gettext), do: locale
+        if locale in Gettext.known_locales(MyAppWeb.Gettext), do: locale
       end
     end
     ```
@@ -51,8 +51,8 @@ is pretty straightforward.
 
     ```
     <!-- After the user dropdown </li> -->
-    <% current_locale = Gettext.get_locale(WorldviewsWeb.Gettext) %>
-    <% other_locales = Gettext.known_locales(WorldviewsWeb.Gettext) -- [current_locale] %>
+    <% current_locale = Gettext.get_locale(MyAppWeb.Gettext) %>
+    <% other_locales = Gettext.known_locales(MyAppWeb.Gettext) -- [current_locale] %>
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
         <%= flag_for_locale(current_locale) %> <span class="caret"></span>

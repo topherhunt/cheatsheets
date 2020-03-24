@@ -1,0 +1,7 @@
+<div class="pt-1 text-center small">
+  <hr>
+  <%= link "Sign up", to: Routes.auth_path(@conn, :signup) %> &nbsp; &nbsp;
+  <%= link "Log in", to: Routes.auth_path(@conn, :login) %> &nbsp; &nbsp;
+  <%= link "Reset my password", to: Routes.auth_path(@conn, :request_password_reset) %> &nbsp; &nbsp;
+  <%= link "Re-send account confirmation link", to: Routes.auth_path(@conn, :request_email_confirm) %>
+</div>

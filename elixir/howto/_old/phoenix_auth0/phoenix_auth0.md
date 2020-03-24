@@ -1,6 +1,6 @@
 # How to set up Auth0 integration in Elixir/Phoenix
 
-  * Consider using the Coherence dep (Devise clone) instead.
+  * Consider using a JS login flow instead. See the JS Facebook login system I implemented in a recent Rails app (commit `13fae27` on 2019-12-17).
   * See also `howto_auth0_rails.md` which this guide is based on.
 
 

@@ -11,6 +11,15 @@
   * [Fun tutorial on "minimum viable Phoenix"](http://www.petecorey.com/blog/2019/05/20/minimum-viable-phoenix/)
 
 
+## Best practices
+
+  * Multi-signature functions should be rare (unless you're following a specific DSL eg. in genservers).
+  * Only use a pipe when there's no risk of confusion about what type of value is being passed, and preferably if it's the same kind of value all the way down the pipe (e.g. a list undergoing various minor transformations).
+  * Raise errors as early as possible.
+  * Layers of indirection should have comments that identify them and justify them.
+
+
+
 ## Installing Elixir on OSX
 
 The best way to install Elixir/Erlang and manage versions is using `asdf`.
@@ -37,12 +46,28 @@ For more asdf commands, see: https://asdf-vm.com/#/core-commands
 Reverse a map: `Map.new(map, fn {k, v} -> {v, k} end)`
 
 
+## Dates & times
+
+  * Elixir's Date library is pretty solid, but its support for DateTime parsing & manipulation is very limited. Use Timex for the latter.
+
+  * **BE CAREFUL:** Never compare dates (or datetimes) using > / < / >= / <=. Use `Date.diff(date, other)` or `date in Date.range(sdate, edate)` instead.
+
+  * Sort a list of datetimes:
+    `datetimes |> Enum.sort(& DateTime.compare(&1, &2) != :gt)` (if timezoned)
+    `datetimes |> Enum.sort(& NaiveDateTime.compare(&1, &2) != :gt)` (if naive)
+    `datetimes |> Enum.sort(& Timex.diff(&1, &2) < 0)` (using Timex)
+
+
 ## Reading & writing files
 
 Write a file:
 
 ```rb
+# This overwrites any prior content
 File.write!("tmp/filename.txt", contents)
+
+# This preserves any prior content
+File.write!("topher.txt", new_contents, [:append])
 ```
 
 Open a file, loading its full contents into a string:

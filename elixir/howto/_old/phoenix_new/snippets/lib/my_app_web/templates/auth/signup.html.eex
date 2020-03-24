@@ -1,0 +1,47 @@
+<div class="u-centered-600">
+  <h1><%= gettext "Sign up" %></h1>
+
+  <%= form_for @changeset, Routes.auth_path(@conn, :signup_submit), [method: :post], fn f -> %>
+    <%= if @changeset.action do %>
+      <div class="alert alert-danger"><%= gettext "There was an error. Please see messages below." %></div>
+    <% end %>
+
+    <div class="form-group">
+      <%= label f, :name do %>
+        <%= gettext("Name") %>
+        <%= required() %>
+      <% end %>
+      <%= text_input f, :name, class: "form-control", required: true %>
+      <%= error_tag f, :name %>
+    </div>
+    <div class="form-group">
+      <%= label f, :email do %>
+        <%= gettext("Email") %>
+        <%= required() %>
+      <% end %>
+      <%= email_input f, :email, class: "form-control", required: true %>
+      <%= error_tag f, :email %>
+    </div>
+    <div class="form-group">
+      <%= label f, :password do %>
+        <%= gettext("Password") %>
+        <%= required() %>
+      <% end %>
+      <%= password_input f, :password, class: "form-control", required: true %>
+      <%= error_tag f, :password %>
+    </div>
+    <div class="form-group">
+      <%= label f, :password_confirmation do %>
+        <%= gettext("Confirm your password") %>
+        <%= required() %>
+      <% end %>
+      <%= password_input f, :password_confirmation, class: "form-control", required: true %>
+      <%= error_tag f, :password_confirmation %>
+    </div>
+    <div class="form-group">
+      <%= submit gettext("Sign up"), class: "btn btn-primary" %>
+    </div>
+  <% end %>
+
+  <%= render "_links.html", conn: @conn %>
+</div>

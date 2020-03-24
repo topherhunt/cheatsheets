@@ -87,7 +87,7 @@ List the top committers with # of commits:
 ## Diff
 
 - `gd`
-- `gd HEAD`
+- `gd HEAD` - show both staged and (most) unstaged changes
 - `gd -w` - ignore whitespace changes (only show substantial changes)
 - `gd --cached` - only show staged changes
 

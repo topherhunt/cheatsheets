@@ -9,6 +9,7 @@
   * https://law.stackexchange.com - great Q+A database
   * https://devcenter.heroku.com/articles/gdpr
   * https://github.com/good-lly/gdpr-documents/
+  * https://docs.rollbar.com/docs/ruby#section-managing-sensitive-data
 
 
 ## Compliance checklist
@@ -41,6 +42,8 @@
     - Due date
     - Status (new -> in progress -> completed)
     - Assignee
+
+  * Review Rollbar's GDPR advice: https://docs.rollbar.com/docs/ruby#section-managing-sensitive-data - note any other tensions that creates
 
   * Pretend you just received [this broad GDPR request letter](https://github.com/good-lly/gdpr-documents/blob/master/data-access/en/GDPR%20data%20access.md) and practice handling it, to ensure you've got all the pieces in place.
 

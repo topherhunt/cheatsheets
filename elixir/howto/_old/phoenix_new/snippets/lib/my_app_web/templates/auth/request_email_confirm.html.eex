@@ -1,0 +1,17 @@
+<div class="u-centered-600">
+  <h1><%= gettext "Confirm your account" %></h1>
+
+  <p><%= gettext "Didn't receive your account confirmation email? Enter your address below and we'll send you a new one." %></p>
+
+  <%= form_for :user, Routes.auth_path(@conn, :request_email_confirm_submit), [method: :post], fn f -> %>
+    <div class="form-group">
+      <%= label f, :email, gettext("Email") %>
+      <%= email_input f, :email, class: "form-control", required: true %>
+    </div>
+    <div class="form-group">
+      <%= submit gettext("Send me a link"), class: "btn btn-primary" %>
+    </div>
+  <% end %>
+
+  <%= render "_links.html", conn: @conn %>
+</div>

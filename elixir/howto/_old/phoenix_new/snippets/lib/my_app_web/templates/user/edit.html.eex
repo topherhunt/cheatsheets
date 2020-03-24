@@ -1,0 +1,68 @@
+<div class="u-centered-600">
+  <h1><%= gettext "Account settings" %></h1>
+
+  <%= form_for @changeset, Routes.user_path(@conn, :update), [method: :patch], fn f -> %>
+    <%= if @changeset.action do %>
+      <div class="alert alert-danger"><%= gettext "There was an error. Please see messages below." %></div>
+    <% end %>
+
+    <div class="form-group">
+      <%= label f, :name, gettext("Name") %>
+      <%= text_input f, :name, class: "form-control", required: true %>
+      <%= error_tag f, :name %>
+    </div>
+    <div class="form-group">
+      <%= label f, :password do %>
+        <%= gettext("New password") %>
+        <div class="small"><%= gettext "Leave blank if you don't want to change the password." %></div>
+      <% end %>
+      <%= password_input f, :password, class: "form-control", autocomplete: false %>
+      <%= error_tag f, :password %>
+    </div>
+    <div class="form-group u-hidden js-confirm-new-password">
+      <%= label f, :password_confirmation do %>
+        <%= gettext("Confirm new password") %>
+        <%= required() %>
+      <% end %>
+      <%= password_input f, :password_confirmation, class: "form-control" %>
+      <%= error_tag f, :password_confirmation %>
+    </div>
+    <div class="form-group u-hidden js-current-password">
+      <%= label f, :password_confirmation do %>
+        <%= gettext("Current password") %>
+        <%= required() %>
+      <% end %>
+      <%= password_input f, :current_password, class: "form-control" %>
+      <%= error_tag f, :current_password %>
+    </div>
+    <div class="form-group">
+      <%= submit gettext("Save"), class: "btn btn-primary" %>
+    </div>
+  <% end %>
+
+  <h3 class="mt-5"><%= gettext "Change my email address" %></h3>
+
+  <%= form_for @changeset, Routes.user_path(@conn, :update_email), [method: :patch], fn f -> %>
+    <div class="form-group">
+      <%= label f, :email, gettext("Email") %>
+      <%= email_input f, :email, class: "form-control", required: true %>
+    </div>
+    <div class="form-group">
+      <%= submit gettext("Save"), class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>
+
+<script type="text/javascript">
+  $(function(){
+    $('#user_password').keyup(function(){
+      $('.js-confirm-new-password').show()
+      $('.js-current-password').show()
+    })
+
+    if ($('.u-form-error').length > 0) {
+      $('.js-confirm-new-password').show()
+      $('.js-current-password').show()
+    }
+  })
+</script>

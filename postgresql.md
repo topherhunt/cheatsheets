@@ -87,6 +87,10 @@ Execute a .sql script:
 
     psql -d delphi_development -f delphi-structure.sql
 
+Copy a table to another table:
+
+    CREATE TABLE c_trifecta_totals_bak AS TABLE c_trifecta_totals;
+
 
 ## Importing & exporting SQL dumps
 
@@ -120,7 +124,7 @@ NOTE: If your client is on postgres v9.6+, you MUST specify the port in the url 
 
 This query gets the top-level domain from a URL string and uses it to count how many URLs are present for each domain.
 
-```
+```sql
 SELECT
 	DATE(found_at),
 	regexp_replace(url, 'https?://([^\/]+\.)*([\w\d\-\_]+\.[\w]+).*', '\2') AS domain,
@@ -137,6 +141,32 @@ LIMIT 100;
   * Display a timestamp as a date: `DATE(found_at)`
   * Display a date's year as string: `DATE_PART('year', a.created_at)`
   * Add 1 month to a timestamp: `NOW() + INTERVAL '1 month'`
+
+
+## Updates using a join table
+
+```sql
+-- An example of updating one table based on associated data in another table (or more):
+UPDATE cevents
+SET series_id = events.series_id
+FROM events
+WHERE cevents.identifier = events.identifier
+  AND events.series_id IS NOT NULL
+  AND cevents.series_id IS NULL
+  AND cevents.chronotrack_event_id IN (SELECT ct_id FROM tmp_chrono_ids_and_series_names);
+```
+
+
+## Temporary tables
+
+Useful for joining on non-persisted lists of data etc.
+
+```sql
+CREATE TEMP TABLE chrono_ids (id integer PRIMARY KEY);
+INSERT INTO chrono_ids (id) VALUES (1), (2), (3), (100), (101), (103), (106), (107), (108), (109), (111), (112), (114), (115), (116), (117), (123), (124), (125), (126), (127), (130), (131), (132), (133), (134), (135), (136), (137);
+-- Now you can join to this temp table just like any other
+SELECT * FROM some_other_table t WHERE t.chronotrack_id IN (chrono_ids);
+```
 
 
 ## Disk space usage

@@ -4,6 +4,8 @@ defmodule Vanilla.Accounts.User do
 
   schema "samples" do
     belongs_to :user, MyApp.User
+    has_many :subsamples, MyApp.Subsample
+    has_many :kittens, through: [:subsamples, :kitten]
 
     field :name, :string
     field :height_cm, :integer
@@ -11,9 +13,6 @@ defmodule Vanilla.Accounts.User do
     field :collected_at, :utc_datetime
     field :expiration_date, :date
     timestamps()
-
-    has_many :subsamples, MyApp.Subsample
-    has_many :kittens, through: [:subsamples, :kitten]
   end
 
   def changeset(struct, params \\ %{}) do

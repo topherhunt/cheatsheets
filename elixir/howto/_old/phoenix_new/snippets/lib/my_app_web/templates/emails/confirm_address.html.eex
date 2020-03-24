@@ -1,0 +1,7 @@
+<h1>Worldview Journeys: <%= gettext "Please confirm your address" %></h1>
+
+<p><%= gettext "Please click the link below to confirm your email address for your account at wvtest.com." %></p>
+
+<p><%= link @url, to: @url %></p>
+
+<p><strong><%= gettext "If you did not recently register or change your address on wvtest.com, please ignore this email." %></strong> <%= gettext "Maybe someone else entered your address by mistake." %></p>

@@ -2,7 +2,7 @@ def change do
   create table(:users) do
     # Other on_delete options: nothing, nilify_all, restrict
     add :org_id, references(:orgs, on_delete: :delete_all)
-    add :name, :string
+    add :name, :text # NEVER use :string for postgres databases.
     add :age_years, :integer, null: false
     add :birth_date, :date
     add :last_logged_in_at, :utc_datetime
