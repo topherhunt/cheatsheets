@@ -1,5 +1,7 @@
 # Topher cheatsheets
 
+[![HitCount](http://hits.dwyl.com/topherhunt/cheatsheets.svg)](http://hits.dwyl.com/topherhunt/cheatsheets)
+
 Accumulated notes & reminders on how to do things I often need to do.
 
 My favorites:
