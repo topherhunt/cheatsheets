@@ -15,7 +15,7 @@ ssh -vND 1024 vpn1
 - `nc -lk 0.0.0.0 8008 > netcat_listen.txt` # listen on a port, log all cxs to a text file
 - List all listening ports and the responsible PIDs:
   - `netstat -tuplen` # (Linux)
-  - `lsof -Pn -i4` # (OSX)
+  - `lsof -Pn | grep 3000` # (OSX - find Rails processes)
 - `echo '{"text": "Test content"}' | curl -d @- http://domain.com:8000/queries.json`
   # send a test request with JSON data to verify that a JSON service is accessible
 

@@ -45,6 +45,8 @@ For more asdf commands, see: https://asdf-vm.com/#/core-commands
 
 Reverse a map: `Map.new(map, fn {k, v} -> {v, k} end)`
 
+Inspect all bound variables in this context: `IO.inspect binding()`
+
 
 ## Dates & times
 

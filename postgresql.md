@@ -228,3 +228,50 @@ WHERE e.id = t.entry_id
 -- Show details of each currently running query
 SELECT xact_start, query_start, query FROM pg_stat_activity WHERE state != 'idle';
 ```
+
+
+## Full-text search in Postgres
+
+Below is a demo script for a basic PG full-text search system using a dedicated table (searchables) as the search index.
+
+See also:
+  - https://www.postgresql.org/docs/11/textsearch-intro.html
+  - https://www.postgresql.org/docs/11/textsearch-controls.html#TEXTSEARCH-RANKING
+  - https://thoughtbot.com/blog/optimizing-full-text-search-with-postgres-tsvector-columns-and-triggers
+  - http://rachbelaid.com/postgres-full-text-search-is-good-enough/
+
+```sql
+DROP TABLE searchables;
+
+-- We'll create a dedicated `searchables` table to use as our search index.
+-- To make search fast, we'll store the tsvector (parsed lexemes), and index them.
+CREATE TABLE searchables (
+  id SERIAL PRIMARY KEY,
+  text_a TEXT,
+  text_b TEXT,
+  tsvector TSVECTOR);
+CREATE INDEX searchables_tsv_idx ON searchables USING GIN (tsvector);
+
+-- Populate some example values.
+INSERT INTO searchables (text_a, text_b) VALUES
+('Topher Hunt', 'a programmer who enjoys biking and video games. He''s Lily Truong''s husband.'),
+('Lily Truong', 'a businesswoman who lives in the Netherlands and does not enjoy biking. Topher Hunt''s wife.'),
+('Don Hunt', 'Topher Hunt''s father, who is suffering from FTD. ');
+
+-- Now populate the tsvector field from the "raw" source fields (and apply weightings).
+UPDATE searchables
+SET "tsvector" = setweight(to_tsvector(COALESCE(text_a, '')), 'A') || setweight(to_tsvector(COALESCE(text_b, '')), 'B')
+WHERE "tsvector" IS NULL;
+
+-- Inspect the full contents of the searchables table
+SELECT * FROM searchables;
+
+-- A full-text search against the searchables table (with field weightings so we can rank later on)
+SELECT id, text_a, text_b, ts_rank(tsvector, query) AS rank
+FROM searchables, websearch_to_tsquery('hunt') AS query
+WHERE tsvector @@ query
+ORDER BY rank DESC;
+
+-- websearch_to_tsquery can also accept basic search syntax like OR, -, and quotes.
+SELECT websearch_to_tsquery('linux OR "world domination" -trump');
+```

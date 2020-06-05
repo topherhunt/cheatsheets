@@ -13,7 +13,7 @@ Download a list of songs from Youtube for post-processing:
 
   - irb:
     ```rb
-    File.open("urls.txt").read.each_line { |l| puts "Downloading #{l}..."; `youtube-dl -f140 #{l}`; sleep 10 }
+    File.open("urls.txt").read.each_line { |l| print "Downloading #{l}"; `youtube-dl -f140 #{l}`; sleep 10 }
     ```
 
   - In another tab: `watch -n5 "ls | grep .m4a | wc -l"`
@@ -63,9 +63,13 @@ Recursively search for text in this dir:
 
 ## Resources
 
-Show disk space used in this dir and 1 level of subfolders
+Show disk space used in this dir and 1 level of subfolders:
 
-    du -d1 -h .
+    du -h -d1 .
+
+Same thing, but sort by human-readable usage size:
+
+    du -h -d1 . | sort -hr
 
 
 ## Text parsing
