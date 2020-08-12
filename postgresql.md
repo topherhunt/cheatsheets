@@ -1,5 +1,15 @@
 # PostgreSQL
 
+## Process startup
+
+If Postgres is crashing on OSX, try these commands:
+
+  - `brew services list`
+  - `brew services restart postgresql`
+  - `brew info postgres`
+  - `tail -f /var/log/system.log`
+  - `pg_ctl -D /usr/local/var/postgres start` # run this and check the error output
+
 
 ## Basic navigation
 
@@ -136,6 +146,12 @@ LIMIT 100;
 ```
 
 
+## Random numbers
+
+  * `SELECT RANDOM();` => decimal between 0 and 1
+  * `FLOOR(RANDOM() * 900 + 100);` => integer between 100 and 999
+
+
 ## Dates & times
 
   * Display a timestamp as a date: `DATE(found_at)`
@@ -169,12 +185,29 @@ SELECT * FROM some_other_table t WHERE t.chronotrack_id IN (chrono_ids);
 ```
 
 
+## CSV export & import
+
+You can specify what fields to export (default = all), the file path, delimiter, and whether to include a header.
+
+```sql
+COPY athlete_users(id, email, first_name, last_name, gender, created_at, updated_at)
+TO '/Users/topher/Downloads/athlinks-bak/athlete_users.csv' DELIMITER ',' CSV HEADER;
+```
+
+You can import data from .csv in a similar way:
+
+```sql
+COPY athlete_users(id, email, first_name, last_name, gender, created_at, updated_at)
+FROM '/Users/topher/Downloads/athlinks-bak/athlete_users.csv' DELIMITER ',' CSV HEADER
+```
+
+
 ## Disk space usage
 
 - `pg_size_pretty(value)` - formats a number as KB, MB, GB etc.
-- The following query returns disk usage info on the current db:
 
-```
+```sql
+-- List all tables with disk usage info
 SELECT *
 FROM (
   SELECT *, total_bytes - index_bytes - COALESCE(toast_bytes,0) AS table_bytes

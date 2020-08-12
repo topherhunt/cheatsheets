@@ -26,27 +26,25 @@ end
 
 - Set Rails `config.log_level = :info` to hide SQL query logs etc.
 - Install [lograge](https://github.com/roidrage/lograge)
-- Configure it in an initializer:
+- Configure it in an initializer, eg. `config/initializers/lograge.rb`:
 
 ```ruby
 Rails.application.configure do
   config.lograge.enabled = true
+
+  # See also ApplicationController#append_info_to_payload
   config.lograge.custom_options = lambda do |event|
     {
-      pid: Process.pid,
-      ip: event.payload[:ip],
+      # pid: Process.pid,
+      # ip: event.payload[:ip],
+      # time: event.time.utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
       user: event.payload[:user],
-      time: event.time.utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
+      # These params should already be filtered to protect keys like "password".
       params: event.payload[:params].except(*%w(controller action format id))
     }
   end
+
   config.lograge.formatter = ->(data) {
-    # Data I'm excluding for brevity:
-    # - controller=#{data[:controller]}##{data[:action]} (I can infer this)
-    # - ip=#{data[:ip]} (Heroku router logs this in case I need it)
-    # - "#{data[:time]} "\
-    # - "pid=#{data[:pid]} "\
-    # Other possible starting chars: █ »
     "■ [#{data[:method]} #{data[:path]}] "\
     "params=#{data[:params]} "\
     "user=#{data[:user]} "\
@@ -63,7 +61,7 @@ In ApplicationController, add the missing payload metadata:
 # Add request metadata to Lograge payload (see config/initializers/lograge.rb)
 def append_info_to_payload(payload)
   super
-  payload[:ip] = request.remote_ip
+  # payload[:ip] = request.remote_ip
   payload[:user] = current_user ? "#{current_user.id} (#{current_user.name})" : "none"
 end
 ```
@@ -76,3 +74,5 @@ if defined?(Rack::Timeout)
   Rack::Timeout::Logger.disable # these are verbose and unnecessary
 end
 ```
+
+**NOTE:** Triple-check to ensure that sensitive params like :password are filtered out when you customize logging like this. Param filtering is easy to get wrong in Rails.

@@ -71,6 +71,9 @@ Roman's git log output format with the graph on left side:
 
 ## Queries
 
+List all local branches sorted by latest commit date:
+`git for-each-ref --sort="-authordate:iso8601" --format=" %(authordate:relative)%09%(refname:short)" refs/heads`
+
 List last commit date for each file in a directory:
 `for file in ./*; do echo "$file:    $(git log -1 --format=%cd $file)"; done`
 

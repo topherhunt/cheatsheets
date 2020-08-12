@@ -91,6 +91,13 @@ cat combined.tsv \
   | sed -E $'s#^[0-9]+\t([0-9\-]+ [0-9\:]+)\t[0-9\-]+ [0-9\:]+\t[0-9]+\t[A-z\-]+\t([0-9\.]+)\t[A-z0-9]+\t[A-z]+\t([A-z0-9\/\.]+)\t#\\3\t\\1\t#g'
 ```
 
+Copy PART of a text file into a new file (useful when analyzing large logfiles):
+
+```sh
+# Copy just line numbers 1001 through 2000 into latest.log
+sed -n '1001,2000' dev.log > latest.log
+```
+
 
 ## Background processes
 

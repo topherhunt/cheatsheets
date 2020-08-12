@@ -42,3 +42,8 @@ Advanced:
 - `ctrl-b n` => cycle to next window
 - `ctrl-b %` => split panes horizontally
 - `ctrl-b "` => split panes vertically
+
+
+## Troubleshooting
+
+- One time I accidentally ran `tmux attach` from within the tmux session. This created a recursive loop that froze all interaction with that tmux session. To fix it, get back to shell then run `tmux list-windows`, then `tmux kill-window -t <TARGET_ID>`.

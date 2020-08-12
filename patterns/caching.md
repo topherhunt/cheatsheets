@@ -1,11 +1,13 @@
 # Caching
 
+
 ## General checklist for caching layer
 
 - Debug-log every cache hit, miss (log how long it took to recalculate each), and bust (log the pattern, plus every specific cache key busted)
 - Clear the cache on every app init (and log this)
 - Clear the cache before every test
 - Keep cache keys as high-level as possible, to avoid "N+1 caches" problem. Ideally any request should only interact with a small handful of caches.
+
 
 ## Rule: Avoid N+1 caches. Scope cache keys to one global resource ID.
 
@@ -24,3 +26,10 @@ Implications of this strategy:
 - Because there's so much fewer cache interactions, you can debug-log every cache hit and miss in the same way you debug-log your SQL queries, making it easier to troubleshoot caching problems in a methodical way.
 - Makes it easier to reason about what's cached, when it's expired, and what went wrong
 - This is technically more wasteful than highly specific caches. You'll need to rebuild more redundant data this way. But my experience is that I still get most of the performance benefits of caching expensive stuff, but with way less of the complexity.
+
+
+## Other notes on caching strategy
+
+- DON'T try to be programmatic or clever about determining what caches to bust. Instead, each updater function (eg. the insert & update functions in the context) should manually have commands to bust any relevant caches.
+- DO bust swaths of caches where convenient.
+- DON'T do eager cache warming. Lazy warming makes it way easier to think through the performance implications, and makes busting a swath of caches more appealing.
