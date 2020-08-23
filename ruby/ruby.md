@@ -83,7 +83,7 @@ array.sort_by(&:length)
 array.sort_by { |item| item.foo.bar }
 
 # Sort by multiple values: (sort by the first, then by the second, etc.)
-array = [{x: nil, y: 2, z: 2}, {x: nil, y: 1, z: 1}]
+array = [{x: 1, y: 2, z: 2}, {x: 1, y: 1, z: 1}]
 array.sort { |a, b| [a[:x], a[:y], a[:z]] <=> [b[:x], b[:y], b[:z]] }
 
 # NOTE: This does NOT work when present values are compared against nil. So make sure
