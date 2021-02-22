@@ -6,6 +6,11 @@ curl -I https://www.wvtest.com/
 
 # Open an SSH tunnel for poor man's VPN
 ssh -vND 1024 vpn1
+
+# Curl request with JSON body
+curl -i --request POST --header "Content-Type: application/json" \
+  --data '{"something": true}' \
+  http://localhost:3000/blah
 ```
 
 
@@ -15,7 +20,7 @@ ssh -vND 1024 vpn1
 - `nc -lk 0.0.0.0 8008 > netcat_listen.txt` # listen on a port, log all cxs to a text file
 - List all listening ports and the responsible PIDs:
   - `netstat -tuplen` # (Linux)
-  - `lsof -Pn | grep 3000` # (OSX - find Rails processes)
+  - `lsof -Pn | grep 3000` # (OSX - find Rails processes / anything listening on port)
 - `echo '{"text": "Test content"}' | curl -d @- http://domain.com:8000/queries.json`
   # send a test request with JSON data to verify that a JSON service is accessible
 
@@ -105,3 +110,19 @@ For example, let's say that my VPS server `vpn1` is on the ip whitelist to acces
 Then locally I can run the following command to connect to the Postgres server:
 
     psql -h localhost -p 55555 -d my-database
+
+
+## iptables / firewall management
+
+Forward all incoming traffic from port A to port B:
+
+    sudo iptables -t nat -I PREROUTING -p tcp --dport 80 -j REDIRECT --to-ports 4000
+
+List all rules for a particular table (in this case "nat"):
+
+    sudo iptables -t nat --list --line-numbers
+
+Delete a specific rule by table & chain & line number:
+
+    sudo iptables -t nat -D PREROUTING 1
+

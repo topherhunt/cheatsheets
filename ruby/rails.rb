@@ -8,8 +8,13 @@
 # Cache
 #
 
-# Cache any computed/fetched value using Rails' configured cache store
+Rails.cache.write("some_key", :some_value, expires_in: 1.hour)
+
+Rails.cache.read("some_key")
+# => :some_value or nil if expired/absent
+
 Rails.cache.fetch(key, expires_in: 1.month) { ...heavy expression... }
+# returns the computed value. Only runs the block if the cache is empty or expired
 
 # Clear the entire cache (useful to put this in an initializer file)
 Rails.cache.clear
@@ -38,6 +43,11 @@ $('#show-details').html("<%= escape_javascript render(partial: 'edit_game_detail
 # `Rails.ajax` is a wrapper for `Jquery.ajax` which handles csrf tokens and response JS execution (if request format is JS). See: https://www.rubyguides.com/2019/03/rails-ajax/
 
 
+#
+# ActiveRecord queries
+#
+# * IMPORTANT GOTCHA: .delete_all on an association does NOT necessarily destroy the records. By default it might only nullify the FK. So anytime I use .delete_all I must explicitly specify the strategy: `user.posts.delete_all(:delete_all)`.
+
 
 #
 # ActiveRecord migrations
@@ -59,3 +69,14 @@ rename_column :users, :email, :email_address
 add_index :dm_requests, :user_id, unique: true
 
 execute "CREATE TABLE cars_users2 AS SELECT DISTINCT * FROM cars_users;"
+
+# To add / remove fields and then query the model in the same migration:
+User.reset_column_information
+
+
+
+#
+# Timezone support
+#
+
+

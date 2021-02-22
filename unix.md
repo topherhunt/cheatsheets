@@ -1,17 +1,27 @@
 # General
 
-Prevent Mac from sleeping:
+Command-line CSV spreadsheet viewer: [VisiData](https://github.com/saulpw/visidata).
 
-    pmset noidle
+
+## Homebrew
+
+- `brew list` - list all installed packages
+- `brew info PACKAGE` - show info on a package: installed versions, etc.
+- `brew switch PACKAGE VERSION` - activate a specific installed version of a package
+- `brew ls --versions PACKAGE`
+- `brew --prefix openssl` - get the path to that package's folder
+- https://cmsdk.com/python/homebrew-install-specific-version-of-formula.html
 
 
 ## Video / image / audio processing
+
+See also https://github.com/yuanqing/vdx - a friendlier ffmpeg wrapper.
 
 Download a list of songs from Youtube for post-processing:
 
   - Create a file `urls.txt` with one video URL on each line
 
-  - irb:
+  - Open `irb` and run:
     ```rb
     File.open("urls.txt").read.each_line { |l| print "Downloading #{l}"; `youtube-dl -f140 #{l}`; sleep 10 }
     ```
@@ -40,6 +50,25 @@ Join each mp3 in a folder into one long mp3 (each must have same codec):
 
     for f in *.mp3; do echo "file '$f'" >> filesToConcatenate.txt; done
     ffmpeg -f concat -safe 0 -i filesToConcatenate.txt -c copy concatenated.mp3
+
+Convert a .webm video (eg. captured stream) to an .mp4 video, scaled, and set framerate:
+
+    # .webm can be fragile; the following options improve conversion speed & quality:
+    # -r: sets the output video framerate (60fps is only a bit larger on disk than 30fps)
+    # -vf: sets the output video resolution
+    # -vbr: specify varible audio bitrate (5 = highest quality)
+    # -c: specify the audio codec libfdk_aac (much higher quality than the default codec)
+    # (May need to recompile ffmpeg: http://trac.ffmpeg.org/wiki/CompilationGuide/macOS)
+    # To TEST conversion with a small clip, add output flags -ss 00:02:00.0 -t 00:00:20.0
+    ffmpeg -i "file.webm" -r 60 -vf scale=800:600 -c:a libfdk_aac -vbr 5 mp4/file.mp4
+
+How to clip a .mp4 file without decoding & re-encoding:
+
+    # -c copy: skip decoding & re-encoding (same encoding will be used)
+    # -ss 00:02:00.0 -t 00:00:20.0: start at 2 mins 0 secs, and cut after 20 secs.
+    ffmpeg -i "file.mp4" -c copy -ss 00:02:40.0 -t 00:02:25.0 file-clipped.mp4
+
+Use https://github.com/deezer/spleeter or https://splitter.ai/ to separate a song into stems.
 
 
 ## Searching & listing files
@@ -121,13 +150,3 @@ Run a command for each line in a file:
 ## Downloads
 
 - `wget -c <url>` - download a resource, resuming from partial progress if interrupted
-
-
-## Command-line CSV viewer
-
-I haven't tested these, but some ideas are:
-
-- https://www.stefaanlippens.net/pretty-csv.html
-- `tabview`: https://superuser.com/a/1381292/233455 (works great)
-- Vim CSV plugin: https://superuser.com/a/913186/233455
-

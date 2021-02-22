@@ -1,5 +1,12 @@
 # Ruby tips
 
+Using Ruby for bash shell one-liners: https://learnbyexample.github.io/learn_ruby_oneliners/one-liner-introduction.html
+
+
+## Gems
+
+`bundle open devise` - open the Gem sourcecode in your editor
+
 
 ## Strings
 

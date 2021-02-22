@@ -18,6 +18,11 @@ A basic Uploader class:
 class ImageUploader < CarrierWave::Uploader::Base
   include CarrierWave::MiniMagick # add support for image transformations
 
+  # Usage: e.g. @user.picture.attached?
+  def attached?
+    file.present?
+  end
+
   # Override the directory where uploaded files will be stored.
   # This is a sensible default for uploaders that are meant to be mounted:
   def store_dir
@@ -78,7 +83,6 @@ Example usage:
 # - ImageUploader defines the processing, variants, & file validations.
 # - The model must have a `picture` text column present, which stores the filename.
 mount_uploader :picture, ImageUploader
-def picture_attached?() picture.file.present? end # convenience helper
 
 # Attach a file to a model:
 user.picture = params[:user][:picture] # from a file upload in a form submission
@@ -94,7 +98,7 @@ user.save # expect validation errors if the file couldn't be loaded (eg. request
 user.update!(picture: nil) # a callback will delete the file from storage
 
 # Check if a picture is attached
-user.picture.file.present? # or user.picture_attached?
+user.picture.attached?
 
 # URL for an attachment (original file)
 user.picture.url # will be nil if no file is attached
@@ -111,5 +115,8 @@ User.where("picture IS NOT NULL").each { |u| u.picture.recreate_versions! }
 
 # Clear out "abandoned" cached uploads (accumulated due to model validation errers etc.)
 CarrierWave.clean_cached_files!(600) # >= 10 minutes old
-
 ```
+
+Advanced topics:
+
+  - Persist attached file across form resubmits due to validation error: https://github.com/carrierwaveuploader/carrierwave#making-uploads-work-across-form-redisplays

@@ -19,6 +19,14 @@
   * Layers of indirection should have comments that identify them and justify them.
 
 
+## Warts
+
+There's a couple really ugly things about Elixir:
+
+  * Counterintuitive Erlang term comparison. If you try to compare two dates, it will compare based on structure rather than semantics.
+  * working with decimals (eg. summing two decimals)
+  * lists of integers often get "interpreted" as a charlist
+
 
 ## Installing Elixir on OSX
 
@@ -46,6 +54,8 @@ For more asdf commands, see: https://asdf-vm.com/#/core-commands
 Reverse a map: `Map.new(map, fn {k, v} -> {v, k} end)`
 
 Inspect all bound variables in this context: `IO.inspect binding()`
+
+Random number: `:rand.uniform(50)` (from Erlang)
 
 
 ## Dates & times
@@ -126,6 +136,8 @@ Run code in a linked background process (eg. to start a lightweight job from the
       # run stuff here
     end)
 
+Tips on testing multi-process Elixir code: https://samuelmullen.com/articles/elixir-processes-testing/
+
 
 ## ETS
 
@@ -168,11 +180,19 @@ ETS table options include:
   * Structural modules (eg. genservers, LVs, other OTP-related modules, Phx controllers) should not contain domain / business logic.
 
 
-## Performance & benchmarking
+## Memory usage in strings & atoms
 
-Check total memory in use by the Erlang VM:
+  * Each atom used reserves around 110-140 bytes of memory in the Erlang VM, permanently. By default, Erlang sets a ceiling of ~ 1 million atoms, and crashes if you exceed that.
 
-    memory_used_mb = :erlang.memory(:total) / 1_000_000
+  * Re-using the same atom is nearly free memory-wise. So in a long list of atom-keyed maps, the repeated atoms don't create much memory pressure, regardless of their length.
+
+  * But a long list of STRING-keyed maps will weigh a lot, because each instance of the string is stored separately in memory even if the strings are equivalent.
+
+
+## Performance benchmarking
+
+  * Check total memory in use by the Erlang VM:
+    `memory_used_mb = Float.round(:erlang.memory[:total] / 1_000_000.0, 3)`
 
 Here's an example of using Benchee to test whether duplicate Ecto preloads "share" the same in-memory object or not. If preloads are shared, I'd expect the `plus_athlete` case to have substantially higher memory usage than the `plus_event` case.
 

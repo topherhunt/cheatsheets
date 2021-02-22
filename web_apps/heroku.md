@@ -14,6 +14,7 @@
   - `heroku pg:backups:capture -a my_app`
   - `heroku pg:backups:download -a my_app`
   - `pg_restore --verbose --clean --no-acl --no-owner -d my_local_db latest.dump`
+    (run it twice to ensure there's no persistent errors)
   - `rm latest.dump`
 
 There's also a shortcut: `heroku pg:pull -a my_app DATABASE_URL my_local_db`
@@ -52,3 +53,10 @@ heroku rake db:migrate -a mapp-staging
 
 - `heroku repo:purge_cache -a appname` - clear the build cache.
   Useful if deploy fails due to tmpfile permission errors. More info: https://help.heroku.com/18PI5RSY/how-do-i-clear-the-build-cache
+
+- Check how many cores a dyno has:
+  ```
+  heroku run /bin/bash
+  grep -c processor /proc/cpuinfo
+  ```
+

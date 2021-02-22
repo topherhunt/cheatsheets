@@ -1,5 +1,7 @@
 # Caching
 
+TO INCORPORATE: DHH's advice on key-based cache expiration: https://signalvnoise.com/posts/3113-how-key-based-cache-expiration-works - this lets you mostly avoid the problem of cache invalidation.
+
 
 ## General checklist for caching layer
 

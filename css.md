@@ -17,3 +17,14 @@ Benefits:
   * Concise, descriptive, readable html markup with no repetition. The css will be similar verbosity to vanilla BEM. You don't end up with redundant classes like `<div class="b-codingPage__timelineTickmark b-codingPage__timelineTickmark--minor"></div>`.
   * Simple contract for how to use classes guarantees isolation. You can be sure that your `__timeline` element class isn't polluted with irrelevant styles, because the convention is that all styles on elements and modifier are scoped to the parent block.
   * Minimizes agony re: picking class names.
+
+
+## Flexbox
+
+Column A fixed width, column B variable width:
+
+```
+.container { display: flex; }
+.col-a { flex: 0 0 10rem; }
+.col-b { flex: 1 }
+```

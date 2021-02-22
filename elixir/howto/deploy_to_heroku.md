@@ -60,6 +60,10 @@ See also: https://hexdocs.pm/phoenix/heroku.html#content
     heroku addons:create rollbar:free
     ```
 
+  * Set it up at a subdomain if desired:
+    - In the Heroku app settings dashboard, add the desired domain. Copy the target domain that Heroku provides.
+    - In the DNS admin panel (eg. Cloudfront or Namecheap), add a CNAME pointing to the target provided by Heroku.
+
   * If you need direct S3 upload, see also the S3-related steps in RTL's readme.
 
   * Set the env vars, referencing `secrets.exs` to see which ones are needed:
@@ -68,21 +72,14 @@ See also: https://hexdocs.pm/phoenix/heroku.html#content
     heroku config:set KEY=value KEY2=value2
     ```
 
-  * Deploy the app:
-    (the first deploy will take several mins)
+  * Deploy the app: `git push heroku master` (the first deploy will take several mins)
 
-    ```
-    git push heroku master
-    ```
+  * Set up the database: `heroku run mix ecto.migrate`
 
-  * Remember to set up the database:
+  * Smoke test to ensure everything is wired up properly:
 
-    ```
-    heroku run mix ecto.migrate
-    ```
-
-  * Smoke test it (as relevant):
-
-    - Request errors should be reported to Rollbar
-    - Logs show up in Papertrail
+    - Site is reachable
+    - Backend errors are reported to Rollbar
+    - Frontend errors are reported to Rollbar
+    - Request logs are visible in Papertrail
     - Emails are sent as expected

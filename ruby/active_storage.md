@@ -9,10 +9,9 @@ Resources:
 
 Reasons to avoid it:
 
-  - TODO
-  - N+1 queries when you want to display images for a list of models
+  - N+1 queries when you want to display images for a list of models, or even to check for the presence of an attached file
   - The N+1 queries are avoidable using helpers or explicit preloads, but these grow messy fast and it's easy to forget them. The need to traverse 2 associations just to display an image URL adds a lot of complexity as well as nontrivial memory bloat.
-  - N+1 _webserver requests_ when you render a page displaying pictures for N users. Each image's URL points back to Rails, where the blob is queried yet again to generate a short-lived URL to the underlying object (eg. on S3). This is brilliant if your top concern is portability to a new storage backend (eg. S3 -> Google Cloud) but seems like a terrible idea when the content isn't highly sensitive and you just need to easily render lots of images.
+  - N+1 _webserver requests_ when you render a page displaying N images, even if you do the above preloads. Each image's URL points back to Rails, where the blob is queried yet again to generate a short-lived URL to the underlying object (eg. on S3). This is brilliant if your top concern is portability to a new storage backend (eg. S3 -> Google Cloud) but seems like a terrible idea when the content isn't highly sensitive and you just need to easily render lots of images.
   - Very busy logs due to the above. Maybe there's a way to silence web requests to ActiveStorage blobs, but I haven't found it yet.
   - Poor DSL for detecting whether a file is newly attached or not. (you can check the avatar.attachment.created_at timestamp, but I don't know of a cleaner way)
   - No obvious pathway for validating uploaded files _and rejecting them if they don't pass the validations_. eg. don't accept or process overly large images. There's a dubious 3rd-party gem that claims to do it. You can hand-write a model validation that will add errors if an attachment meets certain conditions, but by this point the file has already been accepted and stored, and the standard mechanisms for purging the attachment don't appear to work when called within the parent model's validation hooks.
@@ -35,6 +34,14 @@ user.avatar.attach(io: file, filename: "horse.jpg")
 
 # Check if a file is attached
 user.image.attached?
+
+# Example validation of attachment filename
+# (NOTE: the file won't be auto deleted if validation fails!)
+def validate_icon_is_svg
+  if self.icon.attached? && !(self.icon.filename.to_s =~ /\.svg$/)
+    self.errors.add(:icon, "must be an SVG image")
+  end
+end
 
 # Remove an attached file
 # (NOTE: this doesn't work consistently during model lifecycle hooks!)

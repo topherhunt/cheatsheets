@@ -77,14 +77,22 @@ List all local branches sorted by latest commit date:
 List last commit date for each file in a directory:
 `for file in ./*; do echo "$file:    $(git log -1 --format=%cd $file)"; done`
 
-Get line count for a project, only including certain folders:
+Get line count for a project, only including certain folders (RAILS version):
 `git ls-files | egrep "(app/|config/|db/|test/|spec/[^_])" | grep -v " " | xargs cat | wc -l`
+
+Count lines of code for the project, only including certain folders (ELIXIR version):
+`git ls-files | egrep "(assets/js/|assets/css/|config/|docs/|lib/|priv/|scratch|scripts|test/)" | grep -v " " | xargs cat | wc -l`
 
 List the last 10 branches I worked on:
 `git for-each-ref --count=10 --sort=-committerdate refs/heads/ --format="%(refname:short)"`
 
 List the top committers with # of commits:
 `git shortlog -sn --all --no-merges --since='12 weeks'`
+
+Count total lines of code in a project (squashed, so much smaller than HOC):
+`git diff --shortstat 4b825dc642cb6eb9a060e54bf8d69288fbee4904`
+
+Or per file:
 
 
 ## Diff

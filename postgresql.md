@@ -1,5 +1,11 @@
 # PostgreSQL
 
+
+## Resources
+
+  - https://github.com/LendingHome/zero_downtime_migrations - Rails gem with helpful tips on how to do non-locking migrations on high-traffic tables.
+
+
 ## Process startup
 
 If Postgres is crashing on OSX, try these commands:
@@ -9,6 +15,7 @@ If Postgres is crashing on OSX, try these commands:
   - `brew info postgres`
   - `tail -f /var/log/system.log`
   - `pg_ctl -D /usr/local/var/postgres start` # run this and check the error output
+  - Try `brew remove postgresql` then `brew install postgresql` (fresh reinstall)
 
 
 ## Basic navigation
@@ -156,6 +163,8 @@ LIMIT 100;
 
   * Display a timestamp as a date: `DATE(found_at)`
   * Display a date's year as string: `DATE_PART('year', a.created_at)`
+  * Format a date/time to a time string: `TO_CHAR(a.created_at, 'HH24:MI')`
+    (see https://www.postgresql.org/docs/13/functions-formatting.html for more detail)
   * Add 1 month to a timestamp: `NOW() + INTERVAL '1 month'`
 
 
@@ -253,6 +262,25 @@ FROM (VALUES
 ) AS t(entry_id, rank)
 WHERE e.id = t.entry_id
 ```
+
+
+## Sequences
+
+Sometimes, eg. in a staging DB, primary key sequences can get out of sync with the max id in the table.
+
+List all sequences in this DB:
+
+```sql
+SELECT relname sequence_name FROM pg_class WHERE relkind = 'S';
+```
+
+Reset a sequence to the max id:
+
+```sql
+SELECT MAX(id) FROM teams; -- => 18687
+ALTER SEQUENCE teams_id_seq RESTART WITH 18688;
+```
+
 
 
 ## Viewing connected processes & running queries
