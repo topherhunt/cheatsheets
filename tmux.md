@@ -42,6 +42,7 @@ Advanced:
 - `ctrl-b n` => cycle to next window
 - `ctrl-b %` => split panes horizontally
 - `ctrl-b "` => split panes vertically
+- Copy scrollback history to a file: https://unix.stackexchange.com/a/236845/59680
 
 
 ## Troubleshooting

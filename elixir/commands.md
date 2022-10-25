@@ -27,6 +27,8 @@
   * `mix deps.compile --force` - force-recompile all deps
     - Useful if you're seeing nonsensical "undefined function" errors. (corrupt state?)
 
+  * `mix deps.clean --unused --unlock` - delete all unused deps from `mix.lock`. Useful if you've removed a dependency from `mix.exs` and really want it gone.
+
 
 ## Formatting
 

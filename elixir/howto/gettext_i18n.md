@@ -162,3 +162,5 @@ You'll repeat these steps (or a subset) whenever you change the source text.
   * Don't include leading/trailing whitespace in gettext strings. Where possible, put the space outside of the string. It's easy to lose a leading space when translating.
 
   * Having many Gettext locales may slow down app compilation. To fix it: https://angelika.me/2020/09/02/speed-up-the-compilation-of-elixir-projects-that-use-gettext/
+
+  * Best practices for using gettext: https://angelika.me/2021/11/23/7-gettext-lessons-after-2-years/?utm_medium=email&utm_source=elixir-radar

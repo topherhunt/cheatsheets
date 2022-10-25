@@ -36,3 +36,22 @@ Go to the bucket Permissions -> Bucket policy and paste in this policy.
     ]
 }
 ```
+
+
+### How to set up read/write permissions on a single S3 bucket
+
+When a site needs access to S3, it's best to set up a dedicated IAM role and grant it permission to just the specific bucket(s) needed. There's now a visual permission editor which makes this way easier than it used to be.
+
+  * Create an IAM User (not a role)
+  * Enter a name for the user, like `my-app-name`
+  * Check "Programmatic access"
+  * Under Permissions, click "Attach existing policies", then "Create policy"
+  * Create a custom policy with the right access:
+    * Select S3
+    * Under Actions, check "All actions"
+    * Under Resources -> bucket, click "Add ARN" and enter the bucket name. Then check "Any" for the rest of the Resources subsections to clear all warnings.
+    * Click "Next", then "Review"
+    * Enter a policy name, eg. `s3-my-bucket-full-access`
+  * Then go back to the still-in-progress "Add user" tab, refresh the policies list, and check the box next to this new policy
+  * Click "Next", then "Review", then "Create"
+  * Copy the access key ID & secret to somewhere safe

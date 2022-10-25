@@ -11,6 +11,7 @@ Command-line CSV spreadsheet viewer: [VisiData](https://github.com/saulpw/visida
 - `brew ls --versions PACKAGE`
 - `brew --prefix openssl` - get the path to that package's folder
 - https://cmsdk.com/python/homebrew-install-specific-version-of-formula.html
+- `brew cleanup -s` - clean up unused packages
 
 
 ## Video / image / audio processing
@@ -44,7 +45,12 @@ Convert each mp4 file to mp3:
 
 Boost or reduce volume of a video file:
 
-    ffmpeg -i infile -vcodec copy -af "volume=10dB" outfile # or `-5dB` to reduce
+    ffmpeg -i "file.mp4" -vcodec copy -af "volume=10dB" "new.mp4" # or `-5dB` to reduce
+
+Downscale resolution of a video file:
+
+    ffmpeg -i "file.mp4" -vf scale=800:600 -c:a libfdk_aac "new.mp4"
+    ffmpeg -i input.mp4 -vf scale=360x640 -c:a libfdk_aac output.mp4
 
 Join each mp3 in a folder into one long mp3 (each must have same codec):
 
@@ -88,6 +94,8 @@ Find all appearances of a text segment in certain files:
 Recursively search for text in this dir:
 
     grep -rnw . -e 'test-manage-custom-fields'
+
+https://github.com/jhspetersson/fselect - interesting tool, lets you query various attrs of files on disk using a sql-like syntax.
 
 
 ## Resources
@@ -138,7 +146,7 @@ sed -n '1001,2000' dev.log > latest.log
 
 ## Looping
 
-Infitine loop:
+Infinite loop:
 
     while : ; do echo "Hi there!"; sleep 1; done
 

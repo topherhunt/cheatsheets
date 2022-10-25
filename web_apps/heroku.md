@@ -4,9 +4,15 @@
 ## Basics
 
   - `heroku create my-app-name --region eu`
+  - `heroku git:remote -a my-app-name`
   - `git push heroku master`
   - `heroku restart`
   - `heroku run rake db:migrate` # arbitrary bash commands can be run this way
+
+
+## Logging
+
+See `papertrail.md`.
 
 
 ## Sync database from Heroku to local
@@ -14,7 +20,7 @@
   - `heroku pg:backups:capture -a my_app`
   - `heroku pg:backups:download -a my_app`
   - `pg_restore --verbose --clean --no-acl --no-owner -d my_local_db latest.dump`
-    (run it twice to ensure there's no persistent errors)
+    (you may want to drop & recreate the target DB first)
   - `rm latest.dump`
 
 There's also a shortcut: `heroku pg:pull -a my_app DATABASE_URL my_local_db`
@@ -38,21 +44,13 @@ heroku rake db:migrate -a mapp-staging
 ```
 
 
-## Parsing Papertrail logs
-
-- Download all logfiles as .tsv.gz into a folder
-- Run `sh ~/Sites/personal/utilities/combine_pt_logs.sh` to unpack all logs, combine them into one file, and clean up their format
-- `less cleaned.tsv`
-
-
 ## Troubleshooting
 
 - `heroku ps` - list all running processes on this app
 
 - `heroku ps:stop <process id>` - kill a frozen process
 
-- `heroku repo:purge_cache -a appname` - clear the build cache.
-  Useful if deploy fails due to tmpfile permission errors. More info: https://help.heroku.com/18PI5RSY/how-do-i-clear-the-build-cache
+- `heroku repo:purge_cache -a appname` - clear the build cache. Useful if deploy fails due to tmpfile permission errors. More info: https://help.heroku.com/18PI5RSY/how-do-i-clear-the-build-cache
 
 - Check how many cores a dyno has:
   ```

@@ -1,5 +1,7 @@
 ## Quick reference
 
+  * Visual guide to SSH tunnels: https://robotmoon.com/ssh-tunnels/
+
 ```sh
 # Make a curl request, printing just the headers
 curl -I https://www.wvtest.com/
@@ -26,6 +28,9 @@ curl -i --request POST --header "Content-Type: application/json" \
 
 Monitor my public IP every second:
 `while : ; do dig TXT +short o-o.myaddr.l.google.com @ns1.google.com ; sleep 1 ; done`
+
+Simulate poor network connection / dropped packets on OSX:
+https://twitter.com/chris_mccord/status/1396600053574389765
 
 
 ## Set up a general-purpose SSH server

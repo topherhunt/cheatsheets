@@ -46,7 +46,7 @@ $('#show-details').html("<%= escape_javascript render(partial: 'edit_game_detail
 #
 # ActiveRecord queries
 #
-# * IMPORTANT GOTCHA: .delete_all on an association does NOT necessarily destroy the records. By default it might only nullify the FK. So anytime I use .delete_all I must explicitly specify the strategy: `user.posts.delete_all(:delete_all)`.
+# * IMPORTANT GOTCHA: .delete_all on an association does NOT necessarily destroy the records. By default it might only nullify the FK. So anytime I use .delete_all on an association, I must explicitly specify the strategy: `user.posts.delete_all(:delete_all)`. But it's safe to use .delete_all on a query that is not an association.
 
 
 #

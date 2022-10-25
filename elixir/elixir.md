@@ -24,8 +24,10 @@
 There's a couple really ugly things about Elixir:
 
   * Counterintuitive Erlang term comparison. If you try to compare two dates, it will compare based on structure rather than semantics.
-  * working with decimals (eg. summing two decimals)
-  * lists of integers often get "interpreted" as a charlist
+  * Working with decimals (eg. adding or comparing them) is verbose & painful.
+  * Lists of integers often get "interpreted" as a charlist when inspected. There's no straightforward way to configure `inspect` to print integer lists as lists rather than charlists. (outside of iex)
+  * It's hard to detect a misspelled module eg. in config. Because module names are just atoms, Elixir isn't very proactive about blowing up if you misspell your module. This can lead to silent failures / configured components getting dropped.
+  * Map keys are alphasorted, meaning it's hard to render a json api response with object keys in "semantic ordering". I know this matches the json object spec, but it's inconvenient.
 
 
 ## Installing Elixir on OSX
@@ -48,6 +50,9 @@ For more asdf commands, see: https://asdf-vm.com/#/core-commands
 
 
 ## Misc.
+
+`mix deps.clean --unlock --unused` - clean out no-longer-used packages from the lockfile.
+
 
 `and` and `or` require strict booleans. `&&` and `||` allow any truthy / falsey values.
 
@@ -120,6 +125,23 @@ Parse a csv string (using the :csv package):
 |> String.split("\n")
 |> CSV.decode!()
 |> Enum.to_list()
+```
+
+
+## Metaprogramming
+
+  * How `use` works: https://brooklinmyers.medium.com/using-use-usefully-in-elixir-and-phoenix-b59a5ea08ad2
+  * Tips on how to use `defimpl` to implement a protocol for a module, so for example you can teach PID and other object types how they should be stringified: https://www.devbrett.com/2018/08/implement-string-protocol-elixir-pid.html
+
+```rb
+# /lib/my_app/utils/pid.ex
+defimpl String.Chars, for: PID do
+  def to_string(pid) do
+    info = Process.info(pid)
+    name = info[:registered_name]
+    "#{name}-#{inspect(pid)}"
+  end
+end
 ```
 
 

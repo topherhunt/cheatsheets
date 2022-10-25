@@ -7,18 +7,24 @@ Brief summary of the app's life purpose.
   * URL to the production site
 
 
-## Architecture & main gotchas
+## Architecture
 
-Brief summary of the app's architecture, how it's set up, and main gotchas.
+Brief summary of the app's architecture and how it's set up.
+More context: https://matklad.github.io//2021/02/06/ARCHITECTURE.md.html
 
 
-## Getting set up for dev & test
+## Gotchas
+
+Notes on any pain points or likely confusion points to watch out for.
+
+
+## Dev setup
 
   * Local dependencies
   * Instructions on how to get set up for local development, run the test suite(s), etc.
 
 
-## Test suite
+## Code style
 
 Notes on code style, testing philosophy, etc.
 

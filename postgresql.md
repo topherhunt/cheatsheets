@@ -62,6 +62,8 @@ Rename a database:
 
 ## Performance & scaling
 
+  * Pagination using LIMIT & OFFSET is very expensive. Consider using a "deferred join" to make it more efficient: https://aaronfrancis.com/2022/efficient-pagination-using-deferred-joins and https://planetscale.com/blog/fastpage-faster-offset-pagination-for-rails-apps - but also see more discussion & concerns about: https://news.ycombinator.com/item?id=29969099, https://twitter.com/mdavis1982/status/1482429071288066054, https://news.ycombinator.com/item?id=32484807
+
   * Rule of thumb: Every FK should be indexed. This is important not only to keep join queries fast, but also to prevent gridlock when deleting rows in the target table.
 
   * As table size grows beyond 1M records, `COUNT(*)` grows intolerably slow. If you need an exact count, there's no avoiding a full-table scan which is inefficient. But you can get an _estimated_ (within 0.1%) count quickly by querying the stats table:
@@ -77,6 +79,12 @@ Rename a database:
   * A query / write taking 300ms is "a total disaster". A row deletion should take on the order of 1ms.
 
   * Useful discussion of SQL performance: https://dba.stackexchange.com/a/44345/32795
+
+
+## Misc. query tips
+
+  * Check if 1 array contains any item in another array (test for array intersection):
+    `SELECT * FROM redeemed_trifectas WHERE event_ids && ARRAY[7096, 7097, 7098, 7099];`
 
 
 ## Troubleshoot a slow query
@@ -127,12 +135,6 @@ URL connection format:
 NOTE: If your client is on postgres v9.6+, you MUST specify the port in the url when making remote connections. It may default to port 5434.
 
 
-## Full-text search
-
-- https://youtu.be/YWj8ws6jc0g?t=23m30s
-- https://www.postgresql.org/docs/current/static/textsearch.html
-
-
 ## Regex substitution
 
 - Advanced regex replacement in Postgres:
@@ -158,14 +160,43 @@ LIMIT 100;
   * `SELECT RANDOM();` => decimal between 0 and 1
   * `FLOOR(RANDOM() * 900 + 100);` => integer between 100 and 999
 
+Select a random subset of rows from another query:
+
+```sql
+-- Select a random 10% of the 100K most recently active users
+SELECT *
+FROM (SELECT id FROM users ORDER BY last_logged_in_at DESC LIMIT 100000) t
+WHERE RANDOM() > 0.1;
+```
+
 
 ## Dates & times
 
-  * Display a timestamp as a date: `DATE(found_at)`
+  * Convert a timestamp to a date: `DATE(created_at)` or `created_at::date`
+  * Convert a date to a timestamp (beginning of day): `date::timestamp`
   * Display a date's year as string: `DATE_PART('year', a.created_at)`
   * Format a date/time to a time string: `TO_CHAR(a.created_at, 'HH24:MI')`
     (see https://www.postgresql.org/docs/13/functions-formatting.html for more detail)
   * Add 1 month to a timestamp: `NOW() + INTERVAL '1 month'`
+
+
+## Insertions
+
+Insert hard-coded rows into a table:
+
+```sql
+INSERT INTO teams (name, description)
+VALUES ('Team 1', 'blah blah blah'),
+       ('Team 2', 'blah blah blah'),
+       ...
+```
+
+Insert rows based on output of a SELECT statement:
+
+```sql
+INSERT INTO teams (name, description)
+SELECT name, description FROM teams_old LIMIT 100;
+```
 
 
 ## Updates using a join table
@@ -179,6 +210,21 @@ WHERE cevents.identifier = events.identifier
   AND events.series_id IS NOT NULL
   AND cevents.series_id IS NULL
   AND cevents.chronotrack_event_id IN (SELECT ct_id FROM tmp_chrono_ids_and_series_names);
+```
+
+
+## Nested queries
+
+Here's a simple nested query:
+
+```sql
+-- List a random 5% subset of unique athlete IDs from the ~10K highest-performing athletes:
+SELECT athlete_user_id FROM (
+  SELECT athlete_user_id FROM (
+    SELECT athlete_user_id FROM trifecta_totals ORDER BY num_trifectas DESC LIMIT 10000
+  ) t GROUP BY athlete_user_id
+) t
+WHERE RANDOM() < 0.05;
 ```
 
 
@@ -283,7 +329,7 @@ ALTER SEQUENCE teams_id_seq RESTART WITH 18688;
 
 
 
-## Viewing connected processes & running queries
+## Viewing connections / processes / running queries
 
 ```sql
 -- Show details of each currently running query
@@ -291,15 +337,19 @@ SELECT xact_start, query_start, query FROM pg_stat_activity WHERE state != 'idle
 ```
 
 
-## Full-text search in Postgres
+## Full-text search
 
 Below is a demo script for a basic PG full-text search system using a dedicated table (searchables) as the search index.
 
 See also:
+
   - https://www.postgresql.org/docs/11/textsearch-intro.html
   - https://www.postgresql.org/docs/11/textsearch-controls.html#TEXTSEARCH-RANKING
   - https://thoughtbot.com/blog/optimizing-full-text-search-with-postgres-tsvector-columns-and-triggers
   - http://rachbelaid.com/postgres-full-text-search-is-good-enough/
+  - https://youtu.be/YWj8ws6jc0g?t=23m30s
+  - https://www.postgresql.org/docs/current/static/textsearch.html
+
 
 ```sql
 DROP TABLE searchables;
@@ -336,3 +386,42 @@ ORDER BY rank DESC;
 -- websearch_to_tsquery can also accept basic search syntax like OR, -, and quotes.
 SELECT websearch_to_tsquery('linux OR "world domination" -trump');
 ```
+
+### Full-text search, using Postgres triggers
+
+Below is an example of setting up a full-text search field whose contents are maintained at the DB layer via a trigger and function, so you don't need to remember to refresh their contents via app code:
+
+```rb
+  def up
+    execute <<-SQL
+      ALTER TABLE athlete_users ADD COLUMN searchable tsvector;
+
+      CREATE FUNCTION update_athlete_users_searchable_trigger() RETURNS trigger AS $$
+      begin
+        new.searchable :=
+          setweight(to_tsvector('english', coalesce(new.email, '')), 'A') ||
+          setweight(to_tsvector('english', coalesce(new.first_name,'')), 'B') ||
+          setweight(to_tsvector('english', coalesce(new.last_name,'')), 'C');
+        return new;
+      end
+      $$ LANGUAGE plpgsql;
+
+      CREATE TRIGGER update_athlete_users_searchable BEFORE INSERT OR UPDATE OF email, first_name, last_name
+          ON athlete_users FOR EACH ROW EXECUTE PROCEDURE update_athlete_users_searchable_trigger();
+    SQL
+  end
+```
+
+
+
+### Autocomputed sequential ranks using `ROW_NUMBER()`
+
+https://www.postgresqltutorial.com/postgresql-row_number/
+
+
+### CREATE INDEX CONCURRENTLY
+
+- Be warned, creating an index concurrently can take way longer (in extreme cases 200x longer) than creating the same index non-concurrently. https://dba.stackexchange.com/a/212514/32795
+- Also be aware that while indexes created concurrently don't lock the table from being written, the Rails migration will "block" and wait until the index has been completely built. So watch out for deploy timeouts due to the Rails migration taking too long.
+- Sometimes creating an index concurrently takes way longer than it should. If that happens, use these queries to check if the index is still building or has failed (and thus must be dropped & recreated): https://dba.stackexchange.com/a/242079/32795
+- See also the official docs for caveats on concurrent indexes: https://www.postgresql.org/docs/9.3/sql-createindex.html#SQL-CREATEINDEX-CONCURRENTLY

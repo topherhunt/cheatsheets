@@ -1,5 +1,7 @@
 # Systemd and journald
 
+Basic systemd usage: https://www.thegeekdiary.com/centos-rhel-7-systemd-command-line-reference-cheat-sheet/
+
 
 ## Services
 
@@ -14,6 +16,8 @@
   * Edit service config: `sudo vi /etc/systemd/cerberus.service`
 
   * Apply edited service config: `sudo systemctl daemon-reload`
+
+  * Adding a new service: https://www.garron.me/en/linux/add-service-systemd-systemctl.html
 
 
 ## Logs

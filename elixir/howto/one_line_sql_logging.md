@@ -1,13 +1,17 @@
 # How to set up one-line SQL logging in Phoenix
 
-By default, Ecto queries are logged over two lines like this:
+By default, Ecto queries are logged over two lines. Use the steps below to compress this to one line and strip out the unnecessary quotes. _These steps only work for Ecto v3._
 
 ```
+BEFORE:
+
 09:57:05.784 [debug] QUERY OK source="users" db=9.9ms decode=1.6ms queue=1.0ms idle=7538.9ms
 SELECT u0."id", u0."name", u0."email", u0."password_hash", u0."confirmed_at", u0."last_visit_date", u0."inserted_at", u0."updated_at" FROM "users" AS u0 WHERE (u0."id" = $1) [1]
-```
 
-_These steps only work for Ecto v3._
+AFTER:
+
+09:57:05.784 [debug] SQL query: OK source=users db=9.9ms   SELECT u0.id, u0.name, u0.email, u0.password_hash, u0.confirmed_at, u0.last_visit_date, u0.inserted_at, u0.updated_at FROM "users" AS u0 WHERE (u0.id = $1)   [123]
+```
 
 In `lib/my_app/application.ex` `.start/2`, add this snippet just before the `Supervisor.start_link/2` call to set up the telemetry event:
 
@@ -35,7 +39,7 @@ defmodule MyApp.Telemetry do
       query = Regex.replace(~r/(\d\.)"([^"]+)"/, metadata.query, "\\1\\2")
       params = inspect(metadata.params, charlists: false)
 
-      "SQL query: #{ok} source=#{source} db=#{time}ms   #{query}   params=#{params}"
+      "SQL query: #{ok} source=#{source} db=#{time}ms   #{query}   [#{params}]"
     end)
   end
 end
