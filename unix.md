@@ -87,6 +87,9 @@ Find files by name: (* means "0 or more chars")
 
     find . -name '*erlang*'
 
+    # Find all tax-related documents, case-insensitive
+    find ~ -iname "*tax*" -type f | egrep -i -v "\.(rb|erb|ex|exs|cache|py|pyc|js|jpg|png|yml|c|h|o|y|html|scss)$" | egrep -v "(\/Sites)"
+
 Find all appearances of a text segment in certain files:
 
     grep "<br" *.xml
