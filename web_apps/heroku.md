@@ -57,4 +57,3 @@ heroku rake db:migrate -a mapp-staging
   heroku run /bin/bash
   grep -c processor /proc/cpuinfo
   ```
-

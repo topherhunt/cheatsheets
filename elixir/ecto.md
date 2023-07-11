@@ -9,6 +9,8 @@
   * How to connect to a custom database URL (eg. in an exs script):
     https://thepugautomatic.com/2020/06/connecting-ecto-to-a-legacy-database-in-a-script/
 
+  * Print a query as SQL: `Ecto.Adapters.SQL.to_sql(:all, Repo, query)`
+
 ## Dates & times
 
   * In queries, never use `NOW()` with a `timestamp without time zone` field! This will compare using the DB's configured timezone, which might not be UTC. Instead, inject a timezone-bearing value like `DateTime.utc_now()`.

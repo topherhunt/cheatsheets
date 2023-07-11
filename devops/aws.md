@@ -40,6 +40,8 @@ Go to the bucket Permissions -> Bucket policy and paste in this policy.
 
 ### How to set up read/write permissions on a single S3 bucket
 
+See my Walkaround app's readme for a recent (2023-05) example of setting up Arc file attachments with S3.
+
 When a site needs access to S3, it's best to set up a dedicated IAM role and grant it permission to just the specific bucket(s) needed. There's now a visual permission editor which makes this way easier than it used to be.
 
   * Create an IAM User (not a role)

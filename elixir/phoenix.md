@@ -1,5 +1,21 @@
-# Phoenix: Structure, components, tips
+# Phoenix
 
+## References
+
+- https://hexdocs.pm/phoenix_live_view/Phoenix.Component.html
+- Use `mix phx.gen.html` to generate a scaffolded resource & see examples of how to use the core components, eg .link and .table.
+
+
+
+
+
+
+
+
+
+
+
+# ========= OLD ============
 
 ## Env
 
@@ -42,7 +58,6 @@
   * Insert `IEx.pry` at the target line
   * Run the tests in iex: `iex -S mix test --trace`
 - You can inspect any Hex dependency code in `deps/`. You can even alter the code of a dependency, run `mix deps.compile`, then restart the Phoenix server, and your changes will be live.
-- Print a query as SQL: `Ecto.Adapters.SQL.to_sql(:all, Repo, query)`
 
 
 ## Tests
