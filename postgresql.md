@@ -262,7 +262,7 @@ FROM '/Users/topher/Downloads/athlinks-bak/athlete_users.csv' DELIMITER ',' CSV 
 - `pg_size_pretty(value)` - formats a number as KB, MB, GB etc.
 
 ```sql
--- List all tables with disk usage info
+-- List all tables and matviews, with disk usage info
 SELECT *
 FROM (
   SELECT *, total_bytes - index_bytes - COALESCE(toast_bytes,0) AS table_bytes
@@ -275,7 +275,7 @@ FROM (
       pg_total_relation_size(reltoastrelid) AS toast_bytes
     FROM pg_class c
     LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE relkind = 'r'
+    WHERE relkind IN ('r', 'm') AND nspname = 'public'
   ) a
 ) a
 ORDER BY table_schema, table_name;

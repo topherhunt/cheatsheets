@@ -2,7 +2,7 @@
 
 Thanks to https://excessivelyadequate.com/posts/swinsian.html
 
-- Source MBP: open System Prefs -> Sharing -> Remote Login and check the IP for ssh'ing into that machine.
+- Source MBP: open System Prefs -> Sharing -> Remote Login. Enable it and check the IP for ssh'ing into that machine.
 - Destination MBP: Quit Swinsian
 
 ```sh
@@ -19,10 +19,8 @@ scp "topher@192.168.178.71:~/Library/Application\ Support/Swinsian/Library.sqlit
 
 ```
 
-- Open Library.sqlite in SQLite Browser, and run this query:
+- Open Library.sqlite in SQLite Browser
+- Run this query: `UPDATE track SET path = replace(path, '/topher/', '/topherhunt/');`
+- **Write my changes** then quit the sqlite browser
 
-```sql
-UPDATE track SET path = replace(path, '/topher/', '/topherhunt/');
-```
-
-- Start Swinsian and check that the library is working
+- Start Swinsian and check that the library looks OK
