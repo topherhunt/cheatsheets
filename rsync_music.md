@@ -14,10 +14,12 @@ ssh topher@192.168.178.71
 rsync -avz --progress "topher@192.168.178.71:~/Music/Topher\ music\ library" ~/Music/
 
 # Sync the library DB itself
-rm ~/Library/Application\ Support/Swinsian/Library.sqlite
+mv ~/Library/Application\ Support/Swinsian/Library.sqlite ~/Library/Application\ Support/Swinsian/Library-OLD.sqlite
 scp "topher@192.168.178.71:~/Library/Application\ Support/Swinsian/Library.sqlite" ~/Library/Application\ Support/Swinsian
 
 ```
+
+And unless my home user is named `topher`:
 
 - Open Library.sqlite in SQLite Browser
 - Run this query: `UPDATE track SET path = replace(path, '/topher/', '/topherhunt/');`
