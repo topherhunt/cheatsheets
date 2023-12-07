@@ -13,6 +13,10 @@ ssh -vND 1024 vpn1
 curl -i --request POST --header "Content-Type: application/json" \
   --data '{"something": true}' \
   http://localhost:3000/blah
+
+# Rsync a large folder from another local computer
+# NB: the folder you specify will be synced to WITHIN the destination path.
+rsync -avz --progress topher@192.168.178.71:~/Records ~
 ```
 
 
