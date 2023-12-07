@@ -8,14 +8,14 @@ Thanks to https://excessivelyadequate.com/posts/swinsian.html
 ```sh
 
 # Test that I can connect to the source MBP
-ssh topher@192.168.178.71
+ssh topher@192.168.178.128
 
 # Sync all music files (first time will take around an hour)
-rsync -avz --progress "topher@192.168.178.71:~/Music/Topher\ music\ library" ~/Music/
+rsync -avz --progress "topher@192.168.178.128:~/Music/Topher\ music\ library" ~/Music/
 
 # Sync the library DB itself
 mv ~/Library/Application\ Support/Swinsian/Library.sqlite ~/Library/Application\ Support/Swinsian/Library-OLD.sqlite
-scp "topher@192.168.178.71:~/Library/Application\ Support/Swinsian/Library.sqlite" ~/Library/Application\ Support/Swinsian
+scp "topher@192.168.178.128:~/Library/Application\ Support/Swinsian/Library.sqlite" ~/Library/Application\ Support/Swinsian
 
 ```
 

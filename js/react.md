@@ -9,6 +9,8 @@
 
 - A <u>stateful</u> component uses the class structure, + needs a `constructor` which sets the starting state based on the props.
 
+- Use create-react-app whenever I need to create a production React app. It handles tons of the boilerplate.
+
 
 ## Gotchas
 
