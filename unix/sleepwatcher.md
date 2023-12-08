@@ -3,8 +3,9 @@
 - `brew install sleepwatcher`
 - `brew services start sleepwatcher`
 - `brew install blueutil`
-- `blueutil` to confirm that the utility was installed fully
+- Run `blueutil` to confirm that the utility has the needed MacOS permissions.
 - Create `~/.sleep`, `~/.wakeup`, and `~/.sleepwatcher.log` content as shown below
+- Run `which blueutil` and confirm that the path matches the path used in the scripts below (or update the scripts accordingly)
 - `chmod 700 ~/.sleep`
 - `chmod 700 ~/.wakeup`
 
