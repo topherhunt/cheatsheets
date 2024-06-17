@@ -2,11 +2,28 @@
 
 Thanks to https://excessivelyadequate.com/posts/swinsian.html
 
-- Source MBP: open System Prefs -> Sharing -> Remote Login. Enable it and check the IP for ssh'ing into that machine.
+- Source MBP: Quit Swinsian. Open System Prefs -> Sharing -> Remote Login. Enable it and check the IP for ssh'ing into that machine.
 - Destination MBP: Quit Swinsian
 
-```sh
+## Syncing FROM local TO a remote destination
 
+```sh
+# on the SOURCE:
+# Do a dry run, review and confirm that the changed files look correct
+rsync -avz --progress --delete --dry-run "/Users/topher/Music/Topher music library" topher@192.168.178.128:~/Music/
+# Then do the actual run.
+rsync -avz --progress --delete "/Users/topher/Music/Topher music library" topher@192.168.178.128:~/Music/
+
+# on the DESTINATION:
+mv ~/Library/Application\ Support/Swinsian/Library.sqlite ~/Library/Application\ Support/Swinsian/Library-OLD.sqlite
+
+# on the SOURCE:
+scp ~/Library/Application\ Support/Swinsian/Library.sqlite "topher@192.168.178.128:~/Library/Application Support/Swinsian"
+```
+
+## Syncing FROM remote TO local
+
+```sh
 # Test that I can connect to the source MBP
 ssh topher@192.168.178.128
 
@@ -16,7 +33,6 @@ rsync -avz --progress "topher@192.168.178.128:~/Music/Topher\ music\ library" ~/
 # Sync the library DB itself
 mv ~/Library/Application\ Support/Swinsian/Library.sqlite ~/Library/Application\ Support/Swinsian/Library-OLD.sqlite
 scp "topher@192.168.178.128:~/Library/Application\ Support/Swinsian/Library.sqlite" ~/Library/Application\ Support/Swinsian
-
 ```
 
 And unless my home user is named `topher`:
