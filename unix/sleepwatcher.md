@@ -30,7 +30,7 @@ Contents of `~/.wakeup`:
 # See also: ~/.sleep, ~/.wakeup, ~/.sleepwatcher.log
 /opt/homebrew/bin/blueutil --power on
 /usr/sbin/networksetup -setairportpower en0 on
-echo "$(date -Iseconds) -- Wake event detected. Enabled bluetooth and wifi. Bluetooth status: $(/opt/homebrew/bin/blueutil --power). Wifi status: $(/usr/sbin/networksetup -getairportpower en0)" >> ~/.sleepwatcher.log
+echo "$(date -Iseconds) -- Wake event detected. Enabled bluetooth and wifi. Bluetooth status: $(/opt/homebrew/bin/blueutil --power). $(/usr/sbin/networksetup -getairportpower en0)" >> ~/.sleepwatcher.log
 ```
 
 Contents of `~/.sleepwatcher.log`:
