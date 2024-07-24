@@ -1,5 +1,36 @@
 # PostgreSQL
 
+- [PostgreSQL](#postgresql)
+  - [Resources](#resources)
+  - [Process startup](#process-startup)
+  - [Basic navigation](#basic-navigation)
+  - [Install \& set up a specific version of Postgres (Ubuntu)](#install--set-up-a-specific-version-of-postgres-ubuntu)
+  - [Managing databases, users, roles](#managing-databases-users-roles)
+  - [Performance \& scaling](#performance--scaling)
+  - [Misc. query tips](#misc-query-tips)
+  - [Troubleshoot a slow query](#troubleshoot-a-slow-query)
+  - [Importing \& exporting database structure \& content](#importing--exporting-database-structure--content)
+  - [Importing \& exporting SQL dumps](#importing--exporting-sql-dumps)
+  - [Connecting to a remote database](#connecting-to-a-remote-database)
+  - [Regex substitution](#regex-substitution)
+  - [Random numbers](#random-numbers)
+  - [Dates \& times](#dates--times)
+  - [Insertions](#insertions)
+  - [Updates using a join table](#updates-using-a-join-table)
+  - [Nested queries](#nested-queries)
+  - [Temporary tables](#temporary-tables)
+  - [CSV export \& import](#csv-export--import)
+  - [Disk space usage](#disk-space-usage)
+  - [Install Postgres 9.5 on Ubuntu 16.04](#install-postgres-95-on-ubuntu-1604)
+  - [Update many rows with different values](#update-many-rows-with-different-values)
+  - [Sequences](#sequences)
+  - [Viewing connections / processes / running queries](#viewing-connections--processes--running-queries)
+  - [Full-text search](#full-text-search)
+    - [Full-text search, using Postgres triggers](#full-text-search-using-postgres-triggers)
+    - [Autocomputed sequential ranks using `ROW_NUMBER()`](#autocomputed-sequential-ranks-using-row_number)
+    - [CREATE INDEX CONCURRENTLY](#create-index-concurrently)
+
+
 
 ## Resources
 

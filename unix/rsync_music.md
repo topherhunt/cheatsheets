@@ -2,8 +2,9 @@
 
 Thanks to https://excessivelyadequate.com/posts/swinsian.html
 
-- Source MBP: Quit Swinsian. Open System Prefs -> Sharing -> Remote Login. Enable it and check the IP for ssh'ing into that machine.
-- Destination MBP: Quit Swinsian
+- Quit Swinsian on both machines.
+- Quit any VPN on both machines.
+- Destination: Open System Prefs -> Sharing -> Remote Login. Enable it and check the IP for ssh'ing into that machine.
 
 ## Syncing FROM local TO a remote destination
 
